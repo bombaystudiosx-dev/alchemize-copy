@@ -51,7 +51,7 @@ const features = [
     icon: DollarSign,
     route: 'Finance',
     gradient: 'from-green-500 to-emerald-600',
-    artwork: '💰📊💎'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fa2a8124f_7B0741F4-AC42-43CF-A12B-3ECAB42AA150.png'
   },
   {
     id: 'fitness',
@@ -60,7 +60,7 @@ const features = [
     icon: Dumbbell,
     route: 'Fitness',
     gradient: 'from-red-500 to-orange-600',
-    artwork: '💪🏃‍♂️⚡'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/2731b6a10_F76D9AD5-5B7D-476E-983E-6C939BC91D5A.png'
   },
   {
     id: 'diet',
@@ -69,7 +69,7 @@ const features = [
     icon: Apple,
     route: 'Diet',
     gradient: 'from-lime-500 to-green-600',
-    artwork: '🥗🍎🥑'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/d84f1a2a1_1EE9F255-09A4-47B5-B9E3-49A5928D4EDD.png'
   },
   {
     id: 'appointments',
@@ -78,7 +78,7 @@ const features = [
     icon: Calendar,
     route: 'Appointments',
     gradient: 'from-blue-500 to-indigo-600',
-    artwork: '📅⏰🗓️'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b1af6fd37_AB90EFB7-ADF3-4A1C-8F2A-A6408C34E6EF.png'
   },
   {
     id: 'settings',
