@@ -55,14 +55,18 @@ export default function Splash() {
         </motion.div>
 
         {/* Title */}
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-indigo-300 mb-4 tracking-tight"
+          className="mb-4"
         >
-          Alchemize
-        </motion.h1>
+          <img 
+            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/87ac0e58a_7EFD7764-73E6-4E36-ADAD-927E09F48B68.png"
+            alt="Alchemize"
+            className="h-20 md:h-24 object-contain"
+          />
+        </motion.div>
 
         {/* Tagline */}
         <motion.p
