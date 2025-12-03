@@ -269,7 +269,7 @@ export default function FeatureCarousel() {
                         </div>
                         
                         {/* Text Content */}
-                        <div className="text-center space-y-3">
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-center space-y-3">
                           <h3 className="text-xl font-bold text-white">
                             {feature.title}
                           </h3>
