@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
@@ -9,10 +9,25 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [greeting, setGreeting] = useState('Welcome');
 
+  // Memoize particles to prevent re-renders
+  const particles = useMemo(() => 
+    [...Array(6)].map((_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 2,
+    })), []
+  );
+
   useEffect(() => {
     const loadUser = async () => {
-      const userData = await base44.auth.me();
-      setUser(userData);
+      try {
+        const userData = await base44.auth.me();
+        setUser(userData);
+      } catch (e) {
+        // User not logged in - handled by layout
+      }
     };
     loadUser();
 
@@ -28,25 +43,22 @@ export default function Home() {
   return (
     <CosmicBackground>
       <div className="min-h-screen flex flex-col">
-        {/* Floating particles */}
+        {/* Floating particles - memoized */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          {[...Array(6)].map((_, i) => (
+          {particles.map((p) => (
             <motion.div
-              key={i}
+              key={p.id}
               className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
+              style={{ left: p.left, top: p.top }}
               animate={{
                 y: [-20, 20, -20],
                 opacity: [0.3, 0.7, 0.3],
                 scale: [1, 1.5, 1],
               }}
               transition={{
-                duration: 3 + Math.random() * 2,
+                duration: p.duration,
                 repeat: Infinity,
-                delay: Math.random() * 2,
+                delay: p.delay,
               }}
             />
           ))}

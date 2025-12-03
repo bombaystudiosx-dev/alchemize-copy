@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+// Removed unused react-query imports
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import GlowButton from '@/components/cosmic/GlowButton';
-import CosmicInput from '@/components/cosmic/CosmicInput';
+// Removed unused CosmicInput import
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [showAbout, setShowAbout] = useState(false);
-  const queryClient = useQueryClient();
+  // Removed unused queryClient
 
   useEffect(() => {
     const fetchUser = async () => {

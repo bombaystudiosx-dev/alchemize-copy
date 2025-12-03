@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import GlowButton from '@/components/cosmic/GlowButton';
-import { Moon, KeyRound } from 'lucide-react';
+// KeyRound import removed - not used
 
 export default function Splash() {
   const [showButton, setShowButton] = useState(false);

@@ -34,7 +34,7 @@ export default function Diet() {
     notes: ''
   });
   const [showScanner, setShowScanner] = useState(false);
-  const [selectedMeal, setSelectedMeal] = useState('snacks');
+  // Removed unused selectedMeal state
   const queryClient = useQueryClient();
 
   const { data: mealPlans = [], isLoading } = useQuery({
