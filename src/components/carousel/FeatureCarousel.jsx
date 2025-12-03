@@ -212,7 +212,7 @@ export default function FeatureCarousel() {
                       `} />
                       
                       {/* Card Content */}
-                      <div className="relative z-10 h-full flex flex-col p-6">
+                      <div className="relative z-10 h-full flex flex-col">
                         {/* Artwork Area */}
                         <div className="absolute inset-0 overflow-hidden rounded-3xl">
                           {feature.image ? (
