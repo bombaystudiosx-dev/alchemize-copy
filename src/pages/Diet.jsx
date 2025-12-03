@@ -8,7 +8,8 @@ import GlowButton from '@/components/cosmic/GlowButton';
 import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, Apple, Coffee, Sun, Moon, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Apple, Coffee, Sun, Moon, Trash2, ScanBarcode } from 'lucide-react';
+import BarcodeScanner from '@/components/diet/BarcodeScanner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { format, addDays, subDays } from 'date-fns';
@@ -32,6 +33,8 @@ export default function Diet() {
     total_calories: '',
     notes: ''
   });
+  const [showScanner, setShowScanner] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState('snacks');
   const queryClient = useQueryClient();
 
   const { data: mealPlans = [], isLoading } = useQuery({
@@ -251,6 +254,15 @@ export default function Diet() {
             </DialogHeader>
             
             <div className="space-y-4 mt-4">
+              {/* Barcode Scanner Button */}
+              <button
+                onClick={() => setShowScanner(true)}
+                className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-lime-500/20 to-green-600/20 border border-lime-500/30 hover:border-lime-500/50 transition-colors"
+              >
+                <ScanBarcode className="w-5 h-5 text-lime-400" />
+                <span className="text-lime-300 font-medium">Scan Barcode to Add Food</span>
+              </button>
+
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">☀️ Breakfast</label>
                 <Textarea
@@ -309,6 +321,33 @@ export default function Diet() {
                 {createMutation.isPending || updateMutation.isPending ? 'Saving...' : 'Save Plan'}
               </GlowButton>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Barcode Scanner Dialog */}
+        <Dialog open={showScanner} onOpenChange={setShowScanner}>
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-lime-500/30 text-white max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <ScanBarcode className="w-5 h-5 text-lime-400" />
+                Scan Food Barcode
+              </DialogTitle>
+            </DialogHeader>
+            <BarcodeScanner 
+              onFoodScanned={(data) => {
+                // Add scanned food to snacks with nutritional info
+                const foodEntry = `${data.product_name}${data.brand ? ` (${data.brand})` : ''} - ${data.calories || 0} cal`;
+                setNewMealPlan(prev => ({
+                  ...prev,
+                  snacks: prev.snacks ? `${prev.snacks}, ${foodEntry}` : foodEntry,
+                  total_calories: prev.total_calories 
+                    ? (parseInt(prev.total_calories) + (data.calories || 0)).toString()
+                    : (data.calories || 0).toString()
+                }));
+                setShowScanner(false);
+              }}
+              onClose={() => setShowScanner(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
