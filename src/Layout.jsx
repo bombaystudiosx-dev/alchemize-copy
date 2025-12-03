@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
-import { SoundscapeProvider } from '@/components/audio/SoundscapeContext';
-import SoundscapePanel from '@/components/audio/SoundscapePanel';
 import { Loader2 } from 'lucide-react';
 
 export default function Layout({ children }) {
@@ -57,11 +55,8 @@ export default function Layout({ children }) {
   }
 
   return (
-    <SoundscapeProvider>
-      <div className="min-h-screen">
-        {children}
-        <SoundscapePanel />
-      </div>
-    </SoundscapeProvider>
+    <div className="min-h-screen">
+      {children}
+    </div>
   );
 }
