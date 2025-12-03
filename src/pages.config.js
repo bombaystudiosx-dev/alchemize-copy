@@ -9,6 +9,7 @@ import Fitness from './pages/Fitness';
 import Diet from './pages/Diet';
 import Appointments from './pages/Appointments';
 import Settings from './pages/Settings';
+import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
@@ -28,4 +29,5 @@ export const PAGES = {
 export const pagesConfig = {
     mainPage: "Splash",
     Pages: PAGES,
+    Layout: __Layout,
 };
