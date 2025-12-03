@@ -20,22 +20,25 @@ export default function SoundscapePanel() {
     <>
       {/* Floating Button */}
       <motion.button
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
         className={`
-          fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full
+          fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full
           bg-gradient-to-br from-purple-600 to-indigo-700
           shadow-lg shadow-purple-500/30
           flex items-center justify-center
-          ${isPlaying ? 'animate-pulse' : ''}
+          border border-purple-400/30
         `}
       >
         <Music className="w-6 h-6 text-white" />
         {isPlaying && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping" />
+          <>
+            <span className="absolute inset-0 rounded-full bg-purple-500/30 animate-ping" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full" />
+          </>
         )}
       </motion.button>
 

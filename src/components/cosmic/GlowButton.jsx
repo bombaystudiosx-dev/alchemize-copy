@@ -26,20 +26,26 @@ export default function GlowButton({
     <motion.button
       onClick={onClick}
       disabled={disabled}
-      whileHover={{ scale: disabled ? 1 : 1.02 }}
-      whileTap={{ scale: disabled ? 1 : 0.98 }}
+      whileHover={{ scale: disabled ? 1 : 1.03, boxShadow: '0 0 30px rgba(168, 85, 247, 0.4)' }}
+      whileTap={{ scale: disabled ? 1 : 0.97 }}
       className={cn(
         'relative rounded-full font-medium text-white transition-all duration-300',
         'shadow-lg shadow-purple-500/25',
         'disabled:opacity-50 disabled:cursor-not-allowed',
+        'overflow-hidden',
         variants[variant],
         sizes[size],
         className
       )}
     >
-      {/* Glow effect */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 blur-xl transition-opacity duration-300 group-hover:opacity-50" />
-      <span className="relative z-10">{children}</span>
+      {/* Shimmer effect */}
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+        initial={{ x: '-100%' }}
+        animate={{ x: '100%' }}
+        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+      />
+      <span className="relative z-10 flex items-center justify-center gap-2">{children}</span>
     </motion.button>
   );
 }
