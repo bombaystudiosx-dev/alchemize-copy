@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, CheckSquare, Flame, Check, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { format, startOfWeek, addDays, isToday, isSameDay } from 'date-fns';
+import { format, startOfWeek, addDays, isToday } from 'date-fns';
 
 export default function Habits() {
   const [showDialog, setShowDialog] = useState(false);

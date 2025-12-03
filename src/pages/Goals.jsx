@@ -161,7 +161,7 @@ export default function Goals() {
                     >
                       <CosmicCard 
                         onClick={() => openEditDialog(goal)}
-                        className="relative overflow-hidden"
+                        className="relative overflow-hidden group"
                       >
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1">

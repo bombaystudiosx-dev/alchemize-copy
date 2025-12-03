@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import GlowButton from '@/components/cosmic/GlowButton';
-import CosmicInput from '@/components/cosmic/CosmicInput';
+// Removed unused CosmicInput import
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, Heart, Star, Trash2 } from 'lucide-react';
@@ -58,9 +58,13 @@ export default function Affirmations() {
     ? affirmations.filter(a => a.is_favorite)
     : affirmations.filter(a => a.category === filter);
 
-  const todayAffirmation = affirmations.length > 0 
-    ? affirmations[Math.floor(Math.random() * affirmations.length)]
-    : null;
+  // Use stable daily affirmation based on date, not random on each render
+  const todayAffirmation = React.useMemo(() => {
+    if (affirmations.length === 0) return null;
+    const today = new Date().toDateString();
+    const index = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % affirmations.length;
+    return affirmations[index];
+  }, [affirmations]);
 
   return (
     <CosmicBackground>
