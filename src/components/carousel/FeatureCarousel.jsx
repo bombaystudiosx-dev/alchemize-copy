@@ -87,7 +87,7 @@ const features = [
     icon: Settings,
     route: 'Settings',
     gradient: 'from-slate-500 to-gray-600',
-    artwork: '⚙️🔧✨'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c4f2a10c0_A361E0F7-2289-4491-873F-681D46F0CACB.png'
   }
 ];
 
