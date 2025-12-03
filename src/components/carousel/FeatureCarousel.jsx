@@ -94,6 +94,7 @@ const features = [
 export default function FeatureCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef(null);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
@@ -102,21 +103,31 @@ export default function FeatureCarousel() {
     setIsDragging(true);
     startX.current = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     scrollLeft.current = currentIndex;
+    setDragOffset(0);
   };
 
   const handleDragMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-    const diff = (startX.current - x) / 200;
-    const newIndex = Math.round(scrollLeft.current + diff);
-    if (newIndex >= 0 && newIndex < features.length) {
-      setCurrentIndex(newIndex);
+    const diff = startX.current - x;
+    setDragOffset(diff * 0.3);
+    
+    if (Math.abs(diff) > 50) {
+      const direction = diff > 0 ? 1 : -1;
+      const newIndex = scrollLeft.current + direction;
+      if (newIndex >= 0 && newIndex < features.length && newIndex !== currentIndex) {
+        setCurrentIndex(newIndex);
+        scrollLeft.current = newIndex;
+        startX.current = x;
+        setDragOffset(0);
+      }
     }
   };
 
   const handleDragEnd = () => {
     setIsDragging(false);
+    setDragOffset(0);
   };
 
   const goToSlide = (index) => {

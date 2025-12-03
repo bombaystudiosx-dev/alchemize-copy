@@ -59,16 +59,16 @@ export default function ManifestationBoard() {
     }
   });
 
-  // Auto-advance slideshow every 3 seconds
+  // Auto-advance slideshow every 5 seconds (longer for better viewing)
   useEffect(() => {
-    if (tiles.length <= 1) return;
+    if (tiles.length <= 1 || showDialog || showEditOptions) return;
     
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % tiles.length);
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
-  }, [tiles.length]);
+  }, [tiles.length, showDialog, showEditOptions]);
 
   const goToPrev = () => {
     setCurrentIndex((prev) => (prev - 1 + tiles.length) % tiles.length);
