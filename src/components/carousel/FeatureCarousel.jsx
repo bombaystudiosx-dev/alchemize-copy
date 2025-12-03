@@ -214,7 +214,7 @@ export default function FeatureCarousel() {
                       {/* Card Content */}
                       <div className="relative z-10 h-full flex flex-col">
                         {/* Artwork Area */}
-                        <div className="absolute inset-0 overflow-hidden rounded-3xl">
+                        <div className="absolute inset-0 overflow-hidden rounded-3xl bg-black">
                           {feature.image ? (
                             <motion.div
                               animate={isActive ? { 
@@ -225,7 +225,7 @@ export default function FeatureCarousel() {
                                 repeat: Infinity,
                                 ease: 'easeInOut'
                               }}
-                              className="relative w-full h-full"
+                              className="relative w-full h-full flex items-center justify-center bg-black"
                             >
                               <img 
                                 src={feature.image} 
