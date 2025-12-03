@@ -214,34 +214,58 @@ export default function FeatureCarousel() {
                       {/* Card Content */}
                       <div className="relative z-10 h-full flex flex-col p-6">
                         {/* Artwork Area */}
-                        <div className="flex-1 flex items-center justify-center">
-                          <motion.div
-                            animate={isActive ? { 
-                              y: [0, -10, 0],
-                              rotate: [0, 5, -5, 0]
-                            } : {}}
-                            transition={{ 
-                              duration: 4, 
-                              repeat: Infinity,
-                              ease: 'easeInOut'
-                            }}
-                            className="relative"
-                          >
-                            <div className={`
-                              w-24 h-24 rounded-2xl flex items-center justify-center
-                              bg-gradient-to-br ${feature.gradient}
-                              shadow-lg shadow-purple-500/30
-                            `}>
-                              <Icon className="w-12 h-12 text-white" />
-                            </div>
-                            {/* Floating particles */}
-                            <div className="absolute -top-4 -right-4 text-3xl animate-bounce">
-                              {feature.artwork.split('')[0]}
-                            </div>
-                            <div className="absolute -bottom-2 -left-4 text-2xl animate-pulse">
-                              {feature.artwork.split('')[1]}
-                            </div>
-                          </motion.div>
+                        <div className="flex-1 flex items-center justify-center overflow-hidden">
+                          {feature.image ? (
+                            <motion.div
+                              animate={isActive ? { 
+                                scale: [1, 1.05, 1]
+                              } : {}}
+                              transition={{ 
+                                duration: 4, 
+                                repeat: Infinity,
+                                ease: 'easeInOut'
+                              }}
+                              className="relative w-full h-full"
+                            >
+                              <img 
+                                src={feature.image} 
+                                alt={feature.title}
+                                className="w-full h-full object-cover rounded-t-2xl"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-transparent to-transparent" />
+                            </motion.div>
+                          ) : (
+                            <motion.div
+                              animate={isActive ? { 
+                                y: [0, -10, 0],
+                                rotate: [0, 5, -5, 0]
+                              } : {}}
+                              transition={{ 
+                                duration: 4, 
+                                repeat: Infinity,
+                                ease: 'easeInOut'
+                              }}
+                              className="relative"
+                            >
+                              <div className={`
+                                w-24 h-24 rounded-2xl flex items-center justify-center
+                                bg-gradient-to-br ${feature.gradient}
+                                shadow-lg shadow-purple-500/30
+                              `}>
+                                <Icon className="w-12 h-12 text-white" />
+                              </div>
+                              {feature.artwork && (
+                                <>
+                                  <div className="absolute -top-4 -right-4 text-3xl animate-bounce">
+                                    {feature.artwork.split('')[0]}
+                                  </div>
+                                  <div className="absolute -bottom-2 -left-4 text-2xl animate-pulse">
+                                    {feature.artwork.split('')[1]}
+                                  </div>
+                                </>
+                              )}
+                            </motion.div>
+                          )}
                         </div>
                         
                         {/* Text Content */}
