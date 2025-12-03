@@ -33,7 +33,7 @@ const features = [
     icon: Target,
     route: 'Goals',
     gradient: 'from-amber-500 to-orange-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/eb51f0cc3_11CC2A81-5364-451D-8BCA-95D42C43F09C.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/1278e4fea_3980621C-E6F5-4042-A813-8669BB08CC22.png'
   },
   {
     id: 'habits',
