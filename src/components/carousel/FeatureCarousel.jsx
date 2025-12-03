@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -99,14 +99,14 @@ export default function FeatureCarousel() {
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
-  const handleDragStart = (e) => {
+  const handleDragStart = useCallback((e) => {
     setIsDragging(true);
     startX.current = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     scrollLeft.current = currentIndex;
     setDragOffset(0);
-  };
+  }, [currentIndex]);
 
-  const handleDragMove = (e) => {
+  const handleDragMove = useCallback((e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
@@ -123,18 +123,18 @@ export default function FeatureCarousel() {
         setDragOffset(0);
       }
     }
-  };
+  }, [isDragging, currentIndex]);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setIsDragging(false);
     setDragOffset(0);
-  };
+  }, []);
 
-  const goToSlide = (index) => {
+  const goToSlide = useCallback((index) => {
     if (index >= 0 && index < features.length) {
       setCurrentIndex(index);
     }
-  };
+  }, []);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center py-8">

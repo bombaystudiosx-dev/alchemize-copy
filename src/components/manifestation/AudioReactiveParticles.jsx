@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 
 export default function AudioReactiveParticles({ moodColor }) {
-  const [particles] = useState(() => 
-    Array.from({ length: 30 }, (_, i) => ({
+  // Reduced particle count for better performance
+  const particles = useMemo(() => 
+    Array.from({ length: 15 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: Math.random() * 4 + 1,
-      duration: Math.random() * 10 + 8,
-      delay: Math.random() * 5,
-    }))
+      size: Math.random() * 3 + 1,
+      duration: Math.random() * 8 + 6,
+      delay: Math.random() * 3,
+    })), []
   );
 
   const [pulseIntensity, setPulseIntensity] = useState(0.5);
