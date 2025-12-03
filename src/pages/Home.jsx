@@ -14,11 +14,12 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-              <KeyRound className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-white">Alchemize</span>
+          <div className="flex items-center">
+            <img 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/3b3299703_7EFD7764-73E6-4E36-ADAD-927E09F48B68.png" 
+              alt="Alchemize"
+              className="h-12 object-contain"
+            />
           </div>
           
           <motion.div
