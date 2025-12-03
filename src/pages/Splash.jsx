@@ -64,7 +64,7 @@ export default function Splash() {
           <img 
             src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/87ac0e58a_7EFD7764-73E6-4E36-ADAD-927E09F48B68.png"
             alt="Alchemize"
-            className="h-32 md:h-40 object-contain"
+            className="h-44 md:h-56 object-contain"
           />
         </motion.div>
 
