@@ -4,37 +4,37 @@ const soundscapes = [
   {
     id: 'cosmic-drift',
     title: 'Cosmic Drift',
-    description: 'Soft pads + chimes',
+    description: 'Soft ambient pads',
     icon: '🌌',
-    url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/08/23/audio_d16737dc28.mp3'
   },
   {
     id: 'deep-theta',
     title: 'Deep Theta',
-    description: 'Deep breathing tones',
+    description: 'Hypnotic healing tones',
     icon: '🧘',
-    url: 'https://cdn.pixabay.com/audio/2022/03/15/audio_115b9d5e4c.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/10/25/audio_946bc06df3.mp3'
   },
   {
     id: 'celestial-rain',
     title: 'Celestial Rain',
-    description: 'Light rain + airy pads',
+    description: 'Gentle rain ambience',
     icon: '🌧️',
-    url: 'https://cdn.pixabay.com/audio/2022/08/02/audio_884fe92c21.mp3'
+    url: 'https://cdn.pixabay.com/audio/2022/05/16/audio_1333dfacdb.mp3'
   },
   {
     id: 'astral-winds',
     title: 'Astral Winds',
-    description: 'Space wind + shimmer',
+    description: 'Ethereal meditation',
     icon: '💫',
-    url: 'https://cdn.pixabay.com/audio/2021/09/06/audio_0eebc8b8f0.mp3'
+    url: 'https://cdn.pixabay.com/audio/2023/09/04/audio_9dcf47b8c8.mp3'
   },
   {
     id: 'inner-temple',
     title: 'Inner Temple',
-    description: 'Tibetan bowls + hum',
+    description: 'Peaceful sleep music',
     icon: '🔔',
-    url: 'https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d2.mp3'
+    url: 'https://cdn.pixabay.com/audio/2023/04/11/audio_5765ab0920.mp3'
   }
 ];
 
