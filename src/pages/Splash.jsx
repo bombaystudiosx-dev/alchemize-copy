@@ -44,11 +44,12 @@ export default function Splash() {
             }}
             className="relative"
           >
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-600 via-indigo-600 to-violet-700 flex items-center justify-center shadow-2xl shadow-purple-500/50 border-2 border-white/20">
-              <div className="relative">
-                <Moon className="w-12 h-12 text-white absolute -top-2 -right-2 opacity-80" />
-                <KeyRound className="w-16 h-16 text-white" />
-              </div>
+            <div className="w-40 h-40 rounded-full overflow-hidden shadow-2xl shadow-purple-500/50 border-2 border-white/20">
+              <img 
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/6a10d4a15_A361E0F7-2289-4491-873F-681D46F0CACB.png"
+                alt="Alchemize"
+                className="w-full h-full object-cover scale-110"
+              />
             </div>
           </motion.div>
         </motion.div>
