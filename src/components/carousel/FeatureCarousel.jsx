@@ -230,7 +230,7 @@ export default function FeatureCarousel() {
                               <img 
                                 src={feature.image} 
                                 alt={feature.title}
-                                className="w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover scale-110"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-[#1a0a2e]/30 to-transparent" />
                             </motion.div>
