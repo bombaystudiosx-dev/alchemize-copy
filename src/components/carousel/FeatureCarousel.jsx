@@ -214,7 +214,7 @@ export default function FeatureCarousel() {
                       {/* Card Content */}
                       <div className="relative z-10 h-full flex flex-col p-6">
                         {/* Artwork Area */}
-                        <div className="flex-1 flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 overflow-hidden rounded-3xl">
                           {feature.image ? (
                             <motion.div
                               animate={isActive ? { 
@@ -230,9 +230,9 @@ export default function FeatureCarousel() {
                               <img 
                                 src={feature.image} 
                                 alt={feature.title}
-                                className="w-full h-full object-cover rounded-t-2xl"
+                                className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-[#1a0a2e]/30 to-transparent" />
                             </motion.div>
                           ) : (
                             <motion.div
