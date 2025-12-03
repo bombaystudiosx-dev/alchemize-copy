@@ -15,7 +15,7 @@ const features = [
     icon: Sparkles,
     route: 'ManifestationBoard',
     gradient: 'from-violet-600 to-purple-600',
-    artwork: '✨🌟💫'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fd46769d1_DC93C701-3D3B-4706-95DB-B435D928B27B.png'
   },
   {
     id: 'affirmations',
@@ -24,7 +24,7 @@ const features = [
     icon: Heart,
     route: 'Affirmations',
     gradient: 'from-pink-600 to-rose-600',
-    artwork: '💖🌸💝'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/eb741e2f8_08E90FB0-1A9C-44F9-9BDB-FBDD45607671.png'
   },
   {
     id: 'goals',
@@ -33,7 +33,7 @@ const features = [
     icon: Target,
     route: 'Goals',
     gradient: 'from-amber-500 to-orange-600',
-    artwork: '🎯🏆⭐'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/eb51f0cc3_11CC2A81-5364-451D-8BCA-95D42C43F09C.png'
   },
   {
     id: 'habits',
@@ -42,7 +42,7 @@ const features = [
     icon: CheckSquare,
     route: 'Habits',
     gradient: 'from-emerald-500 to-teal-600',
-    artwork: '✅📈🔥'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/1f223a74c_731223C4-9062-40AD-ADE6-BEC7D38C40C7.png'
   },
   {
     id: 'finance',
