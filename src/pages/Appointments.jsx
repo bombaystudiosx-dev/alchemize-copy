@@ -8,7 +8,7 @@ import GlowButton from '@/components/cosmic/GlowButton';
 import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2 } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2, Briefcase, User } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -21,9 +21,11 @@ export default function Appointments() {
     title: '',
     date: format(new Date(), 'yyyy-MM-dd'),
     time: '09:00',
+    category: 'personal',
     notes: '',
     reminder: true
   });
+  const [activeTab, setActiveTab] = useState('personal');
   const queryClient = useQueryClient();
 
   const { data: appointments = [], isLoading } = useQuery({
@@ -59,6 +61,7 @@ export default function Appointments() {
       title: '',
       date: format(new Date(), 'yyyy-MM-dd'),
       time: '09:00',
+      category: 'personal',
       notes: '',
       reminder: true
     });
@@ -70,6 +73,7 @@ export default function Appointments() {
       title: appointment.title,
       date: appointment.date,
       time: appointment.time,
+      category: appointment.category || 'personal',
       notes: appointment.notes || '',
       reminder: appointment.reminder !== false
     });
@@ -99,6 +103,9 @@ export default function Appointments() {
     isPast(new Date(a.date)) && !isToday(new Date(a.date))
   );
 
+  const filteredUpcoming = upcomingAppointments.filter(a => (a.category || 'personal') === activeTab);
+  const filteredPast = pastAppointments.filter(a => (a.category || 'personal') === activeTab);
+
   return (
     <CosmicBackground>
       <div className="min-h-screen pb-8">
@@ -122,19 +129,47 @@ export default function Appointments() {
         </motion.header>
 
         <div className="px-6">
-          {/* Stats */}
+          {/* Category Tabs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-2 gap-3 mb-8"
+            className="mb-6"
           >
-            <CosmicCard className="text-center py-4">
-              <p className="text-2xl font-bold text-white">{upcomingAppointments.length}</p>
-              <p className="text-xs text-white/50">Upcoming</p>
-            </CosmicCard>
-            <CosmicCard className="text-center py-4">
-              <p className="text-2xl font-bold text-white/50">{pastAppointments.length}</p>
-              <p className="text-xs text-white/50">Past</p>
+            <CosmicCard className="p-2">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setActiveTab('personal')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+                    activeTab === 'personal'
+                      ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white'
+                      : 'text-white/60 hover:bg-white/10'
+                  }`}
+                >
+                  <User className="w-4 h-4" />
+                  <span className="font-medium">Personal</span>
+                  <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${
+                    activeTab === 'personal' ? 'bg-white/20' : 'bg-white/10'
+                  }`}>
+                    {upcomingAppointments.filter(a => (a.category || 'personal') === 'personal').length}
+                  </span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('business')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+                    activeTab === 'business'
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
+                      : 'text-white/60 hover:bg-white/10'
+                  }`}
+                >
+                  <Briefcase className="w-4 h-4" />
+                  <span className="font-medium">Business</span>
+                  <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${
+                    activeTab === 'business' ? 'bg-white/20' : 'bg-white/10'
+                  }`}>
+                    {upcomingAppointments.filter(a => a.category === 'business').length}
+                  </span>
+                </button>
+              </div>
             </CosmicCard>
           </motion.div>
 
@@ -160,15 +195,19 @@ export default function Appointments() {
             </motion.div>
           ) : (
             <div className="space-y-6">
-              {upcomingAppointments.length > 0 && (
+              {filteredUpcoming.length > 0 && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  key={activeTab}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
                 >
-                  <h2 className="text-lg font-semibold text-white mb-4">Upcoming</h2>
+                  <h2 className="text-lg font-semibold text-white mb-4">
+                    Upcoming {activeTab === 'business' ? 'Business' : 'Personal'}
+                  </h2>
                   <div className="space-y-3">
                     <AnimatePresence>
-                      {upcomingAppointments.map((appointment, index) => (
+                      {filteredUpcoming.map((appointment, index) => (
                         <motion.div
                           key={appointment.id}
                           initial={{ opacity: 0, x: -20 }}
@@ -178,8 +217,15 @@ export default function Appointments() {
                         >
                           <CosmicCard className="group">
                             <div className="flex items-start gap-4">
-                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                                <Calendar className="w-6 h-6 text-white" />
+                              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                                  appointment.category === 'business' 
+                                    ? 'bg-gradient-to-br from-blue-500 to-cyan-600' 
+                                    : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                                }`}>
+                                {appointment.category === 'business' 
+                                  ? <Briefcase className="w-6 h-6 text-white" />
+                                  : <User className="w-6 h-6 text-white" />
+                                }
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-medium text-white">{appointment.title}</h3>
@@ -220,14 +266,14 @@ export default function Appointments() {
                 </motion.div>
               )}
 
-              {pastAppointments.length > 0 && (
+              {filteredPast.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  <h2 className="text-lg font-semibold text-white/50 mb-4">Past</h2>
+                  <h2 className="text-lg font-semibold text-white/50 mb-4">Past {activeTab === 'business' ? 'Business' : 'Personal'}</h2>
                   <div className="space-y-3">
-                    {pastAppointments.slice(0, 5).map((appointment) => (
+                    {filteredPast.slice(0, 5).map((appointment) => (
                       <CosmicCard key={appointment.id} className="opacity-50 group">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
@@ -273,6 +319,36 @@ export default function Appointments() {
                 />
               </div>
               
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewAppointment({ ...newAppointment, category: 'personal' })}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+                      newAppointment.category === 'personal'
+                        ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                    }`}
+                  >
+                    <User className="w-4 h-4" />
+                    Personal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewAppointment({ ...newAppointment, category: 'business' })}
+                    className={`flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${
+                      newAppointment.category === 'business'
+                        ? 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white'
+                        : 'bg-white/10 text-white/60 hover:bg-white/20'
+                    }`}
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    Business
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
