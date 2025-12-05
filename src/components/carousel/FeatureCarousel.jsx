@@ -60,7 +60,7 @@ const features = [
     icon: Dumbbell,
     route: 'Fitness',
     gradient: 'from-red-500 to-orange-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/2731b6a10_F76D9AD5-5B7D-476E-983E-6C939BC91D5A.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/54559d13c_Photoshop5.jpg'
   },
   {
     id: 'diet',
