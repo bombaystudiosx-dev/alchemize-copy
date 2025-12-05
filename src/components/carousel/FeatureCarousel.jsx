@@ -95,9 +95,58 @@ export default function FeatureCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
+  const [visibleFeatures, setVisibleFeatures] = useState(features);
   const containerRef = useRef(null);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+
+  useEffect(() => {
+    // Load enabled features from localStorage
+    const stored = localStorage.getItem('enabled_features');
+    if (stored) {
+      try {
+        const enabledFeatureIds = JSON.parse(stored)
+          .filter(f => f.enabled)
+          .map(f => f.id);
+        
+        const filtered = features.filter(f => enabledFeatureIds.includes(f.id));
+        if (filtered.length > 0) {
+          setVisibleFeatures(filtered);
+          if (currentIndex >= filtered.length) {
+            setCurrentIndex(0);
+          }
+        }
+      } catch (e) {
+        setVisibleFeatures(features);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFeatureUpdate = () => {
+      const stored = localStorage.getItem('enabled_features');
+      if (stored) {
+        try {
+          const enabledFeatureIds = JSON.parse(stored)
+            .filter(f => f.enabled)
+            .map(f => f.id);
+          
+          const filtered = features.filter(f => enabledFeatureIds.includes(f.id));
+          if (filtered.length > 0) {
+            setVisibleFeatures(filtered);
+            if (currentIndex >= filtered.length) {
+              setCurrentIndex(0);
+            }
+          }
+        } catch (e) {
+          setVisibleFeatures(features);
+        }
+      }
+    };
+
+    window.addEventListener('features-updated', handleFeatureUpdate);
+    return () => window.removeEventListener('features-updated', handleFeatureUpdate);
+  }, [currentIndex]);
 
   const handleDragStart = useCallback((e) => {
     setIsDragging(true);
@@ -116,7 +165,7 @@ export default function FeatureCarousel() {
     if (Math.abs(diff) > 50) {
       const direction = diff > 0 ? 1 : -1;
       const newIndex = scrollLeft.current + direction;
-      if (newIndex >= 0 && newIndex < features.length && newIndex !== currentIndex) {
+      if (newIndex >= 0 && newIndex < visibleFeatures.length && newIndex !== currentIndex) {
         setCurrentIndex(newIndex);
         scrollLeft.current = newIndex;
         startX.current = x;
@@ -131,10 +180,10 @@ export default function FeatureCarousel() {
   }, []);
 
   const goToSlide = useCallback((index) => {
-    if (index >= 0 && index < features.length) {
+    if (index >= 0 && index < visibleFeatures.length) {
       setCurrentIndex(index);
     }
-  }, []);
+  }, [visibleFeatures.length]);
 
   return (
     <div className="relative w-full h-full flex flex-col items-center justify-center py-8">
@@ -152,7 +201,7 @@ export default function FeatureCarousel() {
       >
         <div className="relative w-full h-full flex items-center justify-center">
           <AnimatePresence mode="popLayout">
-            {features.map((feature, index) => {
+            {visibleFeatures.map((feature, index) => {
               const offset = index - currentIndex;
               const isActive = index === currentIndex;
               const isVisible = Math.abs(offset) <= 2;
@@ -313,7 +362,7 @@ export default function FeatureCarousel() {
       
       {/* Pagination Dots */}
       <div className="flex items-center gap-2 mt-8">
-        {features.map((_, index) => (
+        {visibleFeatures.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
@@ -336,7 +385,7 @@ export default function FeatureCarousel() {
         className="mt-6 text-center"
       >
         <p className="text-white/50 text-sm">
-          {currentIndex + 1} of {features.length}
+          {currentIndex + 1} of {visibleFeatures.length}
         </p>
       </motion.div>
     </div>
