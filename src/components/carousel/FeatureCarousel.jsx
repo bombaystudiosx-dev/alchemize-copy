@@ -42,7 +42,7 @@ const features = [
     icon: CheckSquare,
     route: 'Habits',
     gradient: 'from-emerald-500 to-teal-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/1f223a74c_731223C4-9062-40AD-ADE6-BEC7D38C40C7.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/7a35f50d7_PhotoShop4.jpg'
   },
   {
     id: 'finance',
@@ -290,7 +290,7 @@ export default function FeatureCarousel() {
                               <img 
                                 src={feature.image} 
                                 alt={feature.title}
-                                className="absolute inset-0 w-full h-full object-cover scale-110"
+                                className={`absolute inset-0 w-full h-full scale-110 ${feature.id === 'habits' ? 'object-contain' : 'object-cover'}`}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-[#1a0a2e]/30 to-transparent" />
                             </motion.div>
