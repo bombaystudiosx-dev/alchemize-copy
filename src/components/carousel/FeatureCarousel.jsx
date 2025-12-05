@@ -227,8 +227,6 @@ export default function FeatureCarousel() {
                   }}
                   className="absolute"
                   style={{ 
-                    perspective: '1000px',
-                    transformStyle: 'preserve-3d',
                     zIndex: isActive ? 10 : 5 - Math.abs(offset)
                   }}
                 >
