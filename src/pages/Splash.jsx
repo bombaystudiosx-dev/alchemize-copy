@@ -20,7 +20,7 @@ export default function Splash() {
       <div 
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c5fb0f643_icon.jpeg)'
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/9849c9061_499DEEC8-FAC9-47E3-B2D8-4CD0824E2343.png)'
         }}
       />
       
