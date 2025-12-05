@@ -55,13 +55,18 @@ export default function Splash() {
         transition={{ delay: 0.3 }}
         className="absolute top-6 right-6 z-20 flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5"
       >
-        <span className={`text-xs font-medium ${language === 'en' ? 'text-white' : 'text-white/50'}`}>EN</span>
-        <Switch
-          checked={language === 'es'}
-          onCheckedChange={(checked) => setLanguage(checked ? 'es' : 'en')}
-          className="data-[state=checked]:bg-purple-600 data-[state=unchecked]:bg-white/30"
-        />
-        <span className={`text-xs font-medium ${language === 'es' ? 'text-white' : 'text-white/50'}`}>ES</span>
+        <button
+          onClick={() => setLanguage('en')}
+          className={`text-xs font-medium px-2 py-1 rounded ${language === 'en' ? 'text-white bg-purple-600' : 'text-white/50'}`}
+        >
+          EN
+        </button>
+        <button
+          onClick={() => setLanguage('es')}
+          className={`text-xs font-medium px-2 py-1 rounded ${language === 'es' ? 'text-white bg-purple-600' : 'text-white/50'}`}
+        >
+          ES
+        </button>
       </motion.div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-32">
