@@ -9,7 +9,7 @@ const CosmicBackground = memo(function CosmicBackground({ children, dimmed = fal
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
         style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/1f39af073_D0F70B0F-1FE5-47CD-8ABE-507BC33A3127.png)'
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fb4acda75_20250831_0307_VibrantCelestialGlow_remix_01k3zse7f3fjxse4jt9v4t8vyh.jpg)'
         }}
       />
       
