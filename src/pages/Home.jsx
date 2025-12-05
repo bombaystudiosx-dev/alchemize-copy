@@ -126,7 +126,7 @@ export default function Home() {
             {firstName}
           </h1>
           <p className="text-purple-200/70 text-sm md:text-base">
-            Swipe to explore your transformation journey
+            Transform your reality by transforming yourself
           </p>
         </motion.div>
 

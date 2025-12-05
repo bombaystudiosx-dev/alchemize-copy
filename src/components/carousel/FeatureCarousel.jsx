@@ -38,7 +38,7 @@ const features = [
   {
     id: 'habits',
     title: 'Habit Tracker',
-    description: 'Build lasting positive routines',
+    description: 'Condition yourself for greatness',
     icon: CheckSquare,
     route: 'Habits',
     gradient: 'from-emerald-500 to-teal-600',
@@ -47,7 +47,7 @@ const features = [
   {
     id: 'finance',
     title: 'Financial Tracker',
-    description: 'Master your money and grow wealth',
+    description: 'Organize Finances',
     icon: DollarSign,
     route: 'Finance',
     gradient: 'from-green-500 to-emerald-600',
@@ -339,18 +339,7 @@ export default function FeatureCarousel() {
                           </p>
                         </div>
                         
-                        {/* Tap indicator */}
-                        {isActive && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="mt-4 text-center"
-                          >
-                            <span className="text-xs text-purple-300/80 uppercase tracking-wider">
-                              Tap to Open
-                            </span>
-                          </motion.div>
-                        )}
+
                       </div>
                     </motion.div>
                   </Link>
