@@ -15,44 +15,16 @@ export default function Splash() {
   }, []);
 
   return (
-    <CosmicBackground>
-      <div className="min-h-screen flex flex-col items-center justify-center px-6">
-        {/* Logo Container */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ 
-            type: 'spring',
-            stiffness: 200,
-            delay: 0.2
-          }}
-          className="relative mb-8"
-        >
-          {/* Glow effect behind logo */}
-          <div className="absolute inset-0 blur-3xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 opacity-50 rounded-full scale-150" />
-          
-          {/* Logo Icon */}
-          <motion.div
-            animate={{ 
-              rotate: [0, 5, -5, 0],
-              y: [0, -5, 0]
-            }}
-            transition={{ 
-              duration: 4,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }}
-            className="relative"
-          >
-            <div className="w-40 h-40 rounded-full overflow-hidden shadow-2xl shadow-purple-500/50 border-2 border-white/20">
-              <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/7e90ef684_icon.jpeg"
-                alt="Alchemize"
-                className="w-full h-full object-cover scale-110"
-              />
-            </div>
-          </motion.div>
-        </motion.div>
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c5fb0f643_icon.jpeg)'
+        }}
+      />
+      
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6">
 
 
 
@@ -113,6 +85,6 @@ export default function Splash() {
           className="absolute bottom-12 left-1/2 -translate-x-1/2 w-32 h-px bg-gradient-to-r from-transparent via-purple-500 to-transparent"
         />
       </div>
-    </CosmicBackground>
+    </div>
   );
 }
