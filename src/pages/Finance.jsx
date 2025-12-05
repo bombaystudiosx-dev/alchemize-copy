@@ -9,7 +9,7 @@ import CosmicInput from '@/components/cosmic/CosmicInput';
 import FinanceCalendar from '@/components/finance/FinanceCalendar';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, StickyNote } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
@@ -29,6 +29,7 @@ const categoryEmojis = {
 
 export default function Finance() {
   const [showDialog, setShowDialog] = useState(false);
+  const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [newTransaction, setNewTransaction] = useState({ 
     type: 'expense', 
     amount: '', 
@@ -37,11 +38,20 @@ export default function Finance() {
     notes: '',
     date: format(new Date(), 'yyyy-MM-dd') 
   });
+  const [newNote, setNewNote] = useState({ 
+    content: '', 
+    date: format(new Date(), 'yyyy-MM-dd') 
+  });
   const queryClient = useQueryClient();
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['transactions'],
     queryFn: () => base44.entities.Transaction.list('-date')
+  });
+
+  const { data: notes = [] } = useQuery({
+    queryKey: ['financeNotes'],
+    queryFn: () => base44.entities.FinanceNote.list('-date')
   });
 
   const createMutation = useMutation({
@@ -63,6 +73,20 @@ export default function Finance() {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Transaction.delete(id),
     onSuccess: () => queryClient.invalidateQueries(['transactions'])
+  });
+
+  const createNoteMutation = useMutation({
+    mutationFn: (data) => base44.entities.FinanceNote.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['financeNotes']);
+      setShowNotesDialog(false);
+      setNewNote({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
+    }
+  });
+
+  const deleteNoteMutation = useMutation({
+    mutationFn: (id) => base44.entities.FinanceNote.delete(id),
+    onSuccess: () => queryClient.invalidateQueries(['financeNotes'])
   });
 
   const monthStart = startOfMonth(new Date());
@@ -142,6 +166,64 @@ export default function Finance() {
             className="mb-8"
           >
             <FinanceCalendar transactions={transactions} />
+          </motion.div>
+
+          {/* Notes Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <StickyNote className="w-5 h-5 text-yellow-400" />
+                Notes
+              </h2>
+              <button
+                onClick={() => setShowNotesDialog(true)}
+                className="text-sm text-purple-300 hover:text-purple-200 flex items-center gap-1"
+              >
+                <Plus className="w-4 h-4" />
+                Add Note
+              </button>
+            </div>
+            
+            {notes.length === 0 ? (
+              <CosmicCard className="text-center py-8">
+                <StickyNote className="w-8 h-8 text-yellow-400/50 mx-auto mb-2" />
+                <p className="text-white/50 text-sm">No notes yet</p>
+              </CosmicCard>
+            ) : (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {notes.map((note) => (
+                    <motion.div
+                      key={note.id}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                    >
+                      <CosmicCard className="group">
+                        <div className="flex gap-3">
+                          <StickyNote className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-1" />
+                          <div className="flex-1">
+                            <p className="text-white text-sm leading-relaxed">{note.content}</p>
+                            <p className="text-xs text-white/40 mt-2">{format(new Date(note.date), 'MMM d, yyyy')}</p>
+                          </div>
+                          <button
+                            onClick={() => deleteNoteMutation.mutate(note.id)}
+                            className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                          >
+                            <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
+                          </button>
+                        </div>
+                      </CosmicCard>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
           </motion.div>
 
           {/* Transactions */}
@@ -305,6 +387,48 @@ export default function Finance() {
                 className="w-full"
               >
                 {createMutation.isPending ? 'Adding...' : 'Add Transaction'}
+              </GlowButton>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Note Dialog */}
+        <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-white flex items-center gap-2">
+                <StickyNote className="w-5 h-5 text-yellow-400" />
+                Add Note
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Note</label>
+                <textarea
+                  value={newNote.content}
+                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
+                  placeholder="Write your note here..."
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 focus:bg-white/15 transition-all resize-none"
+                  rows={4}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
+                <CosmicInput
+                  type="date"
+                  value={newNote.date}
+                  onChange={(e) => setNewNote({ ...newNote, date: e.target.value })}
+                />
+              </div>
+              
+              <GlowButton
+                onClick={() => createNoteMutation.mutate(newNote)}
+                disabled={!newNote.content || createNoteMutation.isPending}
+                className="w-full"
+              >
+                {createNoteMutation.isPending ? 'Adding...' : 'Add Note'}
               </GlowButton>
             </div>
           </DialogContent>
