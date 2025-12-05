@@ -10,6 +10,7 @@ export default function Home() {
   const [user, setUser] = useState(null);
   const [greeting, setGreeting] = useState('Welcome');
   const [showFeatureManager, setShowFeatureManager] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Memoize particles to prevent re-renders
   const particles = useMemo(() => 
@@ -38,7 +39,14 @@ export default function Home() {
     if (hour < 12) setGreeting('Good Morning');
     else if (hour < 17) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
-  }, []);
+
+    // Update time every second
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+    }, []);
 
   const firstName = user?.full_name?.split(' ')[0] || 'Seeker';
 
@@ -65,6 +73,17 @@ export default function Home() {
             />
           ))}
         </div>
+
+        {/* Time Display */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center pt-4"
+        >
+          <span className="text-white/80 text-lg font-light tracking-wide">
+            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </span>
+        </motion.div>
 
         {/* Header */}
         <motion.header
@@ -118,14 +137,32 @@ export default function Home() {
             animate={{ scale: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <Sparkles className="w-5 h-5 text-purple-400" />
-            <span className="text-purple-300/80 text-sm uppercase tracking-wider">{greeting}</span>
-            <Sparkles className="w-5 h-5 text-purple-400" />
+            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <span 
+              className="text-sm uppercase tracking-wider font-semibold"
+              style={{
+                background: 'linear-gradient(135deg, #ffd700, #ffec8b, #daa520)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3)',
+                filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))'
+              }}
+            >{greeting}</span>
+            <Sparkles className="w-5 h-5 text-yellow-400" />
           </motion.div>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
             {firstName}
           </h1>
-          <p className="text-purple-200/70 text-sm md:text-base">
+          <p 
+            className="text-sm md:text-base font-medium"
+            style={{
+              background: 'linear-gradient(135deg, #ffd700, #ffec8b, #daa520)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3)',
+              filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))'
+            }}
+          >
             Transform your reality by transforming yourself
           </p>
         </motion.div>
