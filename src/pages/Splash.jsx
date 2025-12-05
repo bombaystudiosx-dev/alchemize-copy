@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import CosmicBackground from '@/components/cosmic/CosmicBackground';
-import GlowButton from '@/components/cosmic/GlowButton';
+import { Apple } from 'lucide-react';
 // KeyRound import removed - not used
 
 export default function Splash() {
