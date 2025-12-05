@@ -74,7 +74,7 @@ export default function Home() {
         >
           <div className="flex items-center">
             <motion.img 
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/3b3299703_7EFD7764-73E6-4E36-ADAD-927E09F48B68.png" 
+              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png" 
               alt="Alchemize"
               className="h-12 object-contain"
               initial={{ scale: 0.8, opacity: 0 }}
