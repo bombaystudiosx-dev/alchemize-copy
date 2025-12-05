@@ -137,30 +137,32 @@ export default function Home() {
             animate={{ scale: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <Sparkles className="w-5 h-5 text-amber-400" />
             <span 
-              className="text-sm uppercase tracking-wider font-semibold"
+              className="text-sm uppercase tracking-widest"
               style={{
-                background: 'linear-gradient(135deg, #ffd700, #ffec8b, #daa520)',
+                background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3)',
-                filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))'
+                filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
+                fontFamily: 'Georgia, serif',
+                fontStyle: 'italic'
               }}
             >{greeting}</span>
-            <Sparkles className="w-5 h-5 text-yellow-400" />
+            <Sparkles className="w-5 h-5 text-purple-400" />
           </motion.div>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
             {firstName}
           </h1>
           <p 
-            className="text-sm md:text-base font-medium"
+            className="text-sm md:text-base"
             style={{
-              background: 'linear-gradient(135deg, #ffd700, #ffec8b, #daa520)',
+              background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 0 40px rgba(255, 215, 0, 0.3)',
-              filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.6))'
+              filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
+              fontFamily: 'Georgia, serif',
+              fontStyle: 'italic'
             }}
           >
             Transform your reality by transforming yourself
