@@ -217,8 +217,6 @@ export default function FeatureCarousel() {
                   animate={{
                     x: offset * 280,
                     scale: isActive ? 1 : 0.75,
-                    rotateY: offset * -15,
-                    z: isActive ? 0 : -100,
                     opacity: isActive ? 1 : 0.5,
                   }}
                   exit={{ opacity: 0, scale: 0.8 }}
