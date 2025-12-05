@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Apple } from 'lucide-react';
-// KeyRound import removed - not used
+import GlowButton from '@/components/cosmic/GlowButton';
 
 export default function Splash() {
   const [showButton, setShowButton] = useState(false);
