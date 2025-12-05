@@ -11,7 +11,7 @@ const features = [
   {
     id: 'manifestation',
     title: 'Manifestation Board',
-    description: 'Visualize your dreams and bring them to life',
+    description: 'Visualize/feel your dreams until your reality becomes a reflection',
     icon: Sparkles,
     route: 'ManifestationBoard',
     gradient: 'from-violet-600 to-purple-600',
@@ -20,7 +20,7 @@ const features = [
   {
     id: 'affirmations',
     title: 'Affirmations',
-    description: 'Empower yourself with positive thoughts',
+    description: 'Reprogram your subconscious mind with powerful affirmations',
     icon: Heart,
     route: 'Affirmations',
     gradient: 'from-pink-600 to-rose-600',
@@ -28,8 +28,8 @@ const features = [
   },
   {
     id: 'goals',
-    title: 'Goal Setting',
-    description: 'Define and achieve your aspirations',
+    title: 'Set Goals',
+    description: 'Be intentional and strategic with your life',
     icon: Target,
     route: 'Goals',
     gradient: 'from-amber-500 to-orange-600',
