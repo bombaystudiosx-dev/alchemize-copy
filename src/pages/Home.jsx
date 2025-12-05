@@ -156,12 +156,13 @@ export default function Home() {
             {firstName}
           </h1>
           <p 
-            className="text-sm md:text-base"
+            className="text-lg md:text-xl"
             style={{
               background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
+              textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 4px 12px rgba(168, 85, 247, 0.4)',
+              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.5))',
               fontFamily: 'Georgia, serif',
               fontStyle: 'italic'
             }}
