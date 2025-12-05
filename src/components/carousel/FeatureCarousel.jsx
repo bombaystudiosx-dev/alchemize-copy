@@ -72,6 +72,15 @@ const features = [
     image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/d84f1a2a1_1EE9F255-09A4-47B5-B9E3-49A5928D4EDD.png'
   },
   {
+    id: 'calories',
+    title: 'Calorie Tracker',
+    description: 'AI-powered food recognition & macro tracking',
+    icon: Apple,
+    route: 'CalorieTracker',
+    gradient: 'from-green-500 to-emerald-600',
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/d84f1a2a1_1EE9F255-09A4-47B5-B9E3-49A5928D4EDD.png'
+  },
+  {
     id: 'appointments',
     title: 'Appointments',
     description: 'Organize your time with intention',
