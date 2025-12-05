@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import FeatureCarousel from '@/components/carousel/FeatureCarousel';
-import { Moon, Sparkles } from 'lucide-react';
+import FeatureManager from '@/components/home/FeatureManager';
+import { Moon, Sparkles, Settings } from 'lucide-react';
 
 export default function Home() {
   const [user, setUser] = useState(null);
   const [greeting, setGreeting] = useState('Welcome');
+  const [showFeatureManager, setShowFeatureManager] = useState(false);
 
   // Memoize particles to prevent re-renders
   const particles = useMemo(() => 
@@ -81,15 +83,26 @@ export default function Home() {
             />
           </div>
           
-          <motion.div
-            animate={{ 
-              rotate: [0, 10, -10, 0],
-              filter: ['drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))', 'drop-shadow(0 0 16px rgba(168, 85, 247, 0.6))', 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))']
-            }}
-            transition={{ duration: 4, repeat: Infinity }}
-          >
-            <Moon className="w-6 h-6 text-purple-300" />
-          </motion.div>
+          <div className="flex items-center gap-3">
+            <motion.button
+              onClick={() => setShowFeatureManager(true)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            >
+              <Settings className="w-5 h-5 text-purple-300" />
+            </motion.button>
+            
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                filter: ['drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))', 'drop-shadow(0 0 16px rgba(168, 85, 247, 0.6))', 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))']
+              }}
+              transition={{ duration: 4, repeat: Infinity }}
+            >
+              <Moon className="w-6 h-6 text-purple-300" />
+            </motion.div>
+          </div>
         </motion.header>
 
         {/* Welcome Message */}
@@ -140,6 +153,18 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </div>
+
+      {/* Feature Manager */}
+      <FeatureManager 
+        open={showFeatureManager} 
+        onOpenChange={(open) => {
+          setShowFeatureManager(open);
+          if (!open) {
+            // Trigger carousel update
+            window.dispatchEvent(new Event('features-updated'));
+          }
+        }} 
+      />
     </CosmicBackground>
   );
 }
