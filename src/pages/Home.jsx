@@ -74,35 +74,33 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Time Display */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center pt-4"
-        >
-          <span className="text-white/80 text-lg font-light tracking-wide">
-            {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-        </motion.div>
-
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 relative z-10"
         >
+          {/* Left - Crystal Ball / Logo */}
           <div className="flex items-center">
             <motion.img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png" 
               alt="Alchemize"
-              className="h-12 object-contain"
+              className="h-10 object-contain"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             />
           </div>
-          
+
+          {/* Right - Time, Settings, Moon */}
           <div className="flex items-center gap-3">
+            <span 
+              className="text-white/90 text-lg tracking-wider"
+              style={{ fontFamily: 'Georgia, serif' }}
+            >
+              {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+
             <motion.button
               onClick={() => setShowFeatureManager(true)}
               whileHover={{ scale: 1.1 }}
@@ -111,7 +109,7 @@ export default function Home() {
             >
               <Settings className="w-5 h-5 text-purple-300" />
             </motion.button>
-            
+
             <motion.div
               animate={{ 
                 rotate: [0, 10, -10, 0],
@@ -119,7 +117,7 @@ export default function Home() {
               }}
               transition={{ duration: 4, repeat: Infinity }}
             >
-              <Moon className="w-6 h-6 text-purple-300" />
+              <Moon className="w-5 h-5 text-purple-300" />
             </motion.div>
           </div>
         </motion.header>
@@ -151,7 +149,10 @@ export default function Home() {
             >{greeting}</span>
             <Sparkles className="w-5 h-5 text-purple-400" />
           </motion.div>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+          <h1 
+            className="text-2xl md:text-3xl font-bold text-white mb-2"
+            style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}
+          >
             {firstName}
           </h1>
           <p 
