@@ -33,7 +33,7 @@ const features = [
     icon: Target,
     route: 'Goals',
     gradient: 'from-amber-500 to-orange-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/1278e4fea_3980621C-E6F5-4042-A813-8669BB08CC22.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/9f245f835_Photoshop12.jpg'
   },
   {
     id: 'habits',
@@ -87,7 +87,7 @@ const features = [
     icon: Settings,
     route: 'Settings',
     gradient: 'from-slate-500 to-gray-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c4f2a10c0_A361E0F7-2289-4491-873F-681D46F0CACB.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/43a9c36a3_20250831_0435_DreamyGlowingKey_remix_01k3zyegxfez6ad6hbe52apr18.jpg'
   }
 ];
 
