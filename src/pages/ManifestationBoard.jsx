@@ -28,6 +28,7 @@ export default function ManifestationBoard() {
   const [showDailyRitual, setShowDailyRitual] = useState(false);
   const [ritualShown, setRitualShown] = useState(false);
   const [driftOffset, setDriftOffset] = useState({ x: 0, y: 0 });
+  const [ritualTiles, setRitualTiles] = useState([]);
   
   const queryClient = useQueryClient();
   const moodColor = getMoodColors(selectedMood);
@@ -59,17 +60,16 @@ export default function ManifestationBoard() {
       const today = new Date().toDateString();
       
       if (lastRitualDate !== today) {
+        // Prepare 3-5 random tiles for slideshow
+        const shuffled = [...tiles].sort(() => Math.random() - 0.5);
+        const count = Math.min(5, Math.max(3, tiles.length));
+        setRitualTiles(shuffled.slice(0, count));
         setShowDailyRitual(true);
         localStorage.setItem('last_ritual_date', today);
       }
       setRitualShown(true);
     }
   }, [dailyRitualEnabled, tiles, ritualShown]);
-
-  // Get random tile for daily ritual
-  const ritualTile = tiles.length > 0 
-    ? tiles[Math.floor(Math.random() * tiles.length)] 
-    : null;
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.ManifestationTile.create(data),
@@ -139,10 +139,13 @@ export default function ManifestationBoard() {
     <>
       {/* Daily Ritual Modal */}
       <AnimatePresence>
-        {showDailyRitual && ritualTile && (
+        {showDailyRitual && ritualTiles.length > 0 && (
           <DailyRitualModal 
-            tile={ritualTile} 
-            onComplete={() => setShowDailyRitual(false)} 
+            tiles={ritualTiles}
+            onComplete={() => {
+              setShowDailyRitual(false);
+              setRitualTiles([]);
+            }}
           />
         )}
       </AnimatePresence>
