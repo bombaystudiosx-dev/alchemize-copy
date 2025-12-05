@@ -46,7 +46,7 @@ export default function Splash() {
           >
             <div className="w-40 h-40 rounded-full overflow-hidden shadow-2xl shadow-purple-500/50 border-2 border-white/20">
               <img 
-                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/6a10d4a15_A361E0F7-2289-4491-873F-681D46F0CACB.png"
+                src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/7e90ef684_icon.jpeg"
                 alt="Alchemize"
                 className="w-full h-full object-cover scale-110"
               />
@@ -54,19 +54,7 @@ export default function Splash() {
           </motion.div>
         </motion.div>
 
-        {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mb-4"
-        >
-          <img 
-            src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/87ac0e58a_7EFD7764-73E6-4E36-ADAD-927E09F48B68.png"
-            alt="Alchemize"
-            className="h-64 md:h-80 object-contain"
-          />
-        </motion.div>
+
 
         {/* Tagline */}
         <motion.p
