@@ -78,7 +78,7 @@ const features = [
     icon: Calendar,
     route: 'Appointments',
     gradient: 'from-blue-500 to-indigo-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b1af6fd37_AB90EFB7-ADF3-4A1C-8F2A-A6408C34E6EF.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/67a5278b0_Photoshop12.jpg'
   },
   {
     id: 'settings',
@@ -87,7 +87,7 @@ const features = [
     icon: Settings,
     route: 'Settings',
     gradient: 'from-slate-500 to-gray-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/43a9c36a3_20250831_0435_DreamyGlowingKey_remix_01k3zyegxfez6ad6hbe52apr18.jpg'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/4edaa444a_20250831_0435_DreamyGlowingKey_remix_01k3zyegxfez6ad6hbe52apr18.jpg'
   }
 ];
 
