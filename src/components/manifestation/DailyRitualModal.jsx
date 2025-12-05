@@ -23,9 +23,12 @@ const playChime = () => {
   oscillator.stop(audioContext.currentTime + 2);
 };
 
-export default function DailyRitualModal({ tile, onComplete }) {
+export default function DailyRitualModal({ tiles, onComplete }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [showContent, setShowContent] = useState(false);
-  const moodColor = getMoodColors(tile?.category || 'other');
+  
+  const currentTile = tiles?.[currentIndex];
+  const moodColor = getMoodColors(currentTile?.category || 'other');
 
   useEffect(() => {
     // Play subtle chime on mount
@@ -34,18 +37,33 @@ export default function DailyRitualModal({ tile, onComplete }) {
       setShowContent(true);
     }, 500);
 
-    // Auto-dismiss after 8 seconds
-    const dismissTimer = setTimeout(() => {
-      onComplete();
-    }, 8000);
-
     return () => {
       clearTimeout(timer);
-      clearTimeout(dismissTimer);
     };
-  }, [onComplete]);
+  }, []);
 
-  if (!tile) return null;
+  useEffect(() => {
+    if (!tiles || tiles.length === 0) return;
+
+    // Auto-advance slides every 5 seconds
+    const slideTimer = setTimeout(() => {
+      if (currentIndex < tiles.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+        setShowContent(false);
+        setTimeout(() => {
+          playChime();
+          setShowContent(true);
+        }, 300);
+      } else {
+        // End of slideshow
+        onComplete();
+      }
+    }, 5000);
+
+    return () => clearTimeout(slideTimer);
+  }, [currentIndex, tiles, onComplete]);
+
+  if (!tiles || tiles.length === 0 || !currentTile) return null;
 
   return (
     <motion.div
@@ -95,8 +113,9 @@ export default function DailyRitualModal({ tile, onComplete }) {
             </motion.p>
 
             {/* Image */}
-            {tile.image_url && (
+            {currentTile.image_url && (
               <motion.div
+                key={`image-${currentIndex}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.8 }}
@@ -107,8 +126,8 @@ export default function DailyRitualModal({ tile, onComplete }) {
                   style={{ background: moodColor.glow }}
                 />
                 <img
-                  src={tile.image_url}
-                  alt={tile.title}
+                  src={currentTile.image_url}
+                  alt={currentTile.title}
                   className="relative w-64 h-64 md:w-80 md:h-80 object-cover rounded-2xl shadow-2xl"
                 />
               </motion.div>
@@ -116,6 +135,7 @@ export default function DailyRitualModal({ tile, onComplete }) {
 
             {/* Intention */}
             <motion.p
+              key={`title-${currentIndex}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
@@ -124,8 +144,25 @@ export default function DailyRitualModal({ tile, onComplete }) {
                 textShadow: `0 0 30px ${moodColor.glow}`
               }}
             >
-              {tile.title}
+              {currentTile.title}
             </motion.p>
+
+            {/* Progress indicator */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5 }}
+              className="mt-6 flex items-center gap-2"
+            >
+              {tiles.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    idx === currentIndex ? 'w-8 bg-white' : 'w-1.5 bg-white/30'
+                  }`}
+                />
+              ))}
+            </motion.div>
 
             {/* Mood */}
             <motion.div

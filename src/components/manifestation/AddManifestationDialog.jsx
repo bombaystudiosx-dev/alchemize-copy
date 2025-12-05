@@ -38,10 +38,16 @@ export default function AddManifestationDialog({
     const file = e.target.files?.[0];
     if (!file) return;
     
-    setIsUploading(true);
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setNewTile({ ...newTile, image_url: file_url });
-    setIsUploading(false);
+    try {
+      setIsUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setNewTile({ ...newTile, image_url: file_url });
+    } catch (error) {
+      console.error('Upload failed:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSubmit = () => {
