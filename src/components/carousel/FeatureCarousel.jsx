@@ -51,7 +51,7 @@ const features = [
     icon: DollarSign,
     route: 'Finance',
     gradient: 'from-green-500 to-emerald-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fa2a8124f_7B0741F4-AC42-43CF-A12B-3ECAB42AA150.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/d97e23f78_D461046E-F45A-4970-87FD-7AB31B05DB2E.png'
   },
   {
     id: 'fitness',
