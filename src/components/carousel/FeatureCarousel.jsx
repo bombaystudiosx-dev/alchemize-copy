@@ -15,7 +15,7 @@ const features = [
     icon: Sparkles,
     route: 'ManifestationBoard',
     gradient: 'from-violet-600 to-purple-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fd46769d1_DC93C701-3D3B-4706-95DB-B435D928B27B.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/76aebc03e_3980621C-E6F5-4042-A813-8669BB08CC22.png'
   },
   {
     id: 'affirmations',
