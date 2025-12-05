@@ -19,7 +19,7 @@ export default function Splash() {
     if (rememberMe) {
       localStorage.setItem('remember_me', 'true');
     }
-    base44.auth.redirectToLogin();
+    window.location.href = createPageUrl('Home');
   };
 
   const text = {
