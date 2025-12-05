@@ -140,17 +140,19 @@ export default function Splash() {
             </div>
 
             {/* Remember Me */}
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={setRememberMe}
-                className="border-white/30 data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
-              />
-              <label htmlFor="remember" className="text-white/70 text-sm cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <div 
+                onClick={() => setRememberMe(!rememberMe)}
+                className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                  rememberMe ? 'bg-purple-600 border-purple-600' : 'border-white/30'
+                }`}
+              >
+                {rememberMe && <Check className="w-3 h-3 text-white" />}
+              </div>
+              <span className="text-white/70 text-sm">
                 {t.rememberMe}
-              </label>
-            </div>
+              </span>
+            </label>
           </div>
         </motion.div>
       </div>
