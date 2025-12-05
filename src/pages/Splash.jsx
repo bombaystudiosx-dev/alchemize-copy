@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import { Apple, Check } from 'lucide-react';
 
 export default function Splash() {
