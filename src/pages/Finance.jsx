@@ -34,6 +34,7 @@ export default function Finance() {
     amount: '', 
     category: 'other', 
     description: '', 
+    notes: '',
     date: format(new Date(), 'yyyy-MM-dd') 
   });
   const queryClient = useQueryClient();
@@ -53,6 +54,7 @@ export default function Finance() {
         amount: '', 
         category: 'other', 
         description: '', 
+        notes: '',
         date: format(new Date(), 'yyyy-MM-dd') 
       });
     }
@@ -181,6 +183,9 @@ export default function Finance() {
                         </span>
                         <div className="flex-1">
                           <p className="font-medium text-white">{transaction.description || transaction.category}</p>
+                          {transaction.notes && (
+                            <p className="text-xs text-white/60 mt-0.5">{transaction.notes}</p>
+                          )}
                           <p className="text-xs text-white/50">{format(new Date(transaction.date), 'MMM d, yyyy')}</p>
                         </div>
                         <p className={`font-bold ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
@@ -271,6 +276,17 @@ export default function Finance() {
                   value={newTransaction.description}
                   onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
                   placeholder="What was this for?"
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Notes</label>
+                <textarea
+                  value={newTransaction.notes}
+                  onChange={(e) => setNewTransaction({ ...newTransaction, notes: e.target.value })}
+                  placeholder="Additional notes..."
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/15 transition-all resize-none"
+                  rows={3}
                 />
               </div>
               
