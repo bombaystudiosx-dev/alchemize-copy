@@ -6,7 +6,6 @@ import Goals from './pages/Goals';
 import Habits from './pages/Habits';
 import Finance from './pages/Finance';
 import Fitness from './pages/Fitness';
-import Diet from './pages/Diet';
 import Appointments from './pages/Appointments';
 import Settings from './pages/Settings';
 import CalorieTracker from './pages/CalorieTracker';
@@ -22,7 +21,6 @@ export const PAGES = {
     "Habits": Habits,
     "Finance": Finance,
     "Fitness": Fitness,
-    "Diet": Diet,
     "Appointments": Appointments,
     "Settings": Settings,
     "CalorieTracker": CalorieTracker,

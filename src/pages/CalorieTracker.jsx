@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
-import { ArrowLeft, Camera, Settings, Search, X } from 'lucide-react';
+import { ArrowLeft, Camera, Settings, Search, X, CalendarDays } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 
@@ -14,6 +14,7 @@ import WeekCalendar from '@/components/diet/WeekCalendar';
 import MealSection from '@/components/diet/MealSection';
 import FoodPhotoAnalyzer from '@/components/diet/FoodPhotoAnalyzer';
 import ProgressRing from '@/components/diet/ProgressRing';
+import MealPlanDialog from '@/components/diet/MealPlanDialog';
 
 const DEFAULT_GOALS = {
   daily_calories: 2000,
@@ -36,6 +37,7 @@ export default function CalorieTracker() {
     carbs: '',
     fat: ''
   });
+  const [showMealPlanner, setShowMealPlanner] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -175,18 +177,28 @@ export default function CalorieTracker() {
         {/* Macro Dashboard */}
         <MacroDashboard totals={totals} goals={goals} />
 
-        {/* Quick Add Button */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => {
-            setActiveMealType('snack');
-            setShowPhotoAnalyzer(true);
-          }}
-          className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium shadow-lg shadow-green-500/30"
-        >
-          <Camera className="w-5 h-5" />
-          Snap Your Food
-        </motion.button>
+        {/* Quick Action Buttons */}
+        <div className="grid grid-cols-2 gap-3">
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              setActiveMealType('snack');
+              setShowPhotoAnalyzer(true);
+            }}
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium shadow-lg shadow-green-500/30"
+          >
+            <Camera className="w-5 h-5" />
+            Snap Food
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setShowMealPlanner(true)}
+            className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-medium shadow-lg shadow-purple-500/30"
+          >
+            <CalendarDays className="w-5 h-5" />
+            Meal Plan
+          </motion.button>
+        </div>
 
         {/* Meal Sections */}
         <div className="space-y-3">
@@ -291,6 +303,14 @@ export default function CalorieTracker() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Meal Plan Dialog */}
+      <MealPlanDialog
+        open={showMealPlanner}
+        onOpenChange={setShowMealPlanner}
+        selectedDate={selectedDate}
+        onAddFoods={(foodData) => createFoodMutation.mutate(foodData)}
+      />
 
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
