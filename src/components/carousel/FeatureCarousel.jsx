@@ -291,7 +291,7 @@ export default function FeatureCarousel() {
                                 src={feature.image} 
                                 alt={feature.title}
                                 className="absolute inset-0 w-full h-full object-cover scale-110"
-                                style={feature.id === 'habits' ? { objectPosition: '40% center' } : {}}
+                                style={feature.id === 'habits' ? { objectPosition: '30% center' } : {}}
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-[#1a0a2e] via-[#1a0a2e]/30 to-transparent" />
                             </motion.div>
