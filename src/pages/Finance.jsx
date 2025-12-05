@@ -6,6 +6,7 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import GlowButton from '@/components/cosmic/GlowButton';
 import CosmicInput from '@/components/cosmic/CosmicInput';
+import FinanceCalendar from '@/components/finance/FinanceCalendar';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
@@ -129,6 +130,16 @@ export default function Finance() {
                 <p className="text-xs text-white/50">Balance</p>
               </CosmicCard>
             </div>
+          </motion.div>
+
+          {/* Calendar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-8"
+          >
+            <FinanceCalendar transactions={transactions} />
           </motion.div>
 
           {/* Transactions */}
