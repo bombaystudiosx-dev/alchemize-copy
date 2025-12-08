@@ -77,11 +77,22 @@ button {
 
 /* Safe area padding for mobile */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 20px);
+  padding-bottom: max(env(safe-area-inset-bottom), 20px);
 }
 
 .safe-area-top {
-  padding-top: env(safe-area-inset-top, 20px);
+  padding-top: max(env(safe-area-inset-top), 20px);
+}
+
+/* Minimum tap target size for mobile (44x44 points) */
+button, a, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+  font-size: 16px !important;
 }
 
 /* Line clamp utilities */

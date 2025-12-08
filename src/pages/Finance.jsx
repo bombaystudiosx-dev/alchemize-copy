@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -89,6 +89,28 @@ export default function Finance() {
     mutationFn: (id) => base44.entities.FinancialExpense.delete(id),
     onSuccess: () => queryClient.invalidateQueries(['financialExpenses'])
   });
+
+  const [notesForm, setNotesForm] = useState({
+    note_login_info: '',
+    note_total_debt: '',
+    debt_amount: 0,
+    debt_due_date: '',
+    savings_amount: 0,
+    emergency_fund: 0
+  });
+
+  useEffect(() => {
+    if (financialNote) {
+      setNotesForm({
+        note_login_info: financialNote.note_login_info || '',
+        note_total_debt: financialNote.note_total_debt || '',
+        debt_amount: financialNote.debt_amount || 0,
+        debt_due_date: financialNote.debt_due_date || '',
+        savings_amount: financialNote.savings_amount || 0,
+        emergency_fund: financialNote.emergency_fund || 0
+      });
+    }
+  }, [financialNote, showNotesDialog]);
 
   const updateNotesMutation = useMutation({
     mutationFn: (data) => {
@@ -322,7 +344,7 @@ export default function Finance() {
 
         {/* Add Income Dialog */}
         <Dialog open={showIncomeDialog} onOpenChange={setShowIncomeDialog}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-green-500/30 text-white max-w-md">
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-green-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white">Add Income</DialogTitle>
             </DialogHeader>
@@ -376,8 +398,12 @@ export default function Finance() {
                 <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
                 <CosmicInput type="date" value={newIncome.income_date} onChange={(e) => setNewIncome({ ...newIncome, income_date: e.target.value })} />
               </div>
-              <GlowButton onClick={() => createIncomeMutation.mutate(newIncome)} disabled={!newIncome.income_gross} className="w-full">
-                Add Income
+              <GlowButton 
+                onClick={() => createIncomeMutation.mutate(newIncome)} 
+                disabled={!newIncome.income_gross || createIncomeMutation.isPending} 
+                className="w-full"
+              >
+                {createIncomeMutation.isPending ? 'Adding...' : 'Add Income'}
               </GlowButton>
             </div>
           </DialogContent>
@@ -385,7 +411,7 @@ export default function Finance() {
 
         {/* Add Expense Dialog */}
         <Dialog open={showExpenseDialog} onOpenChange={setShowExpenseDialog}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-red-500/30 text-white max-w-md">
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-red-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white">Add Expense</DialogTitle>
             </DialogHeader>
@@ -421,8 +447,12 @@ export default function Finance() {
                 <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
                 <CosmicInput type="date" value={newExpense.expense_date} onChange={(e) => setNewExpense({ ...newExpense, expense_date: e.target.value })} />
               </div>
-              <GlowButton onClick={() => createExpenseMutation.mutate(newExpense)} disabled={!newExpense.expense_name || !newExpense.expense_amount} className="w-full">
-                Add Expense
+              <GlowButton 
+                onClick={() => createExpenseMutation.mutate(newExpense)} 
+                disabled={!newExpense.expense_name || !newExpense.expense_amount || createExpenseMutation.isPending} 
+                className="w-full"
+              >
+                {createExpenseMutation.isPending ? 'Adding...' : 'Add Expense'}
               </GlowButton>
             </div>
           </DialogContent>
@@ -430,7 +460,7 @@ export default function Finance() {
 
         {/* Edit Notes Dialog */}
         <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md">
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="text-white">Edit Financial Notes</DialogTitle>
             </DialogHeader>
@@ -441,8 +471,8 @@ export default function Finance() {
                   Important Login Info
                 </label>
                 <textarea
-                  defaultValue={financialNote.note_login_info}
-                  onChange={(e) => financialNote.note_login_info = e.target.value}
+                  value={notesForm.note_login_info}
+                  onChange={(e) => setNotesForm({...notesForm, note_login_info: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 resize-none"
                   rows={4}
                   placeholder="Store sensitive login information here..."
@@ -454,8 +484,8 @@ export default function Finance() {
                   Total Debt Notes
                 </label>
                 <textarea
-                  defaultValue={financialNote.note_total_debt}
-                  onChange={(e) => financialNote.note_total_debt = e.target.value}
+                  value={notesForm.note_total_debt}
+                  onChange={(e) => setNotesForm({...notesForm, note_total_debt: e.target.value})}
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 resize-none"
                   rows={4}
                   placeholder="List debts, interest rates, etc..."
@@ -464,38 +494,57 @@ export default function Finance() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
-                  <CosmicInput type="number" defaultValue={financialNote.debt_amount} onChange={(e) => financialNote.debt_amount = parseFloat(e.target.value)} placeholder="0.00" />
+                  <CosmicInput 
+                    type="number" 
+                    value={notesForm.debt_amount || ''} 
+                    onChange={(e) => setNotesForm({...notesForm, debt_amount: e.target.value})} 
+                    placeholder="0.00" 
+                  />
                 </div>
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Due Date</label>
-                  <CosmicInput type="date" defaultValue={financialNote.debt_due_date} onChange={(e) => financialNote.debt_due_date = e.target.value} />
+                  <CosmicInput 
+                    type="date" 
+                    value={notesForm.debt_due_date || ''} 
+                    onChange={(e) => setNotesForm({...notesForm, debt_due_date: e.target.value})} 
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
-                  <CosmicInput type="number" defaultValue={financialNote.savings_amount} onChange={(e) => financialNote.savings_amount = parseFloat(e.target.value)} placeholder="0.00" />
+                  <CosmicInput 
+                    type="number" 
+                    value={notesForm.savings_amount || ''} 
+                    onChange={(e) => setNotesForm({...notesForm, savings_amount: e.target.value})} 
+                    placeholder="0.00" 
+                  />
                 </div>
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
-                  <CosmicInput type="number" defaultValue={financialNote.emergency_fund} onChange={(e) => financialNote.emergency_fund = parseFloat(e.target.value)} placeholder="0.00" />
+                  <CosmicInput 
+                    type="number" 
+                    value={notesForm.emergency_fund || ''} 
+                    onChange={(e) => setNotesForm({...notesForm, emergency_fund: e.target.value})} 
+                    placeholder="0.00" 
+                  />
                 </div>
               </div>
               <GlowButton 
                 onClick={() => {
-                  const updatedNote = {
-                    note_login_info: financialNote.note_login_info,
-                    note_total_debt: financialNote.note_total_debt,
-                    debt_amount: parseFloat(financialNote.debt_amount) || 0,
-                    debt_due_date: financialNote.debt_due_date,
-                    savings_amount: parseFloat(financialNote.savings_amount) || 0,
-                    emergency_fund: parseFloat(financialNote.emergency_fund) || 0
-                  };
-                  updateNotesMutation.mutate(updatedNote);
+                  updateNotesMutation.mutate({
+                    note_login_info: notesForm.note_login_info,
+                    note_total_debt: notesForm.note_total_debt,
+                    debt_amount: parseFloat(notesForm.debt_amount) || 0,
+                    debt_due_date: notesForm.debt_due_date,
+                    savings_amount: parseFloat(notesForm.savings_amount) || 0,
+                    emergency_fund: parseFloat(notesForm.emergency_fund) || 0
+                  });
                 }} 
+                disabled={updateNotesMutation.isPending}
                 className="w-full"
               >
-                Save Notes
+                {updateNotesMutation.isPending ? 'Saving...' : 'Save Notes'}
               </GlowButton>
             </div>
           </DialogContent>
