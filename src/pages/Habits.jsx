@@ -467,7 +467,7 @@ export default function Habits() {
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
           </Link>
-          <h1 className="text-xl font-bold text-white">GRIT Tracker</h1>
+          <h1 className="text-xl font-bold text-white">Habit Tracker</h1>
           <button 
             onClick={() => setShowAddDialog(true)}
             className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform"
