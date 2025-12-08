@@ -89,6 +89,17 @@ export default function Affirmations() {
         </motion.header>
 
         <div className="px-6">
+          {/* Info Text */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <p className="text-white/70 text-sm leading-relaxed text-center">
+              It is recommended to say these for at least 60-90 days that is how long your subconscious mind takes to accept the beliefs. However, by all means say them until reality reflects them
+            </p>
+          </motion.div>
+
           {/* Today's Affirmation */}
           {todayAffirmation && (
             <motion.div
