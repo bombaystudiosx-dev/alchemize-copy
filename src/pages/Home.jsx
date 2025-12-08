@@ -156,15 +156,16 @@ export default function Home() {
             {firstName}
           </h1>
           <p 
-            className="text-lg md:text-xl"
+            className="text-xl md:text-2xl font-semibold"
             style={{
               background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 4px rgba(0,0,0,0.5), 0 4px 12px rgba(168, 85, 247, 0.4)',
-              filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.6)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.5))',
-              fontFamily: 'Georgia, serif',
-              fontStyle: 'italic'
+              textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.8)',
+              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.9)) drop-shadow(0 0 24px rgba(168, 85, 247, 0.6))',
+              fontFamily: "'Playfair Display', Georgia, serif",
+              fontStyle: 'italic',
+              letterSpacing: '0.02em'
             }}
           >
             Transform your reality by transforming yourself
