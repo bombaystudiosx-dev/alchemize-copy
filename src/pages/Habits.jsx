@@ -322,16 +322,21 @@ export default function Habits() {
   };
 
   const toggleTimer = (sectionId, habitId) => {
+    const section = gritData.sections.find(s => s.id === sectionId);
+    const sectionIdx = gritData.sections.indexOf(section);
+    const habit = section.habits.find(h => h.id === habitId);
+    const habitIdx = section.habits.indexOf(habit);
+    setActiveTimerView({ sectionIdx, habitIdx, habit });
+  };
+  
+  const updateTimerHabit = (sectionIdx, habitIdx, updates) => {
     setGritData(prev => {
       const updated = { ...prev };
-      const section = updated.sections.find(s => s.id === sectionId);
-      const habit = section.habits.find(h => h.id === habitId);
+      const habit = updated.sections[sectionIdx].habits[habitIdx];
       
-      if (habit.timer.status === 'running') {
-        habit.timer.status = 'paused';
-      } else {
-        habit.timer.status = 'running';
-      }
+      Object.keys(updates).forEach(key => {
+        habit[key] = updates[key];
+      });
       
       return updated;
     });
@@ -784,6 +789,19 @@ export default function Habits() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Timer View */}
+      <AnimatePresence>
+        {activeTimerView && (
+          <TimerView
+            habit={activeTimerView.habit}
+            onClose={() => setActiveTimerView(null)}
+            onUpdate={(updates) => {
+              updateTimerHabit(activeTimerView.sectionIdx, activeTimerView.habitIdx, updates);
+            }}
+          />
+        )}
+      </AnimatePresence>
     </CosmicBackground>
   );
 }
