@@ -90,6 +90,18 @@ export default function Finance() {
     onSuccess: () => queryClient.invalidateQueries(['financialExpenses'])
   });
 
+  const deleteIncomeMutation = useMutation({
+    mutationFn: (id) => base44.entities.FinancialIncome.delete(id),
+    onSuccess: () => queryClient.invalidateQueries(['financialIncomes'])
+  });
+
+  const clearAllIncomesMutation = useMutation({
+    mutationFn: async () => {
+      await Promise.all(incomes.map(income => base44.entities.FinancialIncome.delete(income.id)));
+    },
+    onSuccess: () => queryClient.invalidateQueries(['financialIncomes'])
+  });
+
   const [notesForm, setNotesForm] = useState({
     note_login_info: '',
     note_total_debt: '',
@@ -253,7 +265,15 @@ export default function Finance() {
 
           {/* Calendars */}
           <div className="space-y-4">
-            <IncomeCalendar incomes={incomes} />
+            <IncomeCalendar 
+              incomes={incomes} 
+              onDeleteIncome={(id) => deleteIncomeMutation.mutate(id)}
+              onClearAll={() => {
+                if (window.confirm('Are you sure you want to delete all income entries?')) {
+                  clearAllIncomesMutation.mutate();
+                }
+              }}
+            />
             <ExpenseCalendar expenses={expenses} />
           </div>
 

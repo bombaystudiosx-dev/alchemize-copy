@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { motion } from 'framer-motion';
+import { Trash2, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export default function IncomeCalendar({ incomes }) {
+export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll }) {
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const today = new Date();
   const monthStart = startOfMonth(today);
   const monthEnd = endOfMonth(today);
@@ -16,12 +20,32 @@ export default function IncomeCalendar({ incomes }) {
     );
   };
 
+  const handleDayClick = (day) => {
+    const dayIncomes = getIncomeForDay(day);
+    if (dayIncomes.length > 0) {
+      setSelectedDay(day);
+      setShowDeleteDialog(true);
+    }
+  };
+
   return (
-    <div className="bg-white/5 rounded-xl p-4 border border-green-500/30">
-      <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-        <span className="text-green-400">💰</span>
-        Income Calendar - {format(today, 'MMMM yyyy')}
-      </h3>
+    <>
+      <div className="bg-white/5 rounded-xl p-4 border border-green-500/30">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-white font-semibold flex items-center gap-2">
+            <span className="text-green-400">💰</span>
+            Income Calendar - {format(today, 'MMMM yyyy')}
+          </h3>
+          {incomes.length > 0 && onClearAll && (
+            <button
+              onClick={onClearAll}
+              className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 text-xs hover:bg-red-500/30 transition-colors flex items-center gap-1"
+            >
+              <Trash2 className="w-3 h-3" />
+              Clear All
+            </button>
+          )}
+        </div>
       <div className="grid grid-cols-7 gap-1">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
           <div key={day} className="text-center text-xs text-white/50 py-1">{day}</div>
@@ -36,11 +60,12 @@ export default function IncomeCalendar({ incomes }) {
             <motion.div
               key={idx}
               whileHover={{ scale: 1.05 }}
+              onClick={() => handleDayClick(day)}
               className={`
                 aspect-square rounded-lg p-1 text-center text-xs relative
                 ${isCurrentMonth ? 'text-white' : 'text-white/30'}
                 ${isToday ? 'bg-green-500/30 border border-green-500/50' : 'bg-white/5'}
-                ${totalIncome > 0 ? 'bg-green-500/20' : ''}
+                ${totalIncome > 0 ? 'bg-green-500/20 cursor-pointer' : ''}
               `}
             >
               <div className="text-xs">{format(day, 'd')}</div>
@@ -54,5 +79,39 @@ export default function IncomeCalendar({ incomes }) {
         })}
       </div>
     </div>
+
+    <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-green-500/30 text-white max-w-md max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-white">
+            Income on {selectedDay && format(selectedDay, 'MMMM d, yyyy')}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-2 mt-4">
+          {selectedDay && getIncomeForDay(selectedDay).map(income => (
+            <div key={income.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+              <div className="flex-1">
+                <p className="text-white font-medium">{income.income_category}</p>
+                <p className="text-green-400 text-sm">${income.income_gross?.toFixed(2)}</p>
+                <p className="text-white/50 text-xs">Net: ${income.income_net?.toFixed(2)}</p>
+              </div>
+              <button
+                onClick={() => {
+                  onDeleteIncome(income.id);
+                  const remainingIncomes = getIncomeForDay(selectedDay).filter(i => i.id !== income.id);
+                  if (remainingIncomes.length === 0) {
+                    setShowDeleteDialog(false);
+                  }
+                }}
+                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }
