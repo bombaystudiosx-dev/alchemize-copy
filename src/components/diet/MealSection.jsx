@@ -43,19 +43,40 @@ export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, 
                 <img src={food.image_url} alt={food.food_name} className="w-12 h-12 rounded-lg object-cover" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-800 truncate">{food.food_name}</p>
-                <p className="text-xs text-gray-500">{food.portion_size}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-gray-800 truncate">{food.food_name}</p>
+                  {food.is_corrected && (
+                    <span className="px-1.5 py-0.5 text-xs bg-orange-100 text-orange-600 rounded">Corrected</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500">{food.serving_description}</p>
+                {food.correction_notes && (
+                  <div className="mt-1 flex items-start gap-1 text-xs text-orange-600">
+                    <AlertCircle className="w-3 h-3 mt-0.5 flex-shrink-0" />
+                    <p className="line-clamp-1">{food.correction_notes}</p>
+                  </div>
+                )}
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-800">{food.calories}</p>
+                <p className="font-semibold text-gray-800">{Math.round(food.calories)}</p>
                 <p className="text-xs text-gray-400">cal</p>
               </div>
-              <button
-                onClick={() => onDeleteFood(food.id)}
-                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              <div className="flex gap-1">
+                {!food.saved_food_id && onSaveFood && (
+                  <button
+                    onClick={() => onSaveFood(food)}
+                    className="p-1.5 text-gray-400 hover:text-amber-500 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                  </button>
+                )}
+                <button
+                  onClick={() => onDeleteFood(food.id)}
+                  className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>

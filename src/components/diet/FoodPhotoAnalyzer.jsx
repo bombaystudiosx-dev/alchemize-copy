@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, X, Loader2, Sparkles } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Sparkles, AlertTriangle } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
 export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
@@ -20,7 +20,6 @@ export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
     
     setImage(URL.createObjectURL(file));
     
-    // Upload file
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setImageUrl(file_url);
   };
@@ -31,66 +30,68 @@ export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
     setAnalyzing(true);
     try {
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `Analyze this food image and identify all food items visible. For each item, estimate:
+        prompt: `Analyze this food image and provide nutrition information. Be realistic and accurate:
 - Food name
-- Portion size (e.g., "1 cup", "2 oz", "1 medium")
+- Portion size (realistic estimate based on image)
 - Calories
 - Protein (grams)
 - Carbs (grams)
 - Fat (grams)
+- Sugar (grams)
+- Fiber (grams)
+- Confidence score (0-1) based on image clarity
 
-Be realistic with portion estimates based on what you see. If multiple items are visible, list them all.`,
+If you cannot clearly identify the food or portions, set confidence to <0.7.
+DO NOT guess random numbers. Use realistic nutrition ranges only.`,
         file_urls: [imageUrl],
         response_json_schema: {
           type: "object",
           properties: {
-            items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  food_name: { type: "string" },
-                  portion_size: { type: "string" },
-                  calories: { type: "number" },
-                  protein: { type: "number" },
-                  carbs: { type: "number" },
-                  fat: { type: "number" }
-                }
-              }
-            },
-            total_calories: { type: "number" },
-            total_protein: { type: "number" },
-            total_carbs: { type: "number" },
-            total_fat: { type: "number" }
+            food_name: { type: "string" },
+            serving_description: { type: "string" },
+            calories: { type: "number" },
+            protein_grams: { type: "number" },
+            carb_grams: { type: "number" },
+            fat_grams: { type: "number" },
+            sugar_grams: { type: "number" },
+            fiber_grams: { type: "number" },
+            confidence_score: { type: "number" }
           }
         }
       });
       
-      setResult(response);
+      // Validate macros
+      const isValid = response.calories >= 0 && response.calories <= 2000 &&
+                      response.protein_grams >= 0 && response.protein_grams <= 200 &&
+                      response.carb_grams >= 0 && response.carb_grams <= 300 &&
+                      response.fat_grams >= 0 && response.fat_grams <= 100;
+      
+      if (!isValid) {
+        response.confidence_score = 0.3;
+      }
+
+      setResult({ ...response, image_url: imageUrl });
+      setShowConfirm(true);
     } catch (error) {
       console.error('Analysis failed:', error);
+      alert('Analysis failed. Please try again or enter manually.');
     } finally {
       setAnalyzing(false);
     }
   };
 
-  const handleAddFood = (item) => {
-    onAnalyzed({
-      ...item,
-      image_url: imageUrl
-    });
+  const handleConfirm = () => {
+    if (result) {
+      const finalData = editMode 
+        ? { ...result, is_corrected: true, correction_notes: correctionNotes } 
+        : { ...result, is_corrected: false };
+      onAnalyzed(finalData);
+    }
   };
 
-  const handleAddAll = () => {
-    if (result?.items) {
-      result.items.forEach(item => {
-        onAnalyzed({
-          ...item,
-          image_url: imageUrl
-        });
-      });
-    }
-    onClose();
+  const handleEdit = () => {
+    setEditMode(true);
+    setShowConfirm(false);
   };
 
   return (
@@ -113,25 +114,11 @@ Be realistic with portion estimates based on what you see. If multiple items are
             Upload from Gallery
           </button>
           
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileSelect}
-            className="hidden"
-          />
+          <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Image Preview */}
           <div className="relative rounded-2xl overflow-hidden">
             <img src={image} alt="Food" className="w-full h-48 object-cover" />
             <button
@@ -139,6 +126,8 @@ Be realistic with portion estimates based on what you see. If multiple items are
                 setImage(null);
                 setImageUrl(null);
                 setResult(null);
+                setShowConfirm(false);
+                setEditMode(false);
               }}
               className="absolute top-2 right-2 p-2 bg-black/50 rounded-full"
             >
@@ -164,55 +153,58 @@ Be realistic with portion estimates based on what you see. If multiple items are
                 </>
               )}
             </button>
-          ) : (
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-3"
-              >
-                <p className="text-sm font-medium text-gray-500">Detected Items:</p>
-                
-                {result.items?.map((item, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="bg-gray-50 rounded-xl p-4"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="font-medium text-gray-800">{item.food_name}</p>
-                        <p className="text-xs text-gray-500">{item.portion_size}</p>
-                      </div>
-                      <span className="text-lg font-bold text-green-600">{item.calories} cal</span>
-                    </div>
-                    <div className="flex gap-4 text-xs text-gray-500">
-                      <span>P: {item.protein}g</span>
-                      <span>C: {item.carbs}g</span>
-                      <span>F: {item.fat}g</span>
-                    </div>
-                    <button
-                      onClick={() => handleAddFood(item)}
-                      className="mt-2 w-full py-2 text-sm text-green-600 font-medium bg-green-50 rounded-lg"
-                    >
-                      Add This Item
-                    </button>
-                  </motion.div>
-                ))}
-
-                {result.items?.length > 1 && (
-                  <button
-                    onClick={handleAddAll}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-medium"
-                  >
-                    Add All Items ({result.total_calories} cal total)
-                  </button>
-                )}
-              </motion.div>
-            </AnimatePresence>
-          )}
+          ) : showConfirm && !editMode ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              {result.confidence_score < 0.7 && (
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex gap-2">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-medium">Scan uncertain</p>
+                    <p>Please review or edit manually before saving</p>
+                  </div>
+                </div>
+              )}
+              <div className="p-4 bg-gray-50 rounded-lg space-y-2">
+                <p className="font-semibold text-gray-900">{result.food_name}</p>
+                <p className="text-sm text-gray-600">{result.serving_description}</p>
+                <div className="grid grid-cols-2 gap-2 mt-3 text-sm">
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Calories:</span> <span className="ml-2 font-semibold">{Math.round(result.calories)}</span></div>
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Protein:</span> <span className="ml-2 font-semibold">{Math.round(result.protein_grams)}g</span></div>
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Carbs:</span> <span className="ml-2 font-semibold">{Math.round(result.carb_grams)}g</span></div>
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Fat:</span> <span className="ml-2 font-semibold">{Math.round(result.fat_grams)}g</span></div>
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Sugar:</span> <span className="ml-2 font-semibold">{Math.round(result.sugar_grams)}g</span></div>
+                  <div className="p-2 bg-white rounded"><span className="text-gray-500">Fiber:</span> <span className="ml-2 font-semibold">{Math.round(result.fiber_grams)}g</span></div>
+                </div>
+              </div>
+              <p className="text-center text-sm font-medium text-gray-700">Was this accurate?</p>
+              <div className="flex gap-3">
+                <button onClick={handleEdit} className="flex-1 py-3 rounded-lg border-2 border-gray-300 text-gray-700 font-medium hover:bg-gray-50">
+                  No, edit
+                </button>
+                <button onClick={handleConfirm} className="flex-1 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700">
+                  Yes, add it
+                </button>
+              </div>
+            </motion.div>
+          ) : editMode ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+              <p className="text-sm font-medium text-gray-700">Edit the values below:</p>
+              <input type="text" value={result.food_name} onChange={(e) => setResult({...result, food_name: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Food name" />
+              <input type="text" value={result.serving_description} onChange={(e) => setResult({...result, serving_description: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Serving" />
+              <div className="grid grid-cols-2 gap-3">
+                <input type="number" value={result.calories} onChange={(e) => setResult({...result, calories: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Calories" />
+                <input type="number" value={result.protein_grams} onChange={(e) => setResult({...result, protein_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Protein (g)" />
+                <input type="number" value={result.carb_grams} onChange={(e) => setResult({...result, carb_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Carbs (g)" />
+                <input type="number" value={result.fat_grams} onChange={(e) => setResult({...result, fat_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Fat (g)" />
+                <input type="number" value={result.sugar_grams} onChange={(e) => setResult({...result, sugar_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Sugar (g)" />
+                <input type="number" value={result.fiber_grams} onChange={(e) => setResult({...result, fiber_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Fiber (g)" />
+              </div>
+              <textarea value={correctionNotes} onChange={(e) => setCorrectionNotes(e.target.value)} placeholder="Correction notes (what was wrong with this scan?)" className="w-full px-3 py-2 border rounded-lg resize-none" rows={3} />
+              <button onClick={handleConfirm} className="w-full py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700">
+                Save Corrections
+              </button>
+            </motion.div>
+          ) : null}
         </div>
       )}
     </div>

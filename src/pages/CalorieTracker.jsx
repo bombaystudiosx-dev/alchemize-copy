@@ -36,11 +36,11 @@ export default function CalorieTracker() {
     food_name: '',
     serving_description: '',
     calories: '',
-    protein: '',
-    carbs: '',
-    fat: '',
-    sugar: '',
-    fiber: ''
+    protein_grams: '',
+    carb_grams: '',
+    fat_grams: '',
+    sugar_grams: '',
+    fiber_grams: ''
   });
   const [showMealPlanner, setShowMealPlanner] = useState(false);
 
@@ -69,7 +69,7 @@ export default function CalorieTracker() {
       queryClient.invalidateQueries(['foodLogs']);
       setShowAddFood(false);
       setShowPhotoAnalyzer(false);
-      setManualFood({ food_name: '', serving_description: '', calories: '', protein: '', carbs: '', fat: '', sugar: '', fiber: '' });
+      setManualFood({ food_name: '', serving_description: '', calories: '', protein_grams: '', carb_grams: '', fat_grams: '', sugar_grams: '', fiber_grams: '' });
     }
   });
 
@@ -96,25 +96,29 @@ export default function CalorieTracker() {
     }
   });
 
-  const todayLogs = useMemo(() => 
-    foodLogs.filter(log => log.date === selectedDate),
-    [foodLogs, selectedDate]
-  );
+  const todayLogs = useMemo(() => {
+    const today = new Date(selectedDate);
+    return foodLogs.filter(log => {
+      const logDate = new Date(log.logged_at);
+      return logDate.toDateString() === today.toDateString();
+    });
+  }, [foodLogs, selectedDate]);
 
   const totals = useMemo(() => ({
     calories: todayLogs.reduce((sum, f) => sum + (f.calories || 0), 0),
-    protein: todayLogs.reduce((sum, f) => sum + (f.protein || 0), 0),
-    carbs: todayLogs.reduce((sum, f) => sum + (f.carbs || 0), 0),
-    fat: todayLogs.reduce((sum, f) => sum + (f.fat || 0), 0),
-    sugar: todayLogs.reduce((sum, f) => sum + (f.sugar || 0), 0),
-    fiber: todayLogs.reduce((sum, f) => sum + (f.fiber || 0), 0)
+    protein: todayLogs.reduce((sum, f) => sum + (f.protein_grams || 0), 0),
+    carbs: todayLogs.reduce((sum, f) => sum + (f.carb_grams || 0), 0),
+    fat: todayLogs.reduce((sum, f) => sum + (f.fat_grams || 0), 0),
+    sugar: todayLogs.reduce((sum, f) => sum + (f.sugar_grams || 0), 0),
+    fiber: todayLogs.reduce((sum, f) => sum + (f.fiber_grams || 0), 0)
   }), [todayLogs]);
 
   const dailyData = useMemo(() => {
     const data = {};
     foodLogs.forEach(log => {
-      if (!data[log.date]) data[log.date] = 0;
-      data[log.date] += log.calories || 0;
+      const dateKey = new Date(log.logged_at).toISOString().split('T')[0];
+      if (!data[dateKey]) data[dateKey] = 0;
+      data[dateKey] += log.calories || 0;
     });
     return data;
   }, [foodLogs]);
@@ -133,25 +137,23 @@ export default function CalorieTracker() {
 
   const handlePhotoAnalyzed = (foodData) => {
     createFoodMutation.mutate({
-      date: selectedDate,
-      meal_type: activeMealType,
       ...foodData,
-      source_type: 'camera_scan'
+      logged_at: new Date().toISOString(),
+      source_type: 'camera'
     });
   };
 
   const handleManualAdd = () => {
     createFoodMutation.mutate({
-      date: selectedDate,
-      meal_type: activeMealType,
       food_name: manualFood.food_name,
       serving_description: manualFood.serving_description || '1 serving',
-      calories: parseInt(manualFood.calories) || 0,
-      protein: parseInt(manualFood.protein) || 0,
-      carbs: parseInt(manualFood.carbs) || 0,
-      fat: parseInt(manualFood.fat) || 0,
-      sugar: parseInt(manualFood.sugar) || 0,
-      fiber: parseInt(manualFood.fiber) || 0,
+      calories: parseFloat(manualFood.calories) || 0,
+      protein_grams: parseFloat(manualFood.protein_grams) || 0,
+      carb_grams: parseFloat(manualFood.carb_grams) || 0,
+      fat_grams: parseFloat(manualFood.fat_grams) || 0,
+      sugar_grams: parseFloat(manualFood.sugar_grams) || 0,
+      fiber_grams: parseFloat(manualFood.fiber_grams) || 0,
+      logged_at: new Date().toISOString(),
       source_type: 'manual'
     });
   };
@@ -161,27 +163,26 @@ export default function CalorieTracker() {
       food_name: food.food_name,
       serving_description: food.serving_description,
       calories: food.calories,
-      protein_grams: food.protein,
-      carb_grams: food.carbs,
-      fat_grams: food.fat,
-      sugar_grams: food.sugar,
-      fiber_grams: food.fiber,
+      protein_grams: food.protein_grams,
+      carb_grams: food.carb_grams,
+      fat_grams: food.fat_grams,
+      sugar_grams: food.sugar_grams,
+      fiber_grams: food.fiber_grams,
       tags: []
     });
   };
 
   const handleUseSavedFood = (savedFood) => {
     createFoodMutation.mutate({
-      date: selectedDate,
-      meal_type: activeMealType,
       food_name: savedFood.food_name,
       serving_description: savedFood.serving_description,
       calories: savedFood.calories,
-      protein: savedFood.protein_grams,
-      carbs: savedFood.carb_grams,
-      fat: savedFood.fat_grams,
-      sugar: savedFood.sugar_grams,
-      fiber: savedFood.fiber_grams,
+      protein_grams: savedFood.protein_grams,
+      carb_grams: savedFood.carb_grams,
+      fat_grams: savedFood.fat_grams,
+      sugar_grams: savedFood.sugar_grams,
+      fiber_grams: savedFood.fiber_grams,
+      logged_at: new Date().toISOString(),
       source_type: 'saved_food',
       saved_food_id: savedFood.id
     });
@@ -286,11 +287,11 @@ export default function CalorieTracker() {
             <Input placeholder="Serving (e.g., 1 cup)" value={manualFood.serving_description} onChange={(e) => setManualFood({ ...manualFood, serving_description: e.target.value })} />
             <div className="grid grid-cols-2 gap-3">
               <Input type="number" placeholder="Calories" value={manualFood.calories} onChange={(e) => setManualFood({ ...manualFood, calories: e.target.value })} />
-              <Input type="number" placeholder="Protein (g)" value={manualFood.protein} onChange={(e) => setManualFood({ ...manualFood, protein: e.target.value })} />
-              <Input type="number" placeholder="Carbs (g)" value={manualFood.carbs} onChange={(e) => setManualFood({ ...manualFood, carbs: e.target.value })} />
-              <Input type="number" placeholder="Fat (g)" value={manualFood.fat} onChange={(e) => setManualFood({ ...manualFood, fat: e.target.value })} />
-              <Input type="number" placeholder="Sugar (g)" value={manualFood.sugar} onChange={(e) => setManualFood({ ...manualFood, sugar: e.target.value })} />
-              <Input type="number" placeholder="Fiber (g)" value={manualFood.fiber} onChange={(e) => setManualFood({ ...manualFood, fiber: e.target.value })} />
+              <Input type="number" placeholder="Protein (g)" value={manualFood.protein_grams} onChange={(e) => setManualFood({ ...manualFood, protein_grams: e.target.value })} />
+              <Input type="number" placeholder="Carbs (g)" value={manualFood.carb_grams} onChange={(e) => setManualFood({ ...manualFood, carb_grams: e.target.value })} />
+              <Input type="number" placeholder="Fat (g)" value={manualFood.fat_grams} onChange={(e) => setManualFood({ ...manualFood, fat_grams: e.target.value })} />
+              <Input type="number" placeholder="Sugar (g)" value={manualFood.sugar_grams} onChange={(e) => setManualFood({ ...manualFood, sugar_grams: e.target.value })} />
+              <Input type="number" placeholder="Fiber (g)" value={manualFood.fiber_grams} onChange={(e) => setManualFood({ ...manualFood, fiber_grams: e.target.value })} />
             </div>
             <button onClick={handleManualAdd} disabled={!manualFood.food_name || !manualFood.calories} className="w-full py-3 rounded-xl bg-green-600 text-white font-medium disabled:opacity-50">
               Add Food
