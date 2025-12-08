@@ -4,7 +4,7 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2 } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2, Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CosmicInput from '@/components/cosmic/CosmicInput';
@@ -552,6 +552,32 @@ export default function Habits() {
       section.habits = section.habits.filter(h => h.id !== habitId);
       return updated;
     });
+  };
+  
+  const addSection = () => {
+    if (!newSection.name.trim()) return;
+    
+    const sectionId = `sec_${newSection.name.toLowerCase().replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    setGritData(prev => ({
+      ...prev,
+      sections: [...prev.sections, {
+        id: sectionId,
+        name: newSection.name,
+        color: newSection.color,
+        habits: []
+      }]
+    }));
+    
+    setShowAddSectionDialog(false);
+    setNewSection({ name: '', color: '#10b981' });
+  };
+  
+  const deleteSection = (sectionId) => {
+    setGritData(prev => ({
+      ...prev,
+      sections: prev.sections.filter(s => s.id !== sectionId)
+    }));
   };
 
   if (isLoading) {
