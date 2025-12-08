@@ -4,20 +4,17 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TimerView from '@/components/habits/TimerView';
+import { base44 } from '@/api/base44Client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-// Load GRIT spec from localStorage or use default
-const loadGritData = () => {
-  const stored = localStorage.getItem('grit_habit_data');
-  if (stored) {
-    return JSON.parse(stored);
-  }
-  
+// Default GRIT structure
+const getDefaultGritData = () => {
   return {
     spec_lock: "grit.v3.base44",
     user_data: {
@@ -208,12 +205,20 @@ const loadGritData = () => {
   };
 };
 
-const saveGritData = (data) => {
-  localStorage.setItem('grit_habit_data', JSON.stringify(data));
-};
-
 export default function Habits() {
-  const [gritData, setGritData] = useState(loadGritData());
+  const queryClient = useQueryClient();
+  
+  // Fetch habit progress from database
+  const { data: habitRecord, isLoading } = useQuery({
+    queryKey: ['habitProgress'],
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      const records = await base44.entities.HabitProgress.filter({ created_by: user.email });
+      return records[0] || null;
+    }
+  });
+  
+  const [gritData, setGritData] = useState(getDefaultGritData());
   const [activeTimers, setActiveTimers] = useState({});
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [activeTimerView, setActiveTimerView] = useState(null);
@@ -225,10 +230,33 @@ export default function Habits() {
     unit: 'session',
     section: 'sec_morning_7B4R'
   });
-
-  // Save to localStorage whenever data changes
+  
+  // Load habit data from database
   useEffect(() => {
-    saveGritData(gritData);
+    if (habitRecord?.habit_data) {
+      setGritData(habitRecord.habit_data);
+    }
+  }, [habitRecord]);
+  
+  // Save mutation
+  const saveMutation = useMutation({
+    mutationFn: async (data) => {
+      if (habitRecord) {
+        return await base44.entities.HabitProgress.update(habitRecord.id, { habit_data: data });
+      } else {
+        return await base44.entities.HabitProgress.create({ habit_data: data });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['habitProgress'] });
+    }
+  });
+  
+  // Save to database whenever data changes
+  useEffect(() => {
+    if (!isLoading && gritData) {
+      saveMutation.mutate(gritData);
+    }
   }, [gritData]);
 
   // Timer effect with alarm
@@ -464,6 +492,28 @@ export default function Habits() {
   };
 
   const icons = ['⭐', '💪', '📚', '🎯', '🧘‍♀️', '🏃', '💧', '🍎', '🎨', '🎵', '✍️', '🧠'];
+  
+  const deleteHabit = (sectionId, habitId) => {
+    setGritData(prev => {
+      const updated = { ...prev };
+      const section = updated.sections.find(s => s.id === sectionId);
+      section.habits = section.habits.filter(h => h.id !== habitId);
+      return updated;
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <CosmicBackground>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p>Loading your habits...</p>
+          </div>
+        </div>
+      </CosmicBackground>
+    );
+  }
 
   return (
     <CosmicBackground>
@@ -567,12 +617,12 @@ export default function Habits() {
                           className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent transition-all duration-300"
                           style={{ width: `${progress}%` }}
                         />
-                        
+
                         <div className="relative">
                           <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-1">
                               <span className="text-2xl">{habit.icon}</span>
-                              <div>
+                              <div className="flex-1">
                                 <h3 className="font-medium text-white">{habit.name}</h3>
                                 <div className="flex items-center gap-2 mt-1">
                                   <p className="text-xs text-white/50">
@@ -587,18 +637,26 @@ export default function Habits() {
                                 </div>
                               </div>
                             </div>
-                            
-                            <div className="text-right">
-                              <div className="flex items-center gap-2 text-xs">
-                                <div className="flex items-center gap-1 text-purple-400">
-                                  <Award className="w-3 h-3" />
-                                  <span>+{habit.xp_reward}</span>
-                                </div>
-                                <div className="flex items-center gap-1 text-yellow-400">
-                                  <Zap className="w-3 h-3" />
-                                  <span>+{habit.energy_reward}</span>
+
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <div className="flex items-center gap-2 text-xs">
+                                  <div className="flex items-center gap-1 text-purple-400">
+                                    <Award className="w-3 h-3" />
+                                    <span>+{habit.xp_reward}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1 text-yellow-400">
+                                    <Zap className="w-3 h-3" />
+                                    <span>+{habit.energy_reward}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <button
+                                onClick={() => deleteHabit(section.id, habit.id)}
+                                className="p-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-all"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-400" />
+                              </button>
                             </div>
                           </div>
                           
