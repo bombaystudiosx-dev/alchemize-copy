@@ -247,7 +247,10 @@ export default function Habits() {
               // Auto-complete when timer reaches goal
               if (newElapsed >= habit.goal * 60 && habit.progress.value < habit.goal) {
                 const today = format(new Date(), 'yyyy-MM-dd');
-                if (!habit.completion_log.some(log => log.date === today)) {
+                if (!(habit.completion_log || []).some(log => log.date === today)) {
+                  if (!updated.sections[sIdx].habits[hIdx].completion_log) {
+                    updated.sections[sIdx].habits[hIdx].completion_log = [];
+                  }
                   updated.sections[sIdx].habits[hIdx].completion_log.push({
                     date: today,
                     completed: true
@@ -290,13 +293,14 @@ export default function Habits() {
       const section = updated.sections.find(s => s.id === sectionId);
       const habit = section.habits.find(h => h.id === habitId);
       const today = format(new Date(), 'yyyy-MM-dd');
-      const alreadyCompleted = habit.completion_log.some(log => log.date === today);
+      const alreadyCompleted = (habit.completion_log || []).some(log => log.date === today);
       
       if (alreadyCompleted) {
-        habit.completion_log = habit.completion_log.filter(log => log.date !== today);
+        habit.completion_log = (habit.completion_log || []).filter(log => log.date !== today);
         habit.streak = Math.max(0, habit.streak - 1);
         habit.progress.value = 0;
       } else {
+        if (!habit.completion_log) habit.completion_log = [];
         habit.completion_log.push({ date: today, completed: true });
         habit.streak += 1;
         habit.progress.value = 1;
@@ -317,15 +321,16 @@ export default function Habits() {
       habit.progress.value = Math.max(0, Math.min(habit.goal, habit.progress.value + delta));
       
       const today = format(new Date(), 'yyyy-MM-dd');
-      const alreadyCompleted = habit.completion_log.some(log => log.date === today);
+      const alreadyCompleted = (habit.completion_log || []).some(log => log.date === today);
       
       if (habit.progress.value >= habit.goal && !alreadyCompleted) {
+        if (!habit.completion_log) habit.completion_log = [];
         habit.completion_log.push({ date: today, completed: true });
         habit.streak += 1;
         updated.user_data.total_xp += habit.xp_reward;
         updated.user_data.total_energy += habit.energy_reward;
       } else if (habit.progress.value < habit.goal && alreadyCompleted) {
-        habit.completion_log = habit.completion_log.filter(log => log.date !== today);
+        habit.completion_log = (habit.completion_log || []).filter(log => log.date !== today);
         habit.streak = Math.max(0, habit.streak - 1);
       }
       
@@ -435,7 +440,7 @@ export default function Habits() {
                 <div className="space-y-3">
                   {section.habits.map((habit) => {
                     const today = format(new Date(), 'yyyy-MM-dd');
-                    const isCompleted = habit.completion_log.some(log => log.date === today);
+                    const isCompleted = (habit.completion_log || []).some(log => log.date === today);
                     const progress = (habit.progress.value / habit.goal) * 100;
                     
                     return (
