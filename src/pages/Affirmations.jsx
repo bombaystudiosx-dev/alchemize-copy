@@ -96,12 +96,20 @@ export default function Affirmations() {
             className="mb-6"
           >
             <CosmicCard className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
-              <div className="flex items-start gap-3">
-                <Pin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                <p className="text-white/80 text-sm leading-relaxed">
-                  It is recommended to say these for at least 60-90 days that is how long your subconscious mind takes to accept beliefs. However, by all means say them until reality reflects them
-                </p>
-              </div>
+              <p 
+                className="text-sm leading-relaxed text-center"
+                style={{
+                  background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontStyle: 'italic',
+                  letterSpacing: '0.02em'
+                }}
+              >
+                It is recommended to say these for at least 60-90 days that is how long your subconscious mind takes to accept beliefs. However, by all means say them until reality reflects them
+              </p>
             </CosmicCard>
           </motion.div>
 
