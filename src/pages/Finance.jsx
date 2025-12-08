@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
@@ -6,110 +6,125 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import GlowButton from '@/components/cosmic/GlowButton';
 import CosmicInput from '@/components/cosmic/CosmicInput';
-import FinanceCalendar from '@/components/finance/FinanceCalendar';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, StickyNote } from 'lucide-react';
+import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
-
-const categoryEmojis = {
-  salary: '💼',
-  freelance: '💻',
-  investment: '📈',
-  food: '🍔',
-  transport: '🚗',
-  entertainment: '🎬',
-  bills: '📝',
-  shopping: '🛍️',
-  health: '🏥',
-  other: '📦'
-};
+import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
 
 export default function Finance() {
-  const [showDialog, setShowDialog] = useState(false);
+  const [viewMode, setViewMode] = useState('monthly');
+  const [showIncomeDialog, setShowIncomeDialog] = useState(false);
+  const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
-  const [newTransaction, setNewTransaction] = useState({ 
-    type: 'expense', 
-    amount: '', 
-    category: 'other', 
-    description: '', 
-    notes: '',
-    date: format(new Date(), 'yyyy-MM-dd') 
-  });
-  const [newNote, setNewNote] = useState({ 
-    content: '', 
-    date: format(new Date(), 'yyyy-MM-dd') 
-  });
+  const [showLoginInfo, setShowLoginInfo] = useState(false);
+  const [newIncome, setNewIncome] = useState({ income_gross: '', tax_amount: '', deductions: '', income_date: format(new Date(), 'yyyy-MM-dd') });
+  const [newExpense, setNewExpense] = useState({ expense_name: '', expense_category: 'Food', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+  
   const queryClient = useQueryClient();
 
-  const { data: transactions = [], isLoading } = useQuery({
-    queryKey: ['transactions'],
-    queryFn: () => base44.entities.Transaction.list('-date')
+  const { data: incomes = [] } = useQuery({
+    queryKey: ['financialIncomes'],
+    queryFn: () => base44.entities.FinancialIncome.list('-income_date')
   });
 
-  const { data: notes = [] } = useQuery({
-    queryKey: ['financeNotes'],
-    queryFn: () => base44.entities.FinanceNote.list('-date')
+  const { data: expenses = [] } = useQuery({
+    queryKey: ['financialExpenses'],
+    queryFn: () => base44.entities.FinancialExpense.list('-expense_date')
   });
 
-  const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Transaction.create({ ...data, amount: parseFloat(data.amount) }),
+  const { data: notesData = [] } = useQuery({
+    queryKey: ['financialNotes'],
+    queryFn: () => base44.entities.FinancialNote.list()
+  });
+
+  const financialNote = notesData[0] || { note_login_info: '', note_total_debt: '', debt_amount: 0, savings_amount: 0, emergency_fund: 0 };
+
+  const createIncomeMutation = useMutation({
+    mutationFn: (data) => {
+      const netIncome = (parseFloat(data.income_gross) || 0) - (parseFloat(data.tax_amount) || 0) - (parseFloat(data.deductions) || 0);
+      return base44.entities.FinancialIncome.create({ ...data, income_net: netIncome });
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries(['transactions']);
-      setShowDialog(false);
-      setNewTransaction({ 
-        type: 'expense', 
-        amount: '', 
-        category: 'other', 
-        description: '', 
-        notes: '',
-        date: format(new Date(), 'yyyy-MM-dd') 
-      });
+      queryClient.invalidateQueries(['financialIncomes']);
+      setShowIncomeDialog(false);
+      setNewIncome({ income_gross: '', tax_amount: '', deductions: '', income_date: format(new Date(), 'yyyy-MM-dd') });
     }
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Transaction.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['transactions'])
+  const createExpenseMutation = useMutation({
+    mutationFn: (data) => base44.entities.FinancialExpense.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['financialExpenses']);
+      setShowExpenseDialog(false);
+      setNewExpense({ expense_name: '', expense_category: 'Food', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+    }
   });
 
-  const createNoteMutation = useMutation({
-    mutationFn: (data) => base44.entities.FinanceNote.create(data),
+  const deleteExpenseMutation = useMutation({
+    mutationFn: (id) => base44.entities.FinancialExpense.delete(id),
+    onSuccess: () => queryClient.invalidateQueries(['financialExpenses'])
+  });
+
+  const updateNotesMutation = useMutation({
+    mutationFn: (data) => {
+      if (notesData[0]) {
+        return base44.entities.FinancialNote.update(notesData[0].id, data);
+      }
+      return base44.entities.FinancialNote.create(data);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries(['financeNotes']);
+      queryClient.invalidateQueries(['financialNotes']);
       setShowNotesDialog(false);
-      setNewNote({ content: '', date: format(new Date(), 'yyyy-MM-dd') });
     }
   });
 
-  const deleteNoteMutation = useMutation({
-    mutationFn: (id) => base44.entities.FinanceNote.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['financeNotes'])
-  });
+  // Calculate period based on view mode
+  const getPeriodData = () => {
+    const now = new Date();
+    let start, end, label;
+    
+    if (viewMode === 'monthly') {
+      start = startOfMonth(now);
+      end = endOfMonth(now);
+      label = format(now, 'MMMM yyyy');
+    } else if (viewMode === 'quarterly') {
+      start = startOfQuarter(now);
+      end = endOfQuarter(now);
+      const q = Math.floor(now.getMonth() / 3) + 1;
+      label = `Q${q} ${format(now, 'yyyy')}`;
+    } else {
+      start = startOfYear(now);
+      end = endOfYear(now);
+      label = format(now, 'yyyy');
+    }
 
-  const monthStart = startOfMonth(new Date());
-  const monthEnd = endOfMonth(new Date());
-  
-  const thisMonthTransactions = transactions.filter(t => 
-    isWithinInterval(new Date(t.date), { start: monthStart, end: monthEnd })
-  );
+    const periodIncomes = incomes.filter(i => isWithinInterval(new Date(i.income_date), { start, end }));
+    const periodExpenses = expenses.filter(e => isWithinInterval(new Date(e.expense_date), { start, end }));
 
-  const totalIncome = thisMonthTransactions
-    .filter(t => t.type === 'income')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    const grossIncome = periodIncomes.reduce((sum, i) => sum + (i.income_gross || 0), 0);
+    const netIncome = periodIncomes.reduce((sum, i) => sum + (i.income_net || 0), 0);
+    const totalExpenses = periodExpenses.reduce((sum, e) => sum + (e.expense_amount || 0), 0);
+    const moneyLeft = netIncome - totalExpenses;
 
-  const totalExpenses = thisMonthTransactions
-    .filter(t => t.type === 'expense')
-    .reduce((sum, t) => sum + (t.amount || 0), 0);
+    // Category breakdown
+    const categoryBreakdown = {};
+    periodExpenses.forEach(e => {
+      categoryBreakdown[e.expense_category] = (categoryBreakdown[e.expense_category] || 0) + e.expense_amount;
+    });
 
-  const balance = totalIncome - totalExpenses;
+    return { grossIncome, netIncome, totalExpenses, moneyLeft, label, categoryBreakdown, periodExpenses };
+  };
+
+  const { grossIncome, netIncome, totalExpenses, moneyLeft, label, categoryBreakdown, periodExpenses } = getPeriodData();
+  const totalDebt = financialNote.debt_amount || 0;
+
+  const expenseCategories = ['Food', 'Transport', 'Bills', 'Entertainment', 'Shopping', 'Health', 'Other'];
 
   return (
     <CosmicBackground>
       <div className="min-h-screen pb-8">
-        {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -120,315 +135,288 @@ export default function Finance() {
             <span>Back</span>
           </Link>
           <h1 className="text-xl font-bold text-white">Financial Tracker</h1>
-          <button 
-            onClick={() => setShowDialog(true)}
-            className="w-10 h-10 rounded-full bg-gradient-to-r from-green-500 to-emerald-600 flex items-center justify-center"
-          >
-            <Plus className="w-5 h-5 text-white" />
-          </button>
+          <div className="w-10" />
         </motion.header>
 
-        <div className="px-6">
-          {/* Summary Cards */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <p className="text-sm text-white/50 mb-4">{format(new Date(), 'MMMM yyyy')}</p>
-            
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <CosmicCard className="text-center py-4">
-                <TrendingUp className="w-5 h-5 text-green-400 mx-auto mb-2" />
-                <p className="text-lg font-bold text-green-400">${totalIncome.toFixed(2)}</p>
-                <p className="text-xs text-white/50">Income</p>
-              </CosmicCard>
-              <CosmicCard className="text-center py-4">
-                <TrendingDown className="w-5 h-5 text-red-400 mx-auto mb-2" />
-                <p className="text-lg font-bold text-red-400">${totalExpenses.toFixed(2)}</p>
-                <p className="text-xs text-white/50">Expenses</p>
-              </CosmicCard>
-              <CosmicCard className="text-center py-4">
-                <DollarSign className="w-5 h-5 text-purple-400 mx-auto mb-2" />
-                <p className={`text-lg font-bold ${balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  ${Math.abs(balance).toFixed(2)}
-                </p>
-                <p className="text-xs text-white/50">Balance</p>
-              </CosmicCard>
-            </div>
-          </motion.div>
-
-          {/* Calendar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-8"
-          >
-            <FinanceCalendar transactions={transactions} />
-          </motion.div>
-
-          {/* Notes Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mb-8"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <StickyNote className="w-5 h-5 text-yellow-400" />
-                Notes
-              </h2>
+        <div className="px-6 space-y-6">
+          {/* View Mode Tabs */}
+          <div className="flex gap-2">
+            {['monthly', 'quarterly', 'yearly'].map(mode => (
               <button
-                onClick={() => setShowNotesDialog(true)}
-                className="text-sm text-purple-300 hover:text-purple-200 flex items-center gap-1"
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm transition-all ${
+                  viewMode === mode
+                    ? 'bg-purple-500/30 border border-purple-500/50 text-white'
+                    : 'bg-white/10 text-white/60 hover:bg-white/20'
+                }`}
               >
-                <Plus className="w-4 h-4" />
-                Add Note
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </button>
-            </div>
-            
-            {notes.length === 0 ? (
-              <CosmicCard className="text-center py-8">
-                <StickyNote className="w-8 h-8 text-yellow-400/50 mx-auto mb-2" />
-                <p className="text-white/50 text-sm">No notes yet</p>
-              </CosmicCard>
-            ) : (
-              <div className="space-y-3">
-                <AnimatePresence>
-                  {notes.map((note) => (
-                    <motion.div
-                      key={note.id}
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                    >
-                      <CosmicCard className="group">
-                        <div className="flex gap-3">
-                          <StickyNote className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-1" />
-                          <div className="flex-1">
-                            <p className="text-white text-sm leading-relaxed">{note.content}</p>
-                            <p className="text-xs text-white/40 mt-2">{format(new Date(note.date), 'MMM d, yyyy')}</p>
-                          </div>
-                          <button
-                            onClick={() => deleteNoteMutation.mutate(note.id)}
-                            className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                          >
-                            <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
-                          </button>
-                        </div>
-                      </CosmicCard>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            )}
-          </motion.div>
+            ))}
+          </div>
 
-          {/* Transactions */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <h2 className="text-lg font-semibold text-white mb-4">Transactions</h2>
-            
-            {isLoading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+          {/* Budget Sheet */}
+          <CosmicCard>
+            <h2 className="text-lg font-bold text-white mb-4">{label} Summary</h2>
+            <div className="space-y-3">
+              <div className="flex justify-between">
+                <span className="text-white/70">Gross Income</span>
+                <span className="text-green-400 font-bold">${grossIncome.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/70">Net Income</span>
+                <span className="text-green-400 font-bold">${netIncome.toFixed(2)}</span>
+              </div>
+              <div className="h-px bg-white/20" />
+              <div className="flex justify-between">
+                <span className="text-white/70">Total Expenses</span>
+                <span className="text-red-400 font-bold">${totalExpenses.toFixed(2)}</span>
+              </div>
+              <div className="h-px bg-white/20" />
+              <div className="flex justify-between text-lg">
+                <span className="text-white font-semibold">Money Left Over</span>
+                <span className={`font-bold ${moneyLeft >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  ${moneyLeft.toFixed(2)}
+                </span>
+              </div>
+              {(financialNote.savings_amount > 0 || financialNote.emergency_fund > 0) && (
+                <>
+                  <div className="h-px bg-white/20" />
+                  {financialNote.savings_amount > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Savings</span>
+                      <span className="text-purple-400 font-bold">${financialNote.savings_amount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  {financialNote.emergency_fund > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Emergency Fund</span>
+                      <span className="text-blue-400 font-bold">${financialNote.emergency_fund.toFixed(2)}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <GlowButton onClick={() => setShowIncomeDialog(true)} className="flex-1" size="sm">
+                <Plus className="w-4 h-4" /> Income
+              </GlowButton>
+              <GlowButton onClick={() => setShowExpenseDialog(true)} variant="secondary" className="flex-1" size="sm">
+                <Plus className="w-4 h-4" /> Expense
+              </GlowButton>
+            </div>
+          </CosmicCard>
+
+          {/* Category Breakdown */}
+          {Object.keys(categoryBreakdown).length > 0 && (
+            <CosmicCard>
+              <h3 className="text-white font-semibold mb-3">Category Breakdown</h3>
+              <div className="space-y-2">
+                {Object.entries(categoryBreakdown).map(([cat, amount]) => (
+                  <div key={cat} className="flex justify-between items-center">
+                    <span className="text-white/70 text-sm">{cat}</span>
+                    <span className="text-red-400 font-medium">${amount.toFixed(2)}</span>
+                  </div>
                 ))}
               </div>
-            ) : transactions.length === 0 ? (
-              <div className="text-center py-16">
-                <DollarSign className="w-12 h-12 text-green-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-white mb-2">No Transactions</h3>
-                <p className="text-white/50 mb-6">Start tracking your finances</p>
-                <GlowButton onClick={() => setShowDialog(true)}>
-                  Add Transaction
-                </GlowButton>
-              </div>
+            </CosmicCard>
+          )}
+
+          {/* Expenses List */}
+          <CosmicCard>
+            <h3 className="text-white font-semibold mb-3">Recent Expenses</h3>
+            {periodExpenses.length === 0 ? (
+              <p className="text-white/50 text-sm text-center py-4">No expenses for this period</p>
             ) : (
-              <div className="space-y-3">
-                <AnimatePresence>
-                  {transactions.map((transaction, index) => (
-                    <motion.div
-                      key={transaction.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ delay: index * 0.03 }}
-                    >
-                      <CosmicCard className="flex items-center gap-4 py-4 group">
-                        <span className="text-2xl">
-                          {categoryEmojis[transaction.category]}
-                        </span>
-                        <div className="flex-1">
-                          <p className="font-medium text-white">{transaction.description || transaction.category}</p>
-                          {transaction.notes && (
-                            <p className="text-xs text-white/60 mt-0.5">{transaction.notes}</p>
-                          )}
-                          <p className="text-xs text-white/50">{format(new Date(transaction.date), 'MMM d, yyyy')}</p>
-                        </div>
-                        <p className={`font-bold ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
-                          {transaction.type === 'income' ? '+' : '-'}${transaction.amount?.toFixed(2)}
-                        </p>
-                        <button
-                          onClick={() => deleteMutation.mutate(transaction.id)}
-                          className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
-                        </button>
-                      </CosmicCard>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+              <div className="space-y-2">
+                {periodExpenses.slice(0, 10).map(expense => (
+                  <div key={expense.id} className="flex items-center justify-between py-2 border-b border-white/10">
+                    <div className="flex-1">
+                      <p className="text-white text-sm">{expense.expense_name}</p>
+                      <p className="text-white/50 text-xs">{expense.expense_category} • {format(new Date(expense.expense_date), 'MMM d')}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-red-400 font-medium">${expense.expense_amount.toFixed(2)}</span>
+                      <button onClick={() => deleteExpenseMutation.mutate(expense.id)} className="p-1 hover:bg-white/10 rounded">
+                        <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
-          </motion.div>
+          </CosmicCard>
+
+          {/* Notes Section */}
+          <CosmicCard>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-white font-semibold">Financial Notes</h3>
+              <GlowButton onClick={() => setShowNotesDialog(true)} size="sm" variant="ghost">
+                Edit
+              </GlowButton>
+            </div>
+            
+            {/* Important Login Info */}
+            <div className="mb-4 p-3 rounded-lg bg-white/5 border border-yellow-500/30">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-yellow-400" />
+                  <span className="text-yellow-400 text-sm font-medium">Important Login Info</span>
+                </div>
+                <button onClick={() => setShowLoginInfo(!showLoginInfo)} className="text-white/50 hover:text-white">
+                  {showLoginInfo ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-white/70 text-sm whitespace-pre-wrap">
+                {showLoginInfo ? (financialNote.note_login_info || 'No login info saved') : '••••••••••••••'}
+              </p>
+            </div>
+
+            {/* Total Debt Notes */}
+            <div className="p-3 rounded-lg bg-white/5 border border-red-500/30">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertCircle className="w-4 h-4 text-red-400" />
+                <span className="text-red-400 text-sm font-medium">Total Debt Notes</span>
+              </div>
+              <p className="text-white/70 text-sm whitespace-pre-wrap mb-2">
+                {financialNote.note_total_debt || 'No debt notes'}
+              </p>
+              <div className="flex justify-between items-center pt-2 border-t border-white/10">
+                <span className="text-white/50 text-xs">Total Debt Amount:</span>
+                <span className="text-red-400 font-bold">${totalDebt.toFixed(2)}</span>
+              </div>
+              {financialNote.debt_due_date && (
+                <p className="text-white/50 text-xs mt-1">Due: {format(new Date(financialNote.debt_due_date), 'MMM d, yyyy')}</p>
+              )}
+            </div>
+          </CosmicCard>
         </div>
 
-        {/* Add Dialog */}
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
+        {/* Add Income Dialog */}
+        <Dialog open={showIncomeDialog} onOpenChange={setShowIncomeDialog}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-green-500/30 text-white max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <DollarSign className="w-5 h-5 text-green-400" />
-                Add Transaction
-              </DialogTitle>
+              <DialogTitle className="text-white">Add Income</DialogTitle>
             </DialogHeader>
-            
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Type</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {['income', 'expense'].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => setNewTransaction({ ...newTransaction, type })}
-                      className={`
-                        p-3 rounded-xl font-medium transition-all
-                        ${newTransaction.type === type 
-                          ? type === 'income'
-                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white'
-                            : 'bg-gradient-to-r from-red-500 to-rose-600 text-white'
-                          : 'bg-white/10 text-white/60'
-                        }
-                      `}
-                    >
-                      {type === 'income' ? '💰 Income' : '💸 Expense'}
-                    </button>
-                  ))}
-                </div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Gross Income</label>
+                <CosmicInput type="number" value={newIncome.income_gross} onChange={(e) => setNewIncome({ ...newIncome, income_gross: e.target.value })} placeholder="0.00" />
               </div>
-              
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Amount</label>
-                <CosmicInput
-                  type="number"
-                  value={newTransaction.amount}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })}
-                  placeholder="0.00"
-                  icon={DollarSign}
-                />
+                <label className="text-sm text-purple-200/70 mb-2 block">Taxes</label>
+                <CosmicInput type="number" value={newIncome.tax_amount} onChange={(e) => setNewIncome({ ...newIncome, tax_amount: e.target.value })} placeholder="0.00" />
               </div>
-              
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
-                <Select
-                  value={newTransaction.category}
-                  onValueChange={(value) => setNewTransaction({ ...newTransaction, category: value })}
-                >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
-                    {Object.entries(categoryEmojis).map(([key, emoji]) => (
-                      <SelectItem key={key} value={key}>
-                        {emoji} {key.charAt(0).toUpperCase() + key.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <label className="text-sm text-purple-200/70 mb-2 block">Other Deductions</label>
+                <CosmicInput type="number" value={newIncome.deductions} onChange={(e) => setNewIncome({ ...newIncome, deductions: e.target.value })} placeholder="0.00" />
               </div>
-              
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Description</label>
-                <CosmicInput
-                  value={newTransaction.description}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, description: e.target.value })}
-                  placeholder="What was this for?"
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Notes</label>
-                <textarea
-                  value={newTransaction.notes}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, notes: e.target.value })}
-                  placeholder="Additional notes..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-purple-500/50 focus:bg-white/15 transition-all resize-none"
-                  rows={3}
-                />
-              </div>
-              
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
-                <CosmicInput
-                  type="date"
-                  value={newTransaction.date}
-                  onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })}
-                />
+                <CosmicInput type="date" value={newIncome.income_date} onChange={(e) => setNewIncome({ ...newIncome, income_date: e.target.value })} />
               </div>
-              
-              <GlowButton
-                onClick={() => createMutation.mutate(newTransaction)}
-                disabled={!newTransaction.amount || createMutation.isPending}
-                className="w-full"
-              >
-                {createMutation.isPending ? 'Adding...' : 'Add Transaction'}
+              <GlowButton onClick={() => createIncomeMutation.mutate(newIncome)} disabled={!newIncome.income_gross} className="w-full">
+                Add Income
               </GlowButton>
             </div>
           </DialogContent>
         </Dialog>
 
-        {/* Add Note Dialog */}
+        {/* Add Expense Dialog */}
+        <Dialog open={showExpenseDialog} onOpenChange={setShowExpenseDialog}>
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-red-500/30 text-white max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-white">Add Expense</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Name</label>
+                <CosmicInput value={newExpense.expense_name} onChange={(e) => setNewExpense({ ...newExpense, expense_name: e.target.value })} placeholder="Grocery shopping" />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
+                <Select value={newExpense.expense_category} onValueChange={(val) => setNewExpense({ ...newExpense, expense_category: val })}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
+                    {expenseCategories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Amount</label>
+                <CosmicInput type="number" value={newExpense.expense_amount} onChange={(e) => setNewExpense({ ...newExpense, expense_amount: e.target.value })} placeholder="0.00" />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
+                <CosmicInput type="date" value={newExpense.expense_date} onChange={(e) => setNewExpense({ ...newExpense, expense_date: e.target.value })} />
+              </div>
+              <GlowButton onClick={() => createExpenseMutation.mutate({ ...newExpense, expense_amount: parseFloat(newExpense.expense_amount) })} disabled={!newExpense.expense_name || !newExpense.expense_amount} className="w-full">
+                Add Expense
+              </GlowButton>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Notes Dialog */}
         <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <StickyNote className="w-5 h-5 text-yellow-400" />
-                Add Note
-              </DialogTitle>
+              <DialogTitle className="text-white">Edit Financial Notes</DialogTitle>
             </DialogHeader>
-            
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Note</label>
+                <label className="text-sm text-yellow-400 mb-2 block flex items-center gap-2">
+                  <Lock className="w-4 h-4" />
+                  Important Login Info
+                </label>
                 <textarea
-                  value={newNote.content}
-                  onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
-                  placeholder="Write your note here..."
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 focus:bg-white/15 transition-all resize-none"
+                  defaultValue={financialNote.note_login_info}
+                  onChange={(e) => financialNote.note_login_info = e.target.value}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 resize-none"
                   rows={4}
+                  placeholder="Store sensitive login information here..."
                 />
               </div>
-              
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
-                <CosmicInput
-                  type="date"
-                  value={newNote.date}
-                  onChange={(e) => setNewNote({ ...newNote, date: e.target.value })}
+                <label className="text-sm text-red-400 mb-2 block flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4" />
+                  Total Debt Notes
+                </label>
+                <textarea
+                  defaultValue={financialNote.note_total_debt}
+                  onChange={(e) => financialNote.note_total_debt = e.target.value}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 resize-none"
+                  rows={4}
+                  placeholder="List debts, interest rates, etc..."
                 />
               </div>
-              
-              <GlowButton
-                onClick={() => createNoteMutation.mutate(newNote)}
-                disabled={!newNote.content || createNoteMutation.isPending}
-                className="w-full"
-              >
-                {createNoteMutation.isPending ? 'Adding...' : 'Add Note'}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
+                  <CosmicInput type="number" defaultValue={financialNote.debt_amount} onChange={(e) => financialNote.debt_amount = parseFloat(e.target.value)} placeholder="0.00" />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Due Date</label>
+                  <CosmicInput type="date" defaultValue={financialNote.debt_due_date} onChange={(e) => financialNote.debt_due_date = e.target.value} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
+                  <CosmicInput type="number" defaultValue={financialNote.savings_amount} onChange={(e) => financialNote.savings_amount = parseFloat(e.target.value)} placeholder="0.00" />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
+                  <CosmicInput type="number" defaultValue={financialNote.emergency_fund} onChange={(e) => financialNote.emergency_fund = parseFloat(e.target.value)} placeholder="0.00" />
+                </div>
+              </div>
+              <GlowButton onClick={() => updateNotesMutation.mutate(financialNote)} className="w-full">
+                Save Notes
               </GlowButton>
             </div>
           </DialogContent>
