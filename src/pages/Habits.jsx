@@ -228,7 +228,8 @@ export default function Habits() {
     type: 'check',
     goal: 1,
     unit: 'session',
-    section: 'sec_morning_7B4R'
+    section: 'sec_morning_7B4R',
+    alarm_time: '08:00'
   });
   
   // Load habit data from database
@@ -352,6 +353,64 @@ export default function Habits() {
       Notification.requestPermission();
     }
   }, []);
+  
+  // Check alarms every minute
+  useEffect(() => {
+    const checkAlarms = () => {
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      
+      gritData.sections.forEach((section) => {
+        section.habits.forEach((habit) => {
+          if (habit.progress.type === 'alarm' && habit.alarm_time === currentTime) {
+            const today = format(now, 'yyyy-MM-dd');
+            const alreadyNotified = (habit.completion_log || []).some(log => log.date === today && log.notified);
+            
+            if (!alreadyNotified && 'Notification' in window && Notification.permission === 'granted') {
+              new Notification(`🔔 Time for: ${habit.name}`, {
+                body: `It's ${currentTime} - Time to ${habit.name}!`,
+                icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+                vibrate: [200, 100, 200],
+                requireInteraction: true
+              });
+              
+              // Play alarm sound
+              const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+              for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                  const oscillator = audioContext.createOscillator();
+                  const gainNode = audioContext.createGain();
+                  oscillator.connect(gainNode);
+                  gainNode.connect(audioContext.destination);
+                  oscillator.frequency.value = 800;
+                  oscillator.type = 'sine';
+                  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                  oscillator.start(audioContext.currentTime);
+                  oscillator.stop(audioContext.currentTime + 0.5);
+                }, i * 500);
+              }
+              
+              // Mark as notified
+              setGritData(prev => {
+                const updated = { ...prev };
+                const sect = updated.sections.find(s => s.id === section.id);
+                const hab = sect.habits.find(h => h.id === habit.id);
+                if (!hab.completion_log) hab.completion_log = [];
+                hab.completion_log.push({ date: today, notified: true });
+                return updated;
+              });
+            }
+          }
+        });
+      });
+    };
+    
+    const interval = setInterval(checkAlarms, 30000); // Check every 30 seconds
+    checkAlarms(); // Check immediately
+    
+    return () => clearInterval(interval);
+  }, [gritData]);
 
   const toggleTimer = (sectionId, habitId) => {
     const section = gritData.sections.find(s => s.id === sectionId);
@@ -399,28 +458,12 @@ export default function Habits() {
     });
   };
 
-  const updateNumericProgress = (sectionId, habitId, delta) => {
+  const updateAlarmTime = (sectionId, habitId, time) => {
     setGritData(prev => {
       const updated = { ...prev };
       const section = updated.sections.find(s => s.id === sectionId);
       const habit = section.habits.find(h => h.id === habitId);
-      
-      habit.progress.value = Math.max(0, Math.min(habit.goal, habit.progress.value + delta));
-      
-      const today = format(new Date(), 'yyyy-MM-dd');
-      const alreadyCompleted = (habit.completion_log || []).some(log => log.date === today);
-      
-      if (habit.progress.value >= habit.goal && !alreadyCompleted) {
-        if (!habit.completion_log) habit.completion_log = [];
-        habit.completion_log.push({ date: today, completed: true });
-        habit.streak += 1;
-        updated.user_data.total_xp += habit.xp_reward;
-        updated.user_data.total_energy += habit.energy_reward;
-      } else if (habit.progress.value < habit.goal && alreadyCompleted) {
-        habit.completion_log = (habit.completion_log || []).filter(log => log.date !== today);
-        habit.streak = Math.max(0, habit.streak - 1);
-      }
-      
+      habit.alarm_time = time;
       return updated;
     });
   };
@@ -476,6 +519,10 @@ export default function Habits() {
         };
       }
       
+      if (newHabit.type === 'alarm') {
+        newHabitData.alarm_time = newHabit.alarm_time;
+      }
+      
       section.habits.push(newHabitData);
       return updated;
     });
@@ -487,7 +534,8 @@ export default function Habits() {
       type: 'check',
       goal: 1,
       unit: 'session',
-      section: 'sec_morning_7B4R'
+      section: 'sec_morning_7B4R',
+      alarm_time: '08:00'
     });
   };
 
@@ -697,26 +745,28 @@ export default function Habits() {
                             </button>
                           )}
                           
-                          {habit.progress.type === 'numeric' && (
+                          {habit.progress.type === 'alarm' && (
                             <div className="flex items-center gap-3">
-                              <button
-                                onClick={() => updateNumericProgress(section.id, habit.id, -100)}
-                                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
-                              >
-                                <Minus className="w-4 h-4 text-white" />
-                              </button>
-                              
-                              <div className="flex-1 text-center">
-                                <div className="text-2xl font-bold text-white">
-                                  {habit.progress.value}
-                                </div>
+                              <div className="flex-1 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/10">
+                                <span className="text-white/70 text-sm">🔔 Alarm set for:</span>
+                                <input
+                                  type="time"
+                                  value={habit.alarm_time || '08:00'}
+                                  onChange={(e) => updateAlarmTime(section.id, habit.id, e.target.value)}
+                                  className="bg-transparent text-white font-medium outline-none"
+                                />
                               </div>
-                              
                               <button
-                                onClick={() => updateNumericProgress(section.id, habit.id, 100)}
-                                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+                                onClick={() => toggleCheckHabit(section.id, habit.id)}
+                                className={`px-4 py-2 rounded-lg transition-all ${
+                                  isCompleted 
+                                    ? 'bg-gradient-to-r from-green-500 to-emerald-600' 
+                                    : 'bg-white/10 hover:bg-white/20'
+                                }`}
                               >
-                                <Plus className="w-4 h-4 text-white" />
+                                <span className="text-white text-sm">
+                                  {isCompleted ? '✓' : 'Done'}
+                                </span>
                               </button>
                             </div>
                           )}
@@ -810,36 +860,48 @@ export default function Habits() {
                   ⏱ Timer
                 </button>
                 <button
-                  onClick={() => setNewHabit({ ...newHabit, type: 'numeric', unit: 'reps', goal: 100 })}
+                  onClick={() => setNewHabit({ ...newHabit, type: 'alarm', unit: 'time', goal: 1, alarm_time: '08:00' })}
                   className={`py-2 px-3 rounded-lg text-sm transition-all ${
-                    newHabit.type === 'numeric' 
+                    newHabit.type === 'alarm' 
                       ? 'bg-orange-500/30 border border-orange-500/50' 
                       : 'bg-white/10 hover:bg-white/20'
                   }`}
                 >
-                  # Counter
+                  🔔 Alarm
                 </button>
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+{newHabit.type === 'alarm' ? (
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Goal</label>
-                <CosmicInput
-                  type="number"
-                  value={newHabit.goal}
-                  onChange={(e) => setNewHabit({ ...newHabit, goal: e.target.value })}
+                <label className="text-sm text-purple-200/70 mb-2 block">Alarm Time</label>
+                <input
+                  type="time"
+                  value={newHabit.alarm_time}
+                  onChange={(e) => setNewHabit({ ...newHabit, alarm_time: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white outline-none focus:border-purple-500/50"
                 />
               </div>
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Unit</label>
-                <CosmicInput
-                  value={newHabit.unit}
-                  onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
-                  placeholder="e.g., minutes"
-                />
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Goal</label>
+                  <CosmicInput
+                    type="number"
+                    value={newHabit.goal}
+                    onChange={(e) => setNewHabit({ ...newHabit, goal: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Unit</label>
+                  <CosmicInput
+                    value={newHabit.unit}
+                    onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
+                    placeholder="e.g., minutes"
+                  />
+                </div>
               </div>
-            </div>
+            )}
             
             <button
               onClick={addNewHabit}
