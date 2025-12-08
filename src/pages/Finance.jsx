@@ -334,9 +334,9 @@ export default function Finance() {
                     <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
+                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30 text-white">
                       {incomeCategories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        <SelectItem key={cat} value={cat} className="text-white focus:bg-purple-500/30 focus:text-white">{cat}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -401,9 +401,9 @@ export default function Finance() {
                     <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
+                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30 text-white">
                       {expenseCategories.map(cat => (
-                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                        <SelectItem key={cat} value={cat} className="text-white focus:bg-purple-500/30 focus:text-white">{cat}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
