@@ -1008,6 +1008,53 @@ export default function Habits() {
           />
         )}
       </AnimatePresence>
+
+      {/* Add Section Dialog */}
+      <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
+        <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-orange-500/30 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-orange-400" />
+              Add New Category
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Category Name</label>
+              <CosmicInput
+                value={newSection.name}
+                onChange={(e) => setNewSection({ ...newSection, name: e.target.value })}
+                placeholder="e.g., Evening, Fitness, Work"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Color</label>
+              <div className="flex gap-2">
+                {['#10b981', '#f59e0b', '#3b82f6', '#ec4899', '#8b5cf6', '#ef4444'].map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setNewSection({ ...newSection, color })}
+                    className={`w-12 h-12 rounded-lg transition-all ${
+                      newSection.color === color ? 'ring-2 ring-white scale-110' : 'hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={addSection}
+              disabled={!newSection.name.trim()}
+              className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              Add Category
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </CosmicBackground>
   );
 }
