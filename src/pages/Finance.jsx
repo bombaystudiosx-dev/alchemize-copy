@@ -143,8 +143,6 @@ export default function Finance() {
   const { grossIncome, netIncome, totalExpenses, moneyLeft, label, categoryBreakdown, periodExpenses } = getPeriodData();
   const totalDebt = financialNote.debt_amount || 0;
 
-  const expenseCategories = ['Food', 'Transport', 'Bills', 'Entertainment', 'Shopping', 'Health', 'Other'];
-
   return (
     <CosmicBackground>
       <div className="min-h-screen pb-8">
