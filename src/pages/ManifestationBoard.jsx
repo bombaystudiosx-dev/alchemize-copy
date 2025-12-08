@@ -229,7 +229,7 @@ export default function ManifestationBoard() {
 
           {/* Portal Grid */}
           <motion.div 
-            className="flex-1 px-6 pb-8"
+            className="flex-1 px-6 pb-4"
             onDragStart={handleDragStart}
             onDrag={handleDrag}
             onDragEnd={handleDragEnd}
@@ -296,7 +296,7 @@ export default function ManifestationBoard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="px-6 pb-4 text-center"
+            className="px-6 pb-6 text-center"
           >
             <p 
               className="text-sm md:text-base italic"
