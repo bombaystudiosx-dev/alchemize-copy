@@ -9,6 +9,8 @@ import Fitness from './pages/Fitness';
 import Appointments from './pages/Appointments';
 import Settings from './pages/Settings';
 import CalorieTracker from './pages/CalorieTracker';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
 import __Layout from './Layout.jsx';
 
 
@@ -24,6 +26,8 @@ export const PAGES = {
     "Appointments": Appointments,
     "Settings": Settings,
     "CalorieTracker": CalorieTracker,
+    "Terms": Terms,
+    "Privacy": Privacy,
 }
 
 export const pagesConfig = {
