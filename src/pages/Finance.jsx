@@ -494,39 +494,43 @@ export default function Finance() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
-                  <CosmicInput 
-                    type="number" 
+                  <input
+                    type="number"
                     value={notesForm.debt_amount || ''} 
                     onChange={(e) => setNotesForm({...notesForm, debt_amount: e.target.value})} 
-                    placeholder="0.00" 
+                    placeholder="0.00"
+                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
                   />
                 </div>
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Due Date</label>
-                  <CosmicInput 
-                    type="date" 
+                  <input
+                    type="date"
                     value={notesForm.debt_due_date || ''} 
-                    onChange={(e) => setNotesForm({...notesForm, debt_due_date: e.target.value})} 
+                    onChange={(e) => setNotesForm({...notesForm, debt_due_date: e.target.value})}
+                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
-                  <CosmicInput 
-                    type="number" 
+                  <input
+                    type="number"
                     value={notesForm.savings_amount || ''} 
                     onChange={(e) => setNotesForm({...notesForm, savings_amount: e.target.value})} 
-                    placeholder="0.00" 
+                    placeholder="0.00"
+                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
                   />
                 </div>
                 <div>
                   <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
-                  <CosmicInput 
-                    type="number" 
+                  <input
+                    type="number"
                     value={notesForm.emergency_fund || ''} 
                     onChange={(e) => setNotesForm({...notesForm, emergency_fund: e.target.value})} 
-                    placeholder="0.00" 
+                    placeholder="0.00"
+                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
                   />
                 </div>
               </div>
