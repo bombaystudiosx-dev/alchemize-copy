@@ -221,7 +221,9 @@ export default function Habits() {
   const [gritData, setGritData] = useState(getDefaultGritData());
   const [activeTimers, setActiveTimers] = useState({});
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false);
   const [activeTimerView, setActiveTimerView] = useState(null);
+  const [newSection, setNewSection] = useState({ name: '', color: '#10b981' });
   const [newHabit, setNewHabit] = useState({
     name: '',
     icon: '⭐',
@@ -662,6 +664,15 @@ export default function Habits() {
             </CosmicCard>
           </motion.div>
 
+          {/* Add Section Button */}
+          <button
+            onClick={() => setShowAddSectionDialog(true)}
+            className="w-full py-3 mb-4 rounded-xl bg-white/5 border border-white/20 hover:bg-white/10 transition-all flex items-center justify-center gap-2 text-purple-300"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Category</span>
+          </button>
+
           {/* Sections */}
           <AnimatePresence>
             {gritData.sections.map((section, sIdx) => (
@@ -672,12 +683,20 @@ export default function Habits() {
                 transition={{ delay: sIdx * 0.1 }}
                 className="mb-6"
               >
-                <h2 
-                  className="text-lg font-semibold mb-3 flex items-center gap-2"
-                  style={{ color: section.color }}
-                >
-                  {section.title}
-                </h2>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 
+                    className="text-lg font-semibold flex items-center gap-2"
+                    style={{ color: section.color }}
+                  >
+                    {section.title}
+                  </h2>
+                  <button
+                    onClick={() => deleteSection(section.id)}
+                    className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-all"
+                  >
+                    <X className="w-4 h-4 text-red-400" />
+                  </button>
+                </div>
                 
                 <div className="space-y-3">
                   {section.habits.map((habit) => {
