@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Save, AlertCircle } from 'lucide-react';
 
 const mealConfig = {
   breakfast: { emoji: '🌅', label: 'Breakfast', color: 'from-orange-400 to-yellow-500' },
@@ -9,7 +9,7 @@ const mealConfig = {
   snack: { emoji: '🍎', label: 'Snacks', color: 'from-green-400 to-emerald-500' }
 };
 
-export default function MealSection({ mealType, foods, onAddFood, onDeleteFood }) {
+export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, onSaveFood }) {
   const config = mealConfig[mealType];
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
 

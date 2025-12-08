@@ -8,6 +8,9 @@ export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
   const [imageUrl, setImageUrl] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [correctionNotes, setCorrectionNotes] = useState('');
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
