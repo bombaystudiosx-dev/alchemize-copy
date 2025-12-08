@@ -21,8 +21,12 @@ export default function Finance() {
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [showLoginInfo, setShowLoginInfo] = useState(false);
-  const [newIncome, setNewIncome] = useState({ income_gross: '', tax_amount: '', deductions: '', income_date: format(new Date(), 'yyyy-MM-dd') });
-  const [newExpense, setNewExpense] = useState({ expense_name: '', expense_category: 'Food', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+  const [newIncome, setNewIncome] = useState({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
+  const [newExpense, setNewExpense] = useState({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+  const [customIncomeCategory, setCustomIncomeCategory] = useState('');
+  const [customExpenseCategory, setCustomExpenseCategory] = useState('');
+  const [incomeCategories, setIncomeCategories] = useState(['Salary', 'Freelance', 'Business', 'Investment', 'Bonus', 'Other']);
+  const [expenseCategories, setExpenseCategories] = useState(['Bills', 'Business', 'Personal', 'Food', 'Transport', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other']);
   
   const queryClient = useQueryClient();
 
@@ -46,21 +50,24 @@ export default function Finance() {
   const createIncomeMutation = useMutation({
     mutationFn: (data) => {
       const income_gross = parseFloat(data.income_gross) || 0;
-      const tax_amount = parseFloat(data.tax_amount) || 0;
+      const tax_percentage = parseFloat(data.tax_percentage) || 0;
+      const tax_amount = data.tax_amount ? parseFloat(data.tax_amount) : (income_gross * tax_percentage / 100);
       const deductions = parseFloat(data.deductions) || 0;
       const income_net = income_gross - tax_amount - deductions;
       return base44.entities.FinancialIncome.create({ 
         income_gross, 
         tax_amount, 
+        tax_percentage,
         deductions, 
         income_net, 
+        income_category: data.income_category,
         income_date: data.income_date 
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['financialIncomes']);
       setShowIncomeDialog(false);
-      setNewIncome({ income_gross: '', tax_amount: '', deductions: '', income_date: format(new Date(), 'yyyy-MM-dd') });
+      setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
     }
   });
 
@@ -323,11 +330,44 @@ export default function Finance() {
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Gross Income</label>
-                <CosmicInput type="number" value={newIncome.income_gross} onChange={(e) => setNewIncome({ ...newIncome, income_gross: e.target.value })} placeholder="0.00" />
+                <label className="text-sm text-purple-200/70 mb-2 block">Income Category</label>
+                <div className="flex gap-2">
+                  <Select value={newIncome.income_category} onValueChange={(val) => setNewIncome({ ...newIncome, income_category: val })}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
+                      {incomeCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <CosmicInput placeholder="New category" value={customIncomeCategory} onChange={(e) => setCustomIncomeCategory(e.target.value)} />
+                  <button onClick={() => { if(customIncomeCategory) { setIncomeCategories([...incomeCategories, customIncomeCategory]); setNewIncome({...newIncome, income_category: customIncomeCategory}); setCustomIncomeCategory(''); }}} className="px-3 py-2 rounded-lg bg-purple-500/30 text-white text-sm">Add</button>
+                </div>
               </div>
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Taxes</label>
+                <label className="text-sm text-purple-200/70 mb-2 block">Gross Income</label>
+                <CosmicInput type="number" value={newIncome.income_gross} onChange={(e) => {
+                  const gross = e.target.value;
+                  const taxPct = parseFloat(newIncome.tax_percentage) || 0;
+                  const autoTax = gross ? (parseFloat(gross) * taxPct / 100).toFixed(2) : '';
+                  setNewIncome({ ...newIncome, income_gross: gross, tax_amount: autoTax });
+                }} placeholder="0.00" />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Tax Rate (%)</label>
+                <CosmicInput type="number" value={newIncome.tax_percentage} onChange={(e) => {
+                  const taxPct = e.target.value;
+                  const gross = parseFloat(newIncome.income_gross) || 0;
+                  const autoTax = gross && taxPct ? (gross * parseFloat(taxPct) / 100).toFixed(2) : '';
+                  setNewIncome({ ...newIncome, tax_percentage: taxPct, tax_amount: autoTax });
+                }} placeholder="25" />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Tax Amount (auto-calculated)</label>
                 <CosmicInput type="number" value={newIncome.tax_amount} onChange={(e) => setNewIncome({ ...newIncome, tax_amount: e.target.value })} placeholder="0.00" />
               </div>
               <div>
@@ -358,16 +398,22 @@ export default function Finance() {
               </div>
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
-                <Select value={newExpense.expense_category} onValueChange={(val) => setNewExpense({ ...newExpense, expense_category: val })}>
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
-                    {expenseCategories.map(cat => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-2">
+                  <Select value={newExpense.expense_category} onValueChange={(val) => setNewExpense({ ...newExpense, expense_category: val })}>
+                    <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
+                      {expenseCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex gap-2 mt-2">
+                  <CosmicInput placeholder="New category" value={customExpenseCategory} onChange={(e) => setCustomExpenseCategory(e.target.value)} />
+                  <button onClick={() => { if(customExpenseCategory) { setExpenseCategories([...expenseCategories, customExpenseCategory]); setNewExpense({...newExpense, expense_category: customExpenseCategory}); setCustomExpenseCategory(''); }}} className="px-3 py-2 rounded-lg bg-purple-500/30 text-white text-sm">Add</button>
+                </div>
               </div>
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Amount</label>
