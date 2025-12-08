@@ -4,8 +4,11 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Plus, Minus, Award, Zap, PlusCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import CosmicInput from '@/components/cosmic/CosmicInput';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 // Load GRIT spec from localStorage or use default
 const loadGritData = () => {
@@ -211,13 +214,22 @@ const saveGritData = (data) => {
 export default function Habits() {
   const [gritData, setGritData] = useState(loadGritData());
   const [activeTimers, setActiveTimers] = useState({});
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newHabit, setNewHabit] = useState({
+    name: '',
+    icon: '⭐',
+    type: 'check',
+    goal: 1,
+    unit: 'session',
+    section: 'sec_morning_7B4R'
+  });
 
   // Save to localStorage whenever data changes
   useEffect(() => {
     saveGritData(gritData);
   }, [gritData]);
 
-  // Timer effect
+  // Timer effect with alarm
   useEffect(() => {
     const interval = setInterval(() => {
       setGritData(prev => {
@@ -244,7 +256,7 @@ export default function Habits() {
                 }
               };
 
-              // Auto-complete when timer reaches goal
+              // Auto-complete when timer reaches goal + play alarm
               if (newElapsed >= habit.goal * 60 && habit.progress.value < habit.goal) {
                 const today = format(new Date(), 'yyyy-MM-dd');
                 if (!(habit.completion_log || []).some(log => log.date === today)) {
@@ -258,6 +270,10 @@ export default function Habits() {
                   updated.sections[sIdx].habits[hIdx].streak += 1;
                   updated.user_data.total_xp += habit.xp_reward;
                   updated.user_data.total_energy += habit.energy_reward;
+                  updated.sections[sIdx].habits[hIdx].timer.status = 'stopped';
+                  
+                  // Play alarm sound
+                  playAlarm();
                 }
               }
             }
@@ -270,6 +286,38 @@ export default function Habits() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const playAlarm = () => {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+    
+    // Play again after delay
+    setTimeout(() => {
+      const osc2 = audioContext.createOscillator();
+      const gain2 = audioContext.createGain();
+      osc2.connect(gain2);
+      gain2.connect(audioContext.destination);
+      osc2.frequency.value = 1000;
+      osc2.type = 'sine';
+      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      osc2.start(audioContext.currentTime);
+      osc2.stop(audioContext.currentTime + 0.5);
+    }, 600);
+  };
 
   const toggleTimer = (sectionId, habitId) => {
     setGritData(prev => {
@@ -356,6 +404,56 @@ export default function Habits() {
 
   const maxStreak = Math.max(...gritData.sections.flatMap(s => s.habits.map(h => h.streak || 0)));
 
+  const addNewHabit = () => {
+    setGritData(prev => {
+      const updated = { ...prev };
+      const section = updated.sections.find(s => s.id === newHabit.section);
+      
+      const habitId = `hbt_${newHabit.name.toLowerCase().replace(/\s/g, '')}_${Date.now().toString(36)}`;
+      
+      const newHabitData = {
+        id: habitId,
+        name: newHabit.name,
+        icon: newHabit.icon,
+        frequency: 'daily',
+        goal: parseInt(newHabit.goal),
+        unit: newHabit.unit,
+        progress: { 
+          type: newHabit.type, 
+          value: 0 
+        },
+        streak: 0,
+        xp_reward: newHabit.type === 'timer' ? 15 : 5,
+        energy_reward: newHabit.type === 'timer' ? 4 : 2,
+        completion_log: [],
+        ui: { color: section.color }
+      };
+      
+      if (newHabit.type === 'timer') {
+        newHabitData.timer = {
+          status: 'stopped',
+          elapsed_seconds: 0,
+          remaining_seconds: newHabit.goal * 60
+        };
+      }
+      
+      section.habits.push(newHabitData);
+      return updated;
+    });
+    
+    setShowAddDialog(false);
+    setNewHabit({
+      name: '',
+      icon: '⭐',
+      type: 'check',
+      goal: 1,
+      unit: 'session',
+      section: 'sec_morning_7B4R'
+    });
+  };
+
+  const icons = ['⭐', '💪', '📚', '🎯', '🧘‍♀️', '🏃', '💧', '🍎', '🎨', '🎵', '✍️', '🧠'];
+
   return (
     <CosmicBackground>
       <div className="min-h-screen pb-8">
@@ -370,7 +468,12 @@ export default function Habits() {
             <span>Back</span>
           </Link>
           <h1 className="text-xl font-bold text-white">GRIT Tracker</h1>
-          <div className="w-20" />
+          <button 
+            onClick={() => setShowAddDialog(true)}
+            className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform"
+          >
+            <PlusCircle className="w-5 h-5 text-white" />
+          </button>
         </motion.header>
 
         <div className="px-6">
@@ -558,6 +661,127 @@ export default function Habits() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Add Habit Dialog */}
+      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+        <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-orange-500/30 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <PlusCircle className="w-5 h-5 text-orange-400" />
+              Add New Habit
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Habit Name</label>
+              <CosmicInput
+                value={newHabit.name}
+                onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
+                placeholder="e.g., Morning Workout"
+              />
+            </div>
+            
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Icon</label>
+              <div className="flex flex-wrap gap-2">
+                {icons.map((icon) => (
+                  <button
+                    key={icon}
+                    onClick={() => setNewHabit({ ...newHabit, icon })}
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-2xl transition-all ${
+                      newHabit.icon === icon 
+                        ? 'bg-orange-500/30 scale-110' 
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                  >
+                    {icon}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Section</label>
+              <Select value={newHabit.section} onValueChange={(val) => setNewHabit({ ...newHabit, section: val })}>
+                <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a0a2e] border-purple-500/30 text-white">
+                  {gritData.sections.map((section) => (
+                    <SelectItem key={section.id} value={section.id}>
+                      {section.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Type</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setNewHabit({ ...newHabit, type: 'check', unit: 'session', goal: 1 })}
+                  className={`py-2 px-3 rounded-lg text-sm transition-all ${
+                    newHabit.type === 'check' 
+                      ? 'bg-orange-500/30 border border-orange-500/50' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  ✓ Check
+                </button>
+                <button
+                  onClick={() => setNewHabit({ ...newHabit, type: 'timer', unit: 'minutes', goal: 15 })}
+                  className={`py-2 px-3 rounded-lg text-sm transition-all ${
+                    newHabit.type === 'timer' 
+                      ? 'bg-orange-500/30 border border-orange-500/50' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  ⏱ Timer
+                </button>
+                <button
+                  onClick={() => setNewHabit({ ...newHabit, type: 'numeric', unit: 'reps', goal: 100 })}
+                  className={`py-2 px-3 rounded-lg text-sm transition-all ${
+                    newHabit.type === 'numeric' 
+                      ? 'bg-orange-500/30 border border-orange-500/50' 
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  # Counter
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Goal</label>
+                <CosmicInput
+                  type="number"
+                  value={newHabit.goal}
+                  onChange={(e) => setNewHabit({ ...newHabit, goal: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Unit</label>
+                <CosmicInput
+                  value={newHabit.unit}
+                  onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
+                  placeholder="e.g., minutes"
+                />
+              </div>
+            </div>
+            
+            <button
+              onClick={addNewHabit}
+              disabled={!newHabit.name}
+              className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              Add Habit
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </CosmicBackground>
   );
 }
