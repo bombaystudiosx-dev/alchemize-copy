@@ -229,7 +229,9 @@ export default function Habits() {
     goal: 1,
     unit: 'session',
     section: 'sec_morning_7B4R',
-    alarm_time: '08:00'
+    alarm_time: '08:00',
+    frequency_type: 'weekly',
+    active_days: [0, 1, 2, 3, 4, 5, 6] // 0=Mon, 6=Sun
   });
   
   // Load habit data from database
@@ -535,7 +537,9 @@ export default function Habits() {
       goal: 1,
       unit: 'session',
       section: 'sec_morning_7B4R',
-      alarm_time: '08:00'
+      alarm_time: '08:00',
+      frequency_type: 'weekly',
+      active_days: [0, 1, 2, 3, 4, 5, 6]
     });
   };
 
@@ -872,8 +876,8 @@ export default function Habits() {
               </div>
             </div>
             
-{newHabit.type === 'alarm' ? (
-              <div>
+{newHabit.type === 'alarm' && (
+              <div className="mb-4">
                 <label className="text-sm text-purple-200/70 mb-2 block">Alarm Time</label>
                 <input
                   type="time"
@@ -882,26 +886,59 @@ export default function Habits() {
                   className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white outline-none focus:border-purple-500/50"
                 />
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Goal</label>
-                  <CosmicInput
-                    type="number"
-                    value={newHabit.goal}
-                    onChange={(e) => setNewHabit({ ...newHabit, goal: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Unit</label>
-                  <CosmicInput
-                    value={newHabit.unit}
-                    onChange={(e) => setNewHabit({ ...newHabit, unit: e.target.value })}
-                    placeholder="e.g., minutes"
-                  />
-                </div>
-              </div>
             )}
+            
+            {/* Frequency Type */}
+            <div className="mb-4">
+              <label className="text-sm text-purple-200/70 mb-2 block">Frequency</label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setNewHabit({ ...newHabit, frequency_type: 'weekly' })}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm transition-all ${
+                    newHabit.frequency_type === 'weekly'
+                      ? 'bg-purple-500/30 border border-purple-500/50'
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  Weekly
+                </button>
+                <button
+                  onClick={() => setNewHabit({ ...newHabit, frequency_type: 'monthly' })}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm transition-all ${
+                    newHabit.frequency_type === 'monthly'
+                      ? 'bg-purple-500/30 border border-purple-500/50'
+                      : 'bg-white/10 hover:bg-white/20'
+                  }`}
+                >
+                  Monthly
+                </button>
+              </div>
+            </div>
+            
+            {/* Days of Week */}
+            <div>
+              <label className="text-sm text-purple-200/70 mb-2 block">Active Days</label>
+              <div className="grid grid-cols-7 gap-2">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, idx) => (
+                  <button
+                    key={day}
+                    onClick={() => {
+                      const activeDays = newHabit.active_days.includes(idx)
+                        ? newHabit.active_days.filter(d => d !== idx)
+                        : [...newHabit.active_days, idx].sort();
+                      setNewHabit({ ...newHabit, active_days: activeDays });
+                    }}
+                    className={`py-2 rounded-lg text-xs transition-all ${
+                      newHabit.active_days.includes(idx)
+                        ? 'bg-purple-500/40 border border-purple-500/60'
+                        : 'bg-white/10 hover:bg-white/20'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            </div>
             
             <button
               onClick={addNewHabit}
