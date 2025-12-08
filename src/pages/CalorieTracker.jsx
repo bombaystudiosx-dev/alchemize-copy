@@ -99,7 +99,10 @@ export default function CalorieTracker() {
   const todayLogs = useMemo(() => {
     const today = new Date(selectedDate);
     return foodLogs.filter(log => {
-      const logDate = new Date(log.logged_at);
+      const logDateStr = log.logged_at || log.date;
+      if (!logDateStr) return false;
+      const logDate = new Date(logDateStr);
+      if (isNaN(logDate.getTime())) return false;
       return logDate.toDateString() === today.toDateString();
     });
   }, [foodLogs, selectedDate]);
@@ -116,7 +119,11 @@ export default function CalorieTracker() {
   const dailyData = useMemo(() => {
     const data = {};
     foodLogs.forEach(log => {
-      const dateKey = new Date(log.logged_at).toISOString().split('T')[0];
+      const dateStr = log.logged_at || log.date;
+      if (!dateStr) return;
+      const logDate = new Date(dateStr);
+      if (isNaN(logDate.getTime())) return;
+      const dateKey = logDate.toISOString().split('T')[0];
       if (!data[dateKey]) data[dateKey] = 0;
       data[dateKey] += log.calories || 0;
     });
