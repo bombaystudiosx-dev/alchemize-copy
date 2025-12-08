@@ -209,7 +209,7 @@ export default function ManifestationBoard() {
                 <Sun className="w-5 h-5 text-amber-400" />
                 <div>
                   <p className="text-white text-sm font-medium">Morning Portal Ritual</p>
-                  <p className="text-white/50 text-xs">Open a random vision each morning</p>
+                  <p className="text-white/50 text-xs">Pause during each photo and envision and truly feel what it would be like to already have this</p>
                 </div>
               </div>
               <Switch
