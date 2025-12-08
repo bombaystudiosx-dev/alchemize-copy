@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import TimerView from '@/components/habits/TimerView';
 
 // Load GRIT spec from localStorage or use default
 const loadGritData = () => {
@@ -215,6 +216,7 @@ export default function Habits() {
   const [gritData, setGritData] = useState(loadGritData());
   const [activeTimers, setActiveTimers] = useState({});
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [activeTimerView, setActiveTimerView] = useState(null);
   const [newHabit, setNewHabit] = useState({
     name: '',
     icon: '⭐',
