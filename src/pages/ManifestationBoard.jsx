@@ -296,7 +296,7 @@ export default function ManifestationBoard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="px-6 pb-8 text-center"
+            className="px-6 pb-4 text-center"
           >
             <p 
               className="text-sm md:text-base italic"
