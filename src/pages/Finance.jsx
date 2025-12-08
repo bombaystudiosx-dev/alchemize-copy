@@ -43,8 +43,17 @@ export default function Finance() {
 
   const createIncomeMutation = useMutation({
     mutationFn: (data) => {
-      const netIncome = (parseFloat(data.income_gross) || 0) - (parseFloat(data.tax_amount) || 0) - (parseFloat(data.deductions) || 0);
-      return base44.entities.FinancialIncome.create({ ...data, income_net: netIncome });
+      const income_gross = parseFloat(data.income_gross) || 0;
+      const tax_amount = parseFloat(data.tax_amount) || 0;
+      const deductions = parseFloat(data.deductions) || 0;
+      const income_net = income_gross - tax_amount - deductions;
+      return base44.entities.FinancialIncome.create({ 
+        income_gross, 
+        tax_amount, 
+        deductions, 
+        income_net, 
+        income_date: data.income_date 
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['financialIncomes']);
@@ -54,7 +63,12 @@ export default function Finance() {
   });
 
   const createExpenseMutation = useMutation({
-    mutationFn: (data) => base44.entities.FinancialExpense.create(data),
+    mutationFn: (data) => base44.entities.FinancialExpense.create({
+      expense_name: data.expense_name,
+      expense_category: data.expense_category,
+      expense_amount: parseFloat(data.expense_amount) || 0,
+      expense_date: data.expense_date
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries(['financialExpenses']);
       setShowExpenseDialog(false);
@@ -208,6 +222,12 @@ export default function Finance() {
             </div>
           </CosmicCard>
 
+          {/* Calendars */}
+          <div className="space-y-4">
+            <IncomeCalendar incomes={incomes} />
+            <ExpenseCalendar expenses={expenses} />
+          </div>
+
           {/* Category Breakdown */}
           {Object.keys(categoryBreakdown).length > 0 && (
             <CosmicCard>
@@ -355,7 +375,7 @@ export default function Finance() {
                 <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
                 <CosmicInput type="date" value={newExpense.expense_date} onChange={(e) => setNewExpense({ ...newExpense, expense_date: e.target.value })} />
               </div>
-              <GlowButton onClick={() => createExpenseMutation.mutate({ ...newExpense, expense_amount: parseFloat(newExpense.expense_amount) })} disabled={!newExpense.expense_name || !newExpense.expense_amount} className="w-full">
+              <GlowButton onClick={() => createExpenseMutation.mutate(newExpense)} disabled={!newExpense.expense_name || !newExpense.expense_amount} className="w-full">
                 Add Expense
               </GlowButton>
             </div>
@@ -415,7 +435,20 @@ export default function Finance() {
                   <CosmicInput type="number" defaultValue={financialNote.emergency_fund} onChange={(e) => financialNote.emergency_fund = parseFloat(e.target.value)} placeholder="0.00" />
                 </div>
               </div>
-              <GlowButton onClick={() => updateNotesMutation.mutate(financialNote)} className="w-full">
+              <GlowButton 
+                onClick={() => {
+                  const updatedNote = {
+                    note_login_info: financialNote.note_login_info,
+                    note_total_debt: financialNote.note_total_debt,
+                    debt_amount: parseFloat(financialNote.debt_amount) || 0,
+                    debt_due_date: financialNote.debt_due_date,
+                    savings_amount: parseFloat(financialNote.savings_amount) || 0,
+                    emergency_fund: parseFloat(financialNote.emergency_fund) || 0
+                  };
+                  updateNotesMutation.mutate(updatedNote);
+                }} 
+                className="w-full"
+              >
                 Save Notes
               </GlowButton>
             </div>
