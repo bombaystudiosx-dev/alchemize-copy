@@ -77,7 +77,16 @@ export default function Splash() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="text-lg md:text-xl text-purple-200/90 mb-8 tracking-wide text-center"
+          className="text-lg md:text-xl mb-8 tracking-wide text-center font-semibold"
+          style={{
+            background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(168, 85, 247, 0.6)',
+            filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.8))',
+            fontFamily: "'Playfair Display', Georgia, serif",
+            fontStyle: 'italic'
+          }}
         >
           {t.unlockSelf}
         </motion.p>
