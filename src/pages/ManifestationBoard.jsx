@@ -290,6 +290,28 @@ export default function ManifestationBoard() {
               </div>
             )}
           </motion.div>
+
+          {/* Quantum Affirmation */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="px-6 pb-8 text-center"
+          >
+            <p 
+              className="text-sm md:text-base italic"
+              style={{
+                background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
+                fontFamily: "'Playfair Display', Georgia, serif",
+                letterSpacing: '0.02em'
+              }}
+            >
+              Know that there is a version of you in the quantum field that already has all of this and you are now colliding with it
+            </p>
+          </motion.div>
         </div>
       </CosmicBackground>
 
