@@ -21,6 +21,7 @@ export default function Finance() {
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
   const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [showLoginInfo, setShowLoginInfo] = useState(false);
+  const [editingIncome, setEditingIncome] = useState(null);
   const [newIncome, setNewIncome] = useState({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
   const [newExpense, setNewExpense] = useState({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
   const [customIncomeCategory, setCustomIncomeCategory] = useState('');
@@ -54,6 +55,19 @@ export default function Finance() {
       const tax_amount = data.tax_amount ? parseFloat(data.tax_amount) : (income_gross * tax_percentage / 100);
       const deductions = parseFloat(data.deductions) || 0;
       const income_net = income_gross - tax_amount - deductions;
+      
+      if (editingIncome) {
+        return base44.entities.FinancialIncome.update(editingIncome.id, {
+          income_gross, 
+          tax_amount, 
+          tax_percentage,
+          deductions, 
+          income_net, 
+          income_category: data.income_category,
+          income_date: data.income_date 
+        });
+      }
+      
       return base44.entities.FinancialIncome.create({ 
         income_gross, 
         tax_amount, 
@@ -67,6 +81,7 @@ export default function Finance() {
     onSuccess: () => {
       queryClient.invalidateQueries(['financialIncomes']);
       setShowIncomeDialog(false);
+      setEditingIncome(null);
       setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
     }
   });
@@ -268,6 +283,18 @@ export default function Finance() {
             <IncomeCalendar 
               incomes={incomes} 
               onDeleteIncome={(id) => deleteIncomeMutation.mutate(id)}
+              onEditIncome={(income) => {
+                setEditingIncome(income);
+                setNewIncome({
+                  income_gross: income.income_gross,
+                  tax_percentage: income.tax_percentage || '25',
+                  tax_amount: income.tax_amount,
+                  deductions: income.deductions || '',
+                  income_category: income.income_category,
+                  income_date: income.income_date
+                });
+                setShowIncomeDialog(true);
+              }}
               onClearAll={() => {
                 if (window.confirm('Are you sure you want to delete all income entries?')) {
                   clearAllIncomesMutation.mutate();
@@ -363,10 +390,16 @@ export default function Finance() {
         </div>
 
         {/* Add Income Dialog */}
-        <Dialog open={showIncomeDialog} onOpenChange={setShowIncomeDialog}>
+        <Dialog open={showIncomeDialog} onOpenChange={(open) => {
+          setShowIncomeDialog(open);
+          if (!open) {
+            setEditingIncome(null);
+            setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
+          }
+        }}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-green-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-white">Add Income</DialogTitle>
+              <DialogTitle className="text-white">{editingIncome ? 'Edit Income' : 'Add Income'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
@@ -423,7 +456,7 @@ export default function Finance() {
                 disabled={!newIncome.income_gross || createIncomeMutation.isPending} 
                 className="w-full"
               >
-                {createIncomeMutation.isPending ? 'Adding...' : 'Add Income'}
+                {createIncomeMutation.isPending ? (editingIncome ? 'Updating...' : 'Adding...') : (editingIncome ? 'Update Income' : 'Add Income')}
               </GlowButton>
             </div>
           </DialogContent>

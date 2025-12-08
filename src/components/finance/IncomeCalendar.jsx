@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { motion } from 'framer-motion';
-import { Trash2, X } from 'lucide-react';
+import { Trash2, X, Pencil } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
-export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll }) {
+export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll, onEditIncome }) {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const today = new Date();
@@ -95,18 +95,29 @@ export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll }) 
                 <p className="text-green-400 text-sm">${income.income_gross?.toFixed(2)}</p>
                 <p className="text-white/50 text-xs">Net: ${income.income_net?.toFixed(2)}</p>
               </div>
-              <button
-                onClick={() => {
-                  onDeleteIncome(income.id);
-                  const remainingIncomes = getIncomeForDay(selectedDay).filter(i => i.id !== income.id);
-                  if (remainingIncomes.length === 0) {
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    onEditIncome(income);
                     setShowDeleteDialog(false);
-                  }
-                }}
-                className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+                  }}
+                  className="p-2 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    onDeleteIncome(income.id);
+                    const remainingIncomes = getIncomeForDay(selectedDay).filter(i => i.id !== income.id);
+                    if (remainingIncomes.length === 0) {
+                      setShowDeleteDialog(false);
+                    }
+                  }}
+                  className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
