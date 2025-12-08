@@ -150,8 +150,16 @@ export default function Home() {
             <Sparkles className="w-5 h-5 text-purple-400" />
           </motion.div>
           <h1 
-            className="text-2xl md:text-3xl font-bold text-white mb-2"
-            style={{ fontFamily: 'Georgia, serif', letterSpacing: '0.05em' }}
+            className="text-2xl md:text-3xl font-bold mb-2"
+            style={{ 
+              fontFamily: 'Georgia, serif', 
+              letterSpacing: '0.05em',
+              background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(168, 85, 247, 0.6)',
+              filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.8))'
+            }}
           >
             {firstName}
           </h1>
