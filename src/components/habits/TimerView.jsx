@@ -32,20 +32,31 @@ export default function TimerView({ habit, onClose, onUpdate }) {
   }, [isRunning, totalSeconds]);
   
   const playAlarm = () => {
+    // Audio alarm
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       setTimeout(() => {
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
-        oscillator.frequency.value = 800;
+        oscillator.frequency.value = 800 + (i * 100);
         oscillator.type = 'sine';
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + 0.3);
       }, i * 400);
+    }
+    
+    // Browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🎉 Habit Complete!', {
+        body: `Great job! You completed "${habit.name}"`,
+        icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+        badge: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+        vibrate: [200, 100, 200, 100, 200]
+      });
     }
   };
   

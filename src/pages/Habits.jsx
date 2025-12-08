@@ -274,8 +274,8 @@ export default function Habits() {
                   updated.user_data.total_energy += habit.energy_reward;
                   updated.sections[sIdx].habits[hIdx].timer.status = 'stopped';
                   
-                  // Play alarm sound
-                  playAlarm();
+                  // Play alarm sound with notification
+                  playAlarm(habit.name);
                 }
               }
             }
@@ -289,37 +289,41 @@ export default function Habits() {
     return () => clearInterval(interval);
   }, []);
 
-  const playAlarm = () => {
+  const playAlarm = (habitName) => {
+    // Audio alarm
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 800 + (i * 100);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      }, i * 400);
+    }
     
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
-    
-    // Play again after delay
-    setTimeout(() => {
-      const osc2 = audioContext.createOscillator();
-      const gain2 = audioContext.createGain();
-      osc2.connect(gain2);
-      gain2.connect(audioContext.destination);
-      osc2.frequency.value = 1000;
-      osc2.type = 'sine';
-      gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-      osc2.start(audioContext.currentTime);
-      osc2.stop(audioContext.currentTime + 0.5);
-    }, 600);
+    // Browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('🎉 Habit Complete!', {
+        body: `Great job! You completed "${habitName}"`,
+        icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+        badge: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+        vibrate: [200, 100, 200, 100, 200]
+      });
+    }
   };
+  
+  // Request notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
 
   const toggleTimer = (sectionId, habitId) => {
     const section = gritData.sections.find(s => s.id === sectionId);
