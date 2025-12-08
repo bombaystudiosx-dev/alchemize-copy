@@ -8,7 +8,7 @@ import GlowButton from '@/components/cosmic/GlowButton';
 // Removed unused CosmicInput import
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, Heart, Star, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Heart, Star, Trash2, Pin } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -89,15 +89,20 @@ export default function Affirmations() {
         </motion.header>
 
         <div className="px-6">
-          {/* Info Text */}
+          {/* Pinned Post */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6"
           >
-            <p className="text-white/70 text-sm leading-relaxed text-center">
-              It is recommended to say these for at least 60-90 days that is how long your subconscious mind takes to accept the beliefs. However, by all means say them until reality reflects them
-            </p>
+            <CosmicCard className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+              <div className="flex items-start gap-3">
+                <Pin className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-white/80 text-sm leading-relaxed">
+                  It is recommended to say these for at least 60-90 days that is how long your subconscious mind takes to accept beliefs. However, by all means say them until reality reflects them
+                </p>
+              </div>
+            </CosmicCard>
           </motion.div>
 
           {/* Today's Affirmation */}
