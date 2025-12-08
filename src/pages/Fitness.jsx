@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   ArrowLeft, Plus, Dumbbell, Flame, Clock, Trash2, 
-  Ruler, Weight, TrendingUp, Activity, User 
+  Ruler, Weight, TrendingUp, Activity, User, Award, Zap, Target, Calendar 
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -133,6 +133,41 @@ export default function Fitness() {
   const totalMinutes = thisWeekWorkouts.reduce((sum, w) => sum + (w.duration_minutes || 0), 0);
   const totalCalories = thisWeekWorkouts.reduce((sum, w) => sum + (w.calories_burned || 0), 0);
 
+  // Calculate streak
+  const calculateStreak = () => {
+    if (workouts.length === 0) return 0;
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.date) - new Date(a.date));
+    let checkDate = new Date(today);
+    
+    for (const workout of sortedWorkouts) {
+      const workoutDate = new Date(workout.date);
+      workoutDate.setHours(0, 0, 0, 0);
+      
+      const diffDays = Math.floor((checkDate - workoutDate) / (1000 * 60 * 60 * 24));
+      
+      if (diffDays === 0 || diffDays === 1) {
+        streak++;
+        checkDate = workoutDate;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const currentStreak = calculateStreak();
+
+  // Personal records
+  const personalRecords = {
+    longestWorkout: workouts.reduce((max, w) => Math.max(max, w.duration_minutes || 0), 0),
+    mostCalories: workouts.reduce((max, w) => Math.max(max, w.calories_burned || 0), 0),
+    totalWorkouts: workouts.length
+  };
+
   const latestMetrics = metrics[0];
   const previousMetrics = metrics[1];
 
@@ -173,37 +208,93 @@ export default function Fitness() {
 
           {/* Workouts Tab */}
           <TabsContent value="workouts">
-            {/* Weekly Stats */}
+            {/* Hero Stats Cards */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
+              className="mb-6"
             >
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm text-white/50">This Week</p>
+                <h2 className="text-lg font-bold text-white">Performance</h2>
                 <GlowButton size="sm" onClick={() => setShowWorkoutDialog(true)}>
                   <Plus className="w-4 h-4" />
                   Log Workout
                 </GlowButton>
               </div>
+
+              {/* Streak Card */}
+              <CosmicCard className="mb-4 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-full blur-3xl" />
+                <div className="relative flex items-center gap-4 p-4">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                    <Flame className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-white/50 uppercase tracking-wider mb-1">Current Streak</p>
+                    <p className="text-3xl font-bold text-white">{currentStreak} <span className="text-lg text-white/60">days</span></p>
+                    <p className="text-xs text-amber-400 mt-1">Keep the momentum going! 🔥</p>
+                  </div>
+                </div>
+              </CosmicCard>
               
-              <div className="grid grid-cols-3 gap-3">
-                <CosmicCard className="text-center py-4">
-                  <Dumbbell className="w-5 h-5 text-red-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{thisWeekWorkouts.length}</p>
-                  <p className="text-xs text-white/50">Workouts</p>
+              {/* Weekly Stats Grid */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <CosmicCard className="text-center py-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent" />
+                  <div className="relative">
+                    <Dumbbell className="w-6 h-6 text-red-400 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-white">{thisWeekWorkouts.length}</p>
+                    <p className="text-xs text-white/50">Workouts</p>
+                  </div>
                 </CosmicCard>
-                <CosmicCard className="text-center py-4">
-                  <Clock className="w-5 h-5 text-blue-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{totalMinutes}</p>
-                  <p className="text-xs text-white/50">Minutes</p>
+                <CosmicCard className="text-center py-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent" />
+                  <div className="relative">
+                    <Clock className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-white">{totalMinutes}</p>
+                    <p className="text-xs text-white/50">Minutes</p>
+                  </div>
                 </CosmicCard>
-                <CosmicCard className="text-center py-4">
-                  <Flame className="w-5 h-5 text-orange-400 mx-auto mb-2" />
-                  <p className="text-2xl font-bold text-white">{totalCalories}</p>
-                  <p className="text-xs text-white/50">Calories</p>
+                <CosmicCard className="text-center py-4 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/10 to-transparent" />
+                  <div className="relative">
+                    <Zap className="w-6 h-6 text-orange-400 mx-auto mb-2" />
+                    <p className="text-2xl font-bold text-white">{totalCalories}</p>
+                    <p className="text-xs text-white/50">Calories</p>
+                  </div>
                 </CosmicCard>
               </div>
+
+              {/* Personal Records */}
+              <CosmicCard className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Award className="w-5 h-5 text-yellow-400" />
+                  <p className="text-sm font-semibold text-white">Personal Records</p>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center mx-auto mb-2">
+                      <Target className="w-5 h-5 text-purple-400" />
+                    </div>
+                    <p className="text-lg font-bold text-white">{personalRecords.totalWorkouts}</p>
+                    <p className="text-xs text-white/40">Total</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-2">
+                      <Clock className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <p className="text-lg font-bold text-white">{personalRecords.longestWorkout}</p>
+                    <p className="text-xs text-white/40">Longest (min)</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center mx-auto mb-2">
+                      <Flame className="w-5 h-5 text-orange-400" />
+                    </div>
+                    <p className="text-lg font-bold text-white">{personalRecords.mostCalories}</p>
+                    <p className="text-xs text-white/40">Max Burn</p>
+                  </div>
+                </div>
+              </CosmicCard>
             </motion.div>
 
             {/* Workout Log */}
@@ -211,7 +302,13 @@ export default function Fitness() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              <h2 className="text-lg font-semibold text-white mb-4">Workout Log</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-white">Workout History</h2>
+                <div className="flex items-center gap-2 text-xs text-white/40">
+                  <Calendar className="w-3 h-3" />
+                  <span>{workouts.length} total sessions</span>
+                </div>
+              </div>
               
               {loadingWorkouts ? (
                 <div className="space-y-3">
@@ -235,41 +332,48 @@ export default function Fitness() {
                       const type = workoutTypes[workout.type] || workoutTypes.other;
                       return (
                         <motion.div
-                          key={workout.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          transition={{ delay: index * 0.03 }}
+                         key={workout.id}
+                         initial={{ opacity: 0, x: -20 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         exit={{ opacity: 0, x: 20 }}
+                         transition={{ delay: index * 0.03 }}
                         >
-                          <CosmicCard className="flex items-center gap-4 group">
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${type.color} flex items-center justify-center text-2xl`}>
-                              {type.emoji}
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-medium text-white capitalize">{workout.type}</p>
-                              <div className="flex items-center gap-3 text-sm text-white/50">
-                                <span className="flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  {workout.duration_minutes} min
-                                </span>
-                                {workout.calories_burned && (
-                                  <span className="flex items-center gap-1">
-                                    <Flame className="w-3 h-3" />
-                                    {workout.calories_burned} cal
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-white/70">{format(new Date(workout.date), 'MMM d')}</p>
-                            </div>
-                            <button
-                              onClick={() => deleteWorkoutMutation.mutate(workout.id)}
-                              className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                              <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />
-                            </button>
-                          </CosmicCard>
+                         <CosmicCard className="flex items-center gap-4 group hover:scale-[1.01] transition-transform">
+                           <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${type.color} flex items-center justify-center text-2xl shadow-lg relative`}>
+                             <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${type.color} blur-md opacity-50`} />
+                             <span className="relative">{type.emoji}</span>
+                           </div>
+                           <div className="flex-1">
+                             <p className="font-semibold text-white capitalize mb-1">{workout.type}</p>
+                             <div className="flex items-center gap-3 text-sm">
+                               <span className="flex items-center gap-1.5 text-blue-400">
+                                 <Clock className="w-3.5 h-3.5" />
+                                 <span className="font-medium">{workout.duration_minutes}</span>
+                                 <span className="text-white/40">min</span>
+                               </span>
+                               {workout.calories_burned && (
+                                 <span className="flex items-center gap-1.5 text-orange-400">
+                                   <Flame className="w-3.5 h-3.5" />
+                                   <span className="font-medium">{workout.calories_burned}</span>
+                                   <span className="text-white/40">cal</span>
+                                 </span>
+                               )}
+                             </div>
+                             {workout.notes && (
+                               <p className="text-xs text-white/40 mt-1 line-clamp-1">{workout.notes}</p>
+                             )}
+                           </div>
+                           <div className="text-right flex flex-col items-end gap-1">
+                             <p className="text-sm font-medium text-white/70">{format(new Date(workout.date), 'MMM d')}</p>
+                             <p className="text-xs text-white/40">{format(new Date(workout.date), 'yyyy')}</p>
+                           </div>
+                           <button
+                             onClick={() => deleteWorkoutMutation.mutate(workout.id)}
+                             className="p-2 rounded-full hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-all"
+                           >
+                             <Trash2 className="w-4 h-4 text-red-400" />
+                           </button>
+                         </CosmicCard>
                         </motion.div>
                       );
                     })}
