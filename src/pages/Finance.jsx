@@ -22,6 +22,7 @@ export default function Finance() {
   const [showNotesDialog, setShowNotesDialog] = useState(false);
   const [showLoginInfo, setShowLoginInfo] = useState(false);
   const [editingIncome, setEditingIncome] = useState(null);
+  const [editingExpense, setEditingExpense] = useState(null);
   const [newIncome, setNewIncome] = useState({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
   const [newExpense, setNewExpense] = useState({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
   const [customIncomeCategory, setCustomIncomeCategory] = useState('');
@@ -87,16 +88,25 @@ export default function Finance() {
   });
 
   const createExpenseMutation = useMutation({
-    mutationFn: (data) => base44.entities.FinancialExpense.create({
-      expense_name: data.expense_name,
-      expense_category: data.expense_category,
-      expense_amount: parseFloat(data.expense_amount) || 0,
-      expense_date: data.expense_date
-    }),
+    mutationFn: (data) => {
+      const expenseData = {
+        expense_name: data.expense_name,
+        expense_category: data.expense_category,
+        expense_amount: parseFloat(data.expense_amount) || 0,
+        expense_date: data.expense_date
+      };
+      
+      if (editingExpense) {
+        return base44.entities.FinancialExpense.update(editingExpense.id, expenseData);
+      }
+      
+      return base44.entities.FinancialExpense.create(expenseData);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries(['financialExpenses']);
       setShowExpenseDialog(false);
-      setNewExpense({ expense_name: '', expense_category: 'Food', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+      setEditingExpense(null);
+      setNewExpense({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
     }
   });
 
@@ -115,6 +125,13 @@ export default function Finance() {
       await Promise.all(incomes.map(income => base44.entities.FinancialIncome.delete(income.id)));
     },
     onSuccess: () => queryClient.invalidateQueries(['financialIncomes'])
+  });
+
+  const clearAllExpensesMutation = useMutation({
+    mutationFn: async () => {
+      await Promise.all(expenses.map(expense => base44.entities.FinancialExpense.delete(expense.id)));
+    },
+    onSuccess: () => queryClient.invalidateQueries(['financialExpenses'])
   });
 
   const [notesForm, setNotesForm] = useState({
@@ -301,7 +318,25 @@ export default function Finance() {
                 }
               }}
             />
-            <ExpenseCalendar expenses={expenses} />
+            <ExpenseCalendar 
+              expenses={expenses}
+              onDeleteExpense={(id) => deleteExpenseMutation.mutate(id)}
+              onEditExpense={(expense) => {
+                setEditingExpense(expense);
+                setNewExpense({
+                  expense_name: expense.expense_name,
+                  expense_category: expense.expense_category,
+                  expense_amount: expense.expense_amount,
+                  expense_date: expense.expense_date
+                });
+                setShowExpenseDialog(true);
+              }}
+              onClearAll={() => {
+                if (window.confirm('Are you sure you want to delete all expense entries?')) {
+                  clearAllExpensesMutation.mutate();
+                }
+              }}
+            />
           </div>
 
           {/* Category Breakdown */}
@@ -463,10 +498,16 @@ export default function Finance() {
         </Dialog>
 
         {/* Add Expense Dialog */}
-        <Dialog open={showExpenseDialog} onOpenChange={setShowExpenseDialog}>
+        <Dialog open={showExpenseDialog} onOpenChange={(open) => {
+          setShowExpenseDialog(open);
+          if (!open) {
+            setEditingExpense(null);
+            setNewExpense({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+          }
+        }}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-red-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-white">Add Expense</DialogTitle>
+              <DialogTitle className="text-white">{editingExpense ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div>
@@ -505,7 +546,7 @@ export default function Finance() {
                 disabled={!newExpense.expense_name || !newExpense.expense_amount || createExpenseMutation.isPending} 
                 className="w-full"
               >
-                {createExpenseMutation.isPending ? 'Adding...' : 'Add Expense'}
+                {createExpenseMutation.isPending ? (editingExpense ? 'Updating...' : 'Adding...') : (editingExpense ? 'Update Expense' : 'Add Expense')}
               </GlowButton>
             </div>
           </DialogContent>
