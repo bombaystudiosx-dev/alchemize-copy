@@ -90,9 +90,9 @@ const features = [
     image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b794538fb_DB31821F-BEE3-4395-8386-4993A465E77E.png'
   },
   {
-    id: 'journal',
-    title: 'Journal',
-    description: 'Write your story, flip through memories',
+    id: 'gratitude',
+    title: 'Gratitude Journal',
+    description: 'Daily gratitude practice',
     icon: BookOpen,
     route: 'Journal',
     gradient: 'from-purple-600 to-indigo-700',
