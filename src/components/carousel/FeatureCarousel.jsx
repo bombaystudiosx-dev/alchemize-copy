@@ -96,7 +96,7 @@ const features = [
     icon: BookOpen,
     route: 'Journal',
     gradient: 'from-purple-600 to-indigo-700',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/29e4aa2e3_2F17C4EA-01BF-4F82-B34B-28F6BC0D42C1.png'
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c7635531d_Photoshoprender2.jpg'
   },
   {
     id: 'settings',
