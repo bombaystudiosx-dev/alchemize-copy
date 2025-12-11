@@ -85,6 +85,17 @@ export default function GratitudeJournal() {
           <div className="w-10" />
         </div>
 
+        {/* Inspirational Message */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-6 pb-4"
+        >
+          <p className="text-sm text-purple-200/80 text-center leading-relaxed italic">
+            Even on hard days, there's always something to be grateful for — health, home, or the small moments. Focus on the good, and the universe will give you more reasons to be grateful.
+          </p>
+        </motion.div>
+
         {/* Calendar */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -188,7 +199,7 @@ export default function GratitudeJournal() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="px-6 mt-8"
+          className="px-6 mt-8 pb-8"
         >
           <h3 className="text-lg font-semibold text-white mb-4">
             Entries for {format(selectedDate, 'MMMM d, yyyy')}
@@ -199,7 +210,7 @@ export default function GratitudeJournal() {
               <p className="text-gray-400">No gratitude entries yet.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
               {selectedDateEntries.map((entry, index) => (
                 <motion.div
                   key={entry.id}

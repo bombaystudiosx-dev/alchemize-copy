@@ -92,7 +92,7 @@ const features = [
   {
     id: 'gratitude',
     title: 'Gratitude Journal',
-    description: 'Daily gratitude practice',
+    description: 'Gratitude is the ability to experience life as a gift.',
     icon: BookOpen,
     route: 'Journal',
     gradient: 'from-purple-600 to-indigo-700',
