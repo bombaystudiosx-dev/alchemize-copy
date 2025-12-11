@@ -150,7 +150,7 @@ export default function Splash() {
             </div>
 
             {/* Remember Me */}
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer mb-4">
               <div 
                 onClick={() => setRememberMe(!rememberMe)}
                 className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
@@ -163,6 +163,17 @@ export default function Splash() {
                 {t.rememberMe}
               </span>
             </label>
+
+            {/* Terms and Privacy Links */}
+            <div className="flex items-center justify-center gap-3 text-xs text-white/50">
+              <Link to={createPageUrl('Terms')} className="hover:text-white/80 transition-colors">
+                Terms
+              </Link>
+              <span>•</span>
+              <Link to={createPageUrl('Privacy')} className="hover:text-white/80 transition-colors">
+                Privacy
+              </Link>
+            </div>
           </div>
         </motion.div>
       </div>
