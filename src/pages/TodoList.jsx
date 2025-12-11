@@ -79,13 +79,21 @@ export default function TodoList() {
           
           {/* Scroll container with background image */}
           <div 
-            className="relative min-h-[600px] bg-cover bg-center rounded-lg shadow-2xl p-8 pt-20"
-            style={{
-              backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b794538fb_DB31821F-BEE3-4395-8386-4993A465E77E.png)',
-              backgroundSize: 'contain',
-              backgroundRepeat: 'no-repeat'
-            }}
+            className="relative min-h-[600px] rounded-lg shadow-2xl overflow-hidden"
           >
+            {/* Background image layer */}
+            <div 
+              className="absolute inset-0 opacity-95"
+              style={{
+                backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b794538fb_DB31821F-BEE3-4395-8386-4993A465E77E.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat'
+              }}
+            />
+            
+            {/* Content layer */}
+            <div className="relative z-10 p-8 pt-20 max-h-[600px] overflow-y-auto scrollbar-hide">
             {/* Add todo form */}
             <form onSubmit={handleAddTodo} className="mb-6">
               <div className="flex gap-2">
@@ -113,8 +121,8 @@ export default function TodoList() {
               </div>
             </form>
 
-            {/* Todo items */}
-            <div className="space-y-3">
+            {/* Todo items with infinite scroll */}
+            <div className="space-y-3 pb-6">
               {isLoading ? (
                 <div className="text-center py-8">
                   <Loader2 className="w-8 h-8 animate-spin mx-auto text-amber-700" />
@@ -131,7 +139,7 @@ export default function TodoList() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
-                      className="flex items-start gap-3 p-3 bg-amber-50/70 rounded-lg border border-amber-800/20 group hover:bg-amber-100/70 transition-colors"
+                      className="flex items-start gap-3 p-3 bg-amber-50/80 rounded-lg border border-amber-800/20 group hover:bg-amber-100/80 transition-colors backdrop-blur-sm"
                     >
                       <button
                         onClick={() => toggleTodoMutation.mutate({ id: todo.id, completed: todo.completed })}
@@ -163,6 +171,7 @@ export default function TodoList() {
                   ))}
                 </AnimatePresence>
               )}
+            </div>
             </div>
           </div>
         </motion.div>
