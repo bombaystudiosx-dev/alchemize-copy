@@ -275,7 +275,7 @@ export default function GratitudeJournal() {
                 Gratitude Entry
               </h2>
 
-              <div className="space-y-6">
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
                 <div>
                   <label className="text-purple-300 font-semibold mb-2 block">1.</label>
                   <textarea
