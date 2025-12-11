@@ -91,9 +91,11 @@ export default function GratitudeJournal() {
           animate={{ opacity: 1, y: 0 }}
           className="px-6 pb-4"
         >
-          <p className="text-sm text-purple-200/80 text-center leading-relaxed italic">
-            Even on hard days, there's always something to be grateful for — health, home, or the small moments. Focus on the good, and the universe will give you more reasons to be grateful.
-          </p>
+          <div className="relative bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+            <p className="text-sm text-white text-center leading-relaxed italic drop-shadow-lg" style={{ textShadow: '0 2px 8px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.6)' }}>
+              Even on hard days, there's always something to be grateful for — health, home, or the small moments. Focus on the good, and the universe will give you more reasons to be grateful.
+            </p>
+          </div>
         </motion.div>
 
         {/* Calendar */}
