@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   Sparkles, Heart, Target, CheckSquare, DollarSign, 
-  Dumbbell, Apple, Calendar, Settings 
+  Dumbbell, Apple, Calendar, Settings, Scroll, BookOpen
 } from 'lucide-react';
 
 const features = [
@@ -79,6 +79,24 @@ const features = [
     route: 'Appointments',
     gradient: 'from-blue-500 to-indigo-600',
     image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/67a5278b0_Photoshop12.jpg'
+  },
+  {
+    id: 'todo',
+    title: 'To-Do List',
+    description: 'Ancient scroll of tasks to conquer',
+    icon: Scroll,
+    route: 'TodoList',
+    gradient: 'from-amber-500 to-yellow-600',
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b794538fb_DB31821F-BEE3-4395-8386-4993A465E77E.png'
+  },
+  {
+    id: 'journal',
+    title: 'Journal',
+    description: 'Write your story, flip through memories',
+    icon: BookOpen,
+    route: 'Journal',
+    gradient: 'from-purple-600 to-indigo-700',
+    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/29e4aa2e3_2F17C4EA-01BF-4F82-B34B-28F6BC0D42C1.png'
   },
   {
     id: 'settings',
