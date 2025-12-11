@@ -83,7 +83,7 @@ const features = [
   {
     id: 'todo',
     title: 'To-Do List',
-    description: 'Ancient scroll of tasks to conquer',
+    description: 'Shape your day, one small win at a time.',
     icon: Scroll,
     route: 'TodoList',
     gradient: 'from-amber-500 to-yellow-600',
