@@ -11,6 +11,8 @@ import Settings from './pages/Settings';
 import CalorieTracker from './pages/CalorieTracker';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
+import TodoList from './pages/TodoList';
+import Journal from './pages/Journal';
 import __Layout from './Layout.jsx';
 
 
@@ -28,6 +30,8 @@ export const PAGES = {
     "CalorieTracker": CalorieTracker,
     "Terms": Terms,
     "Privacy": Privacy,
+    "TodoList": TodoList,
+    "Journal": Journal,
 }
 
 export const pagesConfig = {
