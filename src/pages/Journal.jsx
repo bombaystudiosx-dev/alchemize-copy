@@ -3,19 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
-import { ArrowLeft, Plus, ChevronLeft, ChevronRight, Book, Edit3, Trash2, X, Check } from 'lucide-react';
+import { ArrowLeft, Plus, ChevronLeft, ChevronRight, Trash2, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 
 export default function Journal() {
-  const [viewMode, setViewMode] = useState('write'); // 'write' or 'read'
   const [currentPage, setCurrentPage] = useState(0);
-  const [editingEntry, setEditingEntry] = useState(null);
+  const [isFlipping, setIsFlipping] = useState(false);
+  const [showNewEntry, setShowNewEntry] = useState(false);
   const [newEntry, setNewEntry] = useState({ title: '', content: '', date: format(new Date(), 'yyyy-MM-dd') });
   const queryClient = useQueryClient();
 
-  const { data: entries = [] } = useQuery({
+  const { data: entries = [], isLoading } = useQuery({
     queryKey: ['journal'],
     queryFn: () => base44.entities.JournalEntry.list('-date')
   });
@@ -25,14 +25,7 @@ export default function Journal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['journal'] });
       setNewEntry({ title: '', content: '', date: format(new Date(), 'yyyy-MM-dd') });
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.JournalEntry.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['journal'] });
-      setEditingEntry(null);
+      setShowNewEntry(false);
     }
   });
 
@@ -46,15 +39,21 @@ export default function Journal() {
     }
   });
 
-  const handleSaveNew = () => {
-    if (newEntry.content.trim()) {
-      createMutation.mutate(newEntry);
-    }
+  const handlePageFlip = (direction) => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      if (direction === 'next' && currentPage < entries.length - 1) {
+        setCurrentPage(currentPage + 1);
+      } else if (direction === 'prev' && currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      }
+      setIsFlipping(false);
+    }, 300);
   };
 
-  const handleSaveEdit = () => {
-    if (editingEntry && editingEntry.content.trim()) {
-      updateMutation.mutate({ id: editingEntry.id, data: editingEntry });
+  const handleSave = () => {
+    if (newEntry.content.trim()) {
+      createMutation.mutate(newEntry);
     }
   };
 
@@ -62,9 +61,9 @@ export default function Journal() {
 
   return (
     <CosmicBackground dimmed>
-      <div className="min-h-screen flex flex-col items-center px-4 py-8">
+      <div className="min-h-screen flex flex-col items-center px-4 py-6">
         {/* Header */}
-        <div className="w-full max-w-4xl flex items-center justify-between mb-8">
+        <div className="w-full max-w-6xl flex items-center justify-between mb-6">
           <Link to={createPageUrl('Home')}>
             <motion.button
               whileHover={{ scale: 1.1 }}
@@ -75,218 +74,240 @@ export default function Journal() {
             </motion.button>
           </Link>
           
-          <div className="flex gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setViewMode('write')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                viewMode === 'write' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/70'
-              }`}
-            >
-              <Edit3 className="w-4 h-4" />
-              <span className="text-sm">Write</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setViewMode('read')}
-              className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                viewMode === 'read' ? 'bg-purple-600 text-white' : 'bg-white/10 text-white/70'
-              }`}
-            >
-              <Book className="w-4 h-4" />
-              <span className="text-sm">Read</span>
-            </motion.button>
-          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowNewEntry(true)}
+            className="px-6 py-2 bg-gradient-to-r from-amber-500 to-purple-600 rounded-full text-white font-medium flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            New Entry
+          </motion.button>
         </div>
 
-        {/* Journal Book */}
-        <AnimatePresence mode="wait">
-          {viewMode === 'write' ? (
-            <motion.div
-              key="write"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-2xl"
-            >
-              {/* Journal Book Cover Style */}
-              <div 
-                className="relative bg-cover bg-center rounded-lg shadow-2xl p-8 min-h-[600px]"
-                style={{
-                  backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/29e4aa2e3_2F17C4EA-01BF-4F82-B34B-28F6BC0D42C1.png)',
-                  backgroundSize: 'cover'
-                }}
-              >
-                <div className="absolute inset-8 bg-purple-900/60 backdrop-blur-sm rounded-lg p-6 overflow-y-auto">
-                  <input
-                    type="text"
-                    placeholder="Entry Title..."
-                    value={newEntry.title}
-                    onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
-                    className="w-full px-4 py-2 mb-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple-400"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: '20px' }}
-                  />
-                  <input
-                    type="date"
-                    value={newEntry.date}
-                    onChange={(e) => setNewEntry({ ...newEntry, date: e.target.value })}
-                    className="px-3 py-1 mb-4 bg-white/10 border border-white/20 rounded text-white/80 text-sm"
-                  />
-                  <textarea
-                    placeholder="Write your thoughts..."
-                    value={newEntry.content}
-                    onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
-                    className="w-full h-[400px] px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-purple-400 resize-none"
-                    style={{ fontFamily: "'Courier New', monospace", fontSize: '15px', lineHeight: '1.8' }}
-                  />
-                  <div className="mt-4 flex justify-end">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleSaveNew}
-                      disabled={!newEntry.content.trim() || createMutation.isPending}
-                      className="px-6 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white disabled:opacity-50 flex items-center gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Save Entry
-                    </motion.button>
+        {/* Book */}
+        <div className="relative w-full max-w-6xl" style={{ perspective: '2000px' }}>
+          <motion.div
+            initial={{ rotateX: 10, y: 50 }}
+            animate={{ rotateX: 0, y: 0 }}
+            className="relative"
+          >
+            {/* Book shadow */}
+            <div className="absolute inset-0 bg-black/40 blur-3xl transform translate-y-8" />
+            
+            {/* Open book */}
+            <div className="relative bg-gradient-to-b from-purple-900/40 to-purple-950/60 rounded-lg shadow-2xl overflow-hidden backdrop-blur-sm border border-purple-500/20">
+              <div className="flex">
+                {/* Left Page */}
+                <div className="flex-1 relative bg-gradient-to-br from-amber-50 to-amber-100 min-h-[600px] border-r-4 border-amber-800/30" 
+                     style={{
+                       backgroundImage: `repeating-linear-gradient(transparent, transparent 31px, #d4a574 31px, #d4a574 32px)`,
+                       backgroundSize: '100% 32px',
+                       backgroundPosition: '0 40px'
+                     }}>
+                  {/* Book spine effect */}
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-amber-900/20 to-transparent" />
+                  
+                  <div className="p-12 pt-16">
+                    {isLoading ? (
+                      <div className="flex items-center justify-center h-full">
+                        <Loader2 className="w-8 h-8 animate-spin text-amber-700" />
+                      </div>
+                    ) : entries.length === 0 ? (
+                      <div className="text-center text-amber-800/40 py-20">
+                        <p className="text-xl mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                          Your journal awaits...
+                        </p>
+                        <p className="text-sm">Click "New Entry" to begin</p>
+                      </div>
+                    ) : currentEntry ? (
+                      <motion.div
+                        key={currentEntry.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="h-full"
+                      >
+                        <div className="flex items-start justify-between mb-6">
+                          <div>
+                            <h2 className="text-3xl font-bold text-amber-900 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                              {currentEntry.title || 'Untitled'}
+                            </h2>
+                            <p className="text-sm text-amber-700">
+                              {format(new Date(currentEntry.date), 'EEEE, MMMM d, yyyy')}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => deleteMutation.mutate(currentEntry.id)}
+                            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                        </div>
+                        <div className="prose prose-amber max-w-none">
+                          <p className="text-amber-900 whitespace-pre-wrap leading-8" style={{ fontFamily: "'Courier New', monospace" }}>
+                            {currentEntry.content}
+                          </p>
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Right Page - Index/Navigation */}
+                <div className="flex-1 relative bg-gradient-to-bl from-amber-50 to-amber-100 min-h-[600px]"
+                     style={{
+                       backgroundImage: `repeating-linear-gradient(transparent, transparent 31px, #d4a574 31px, #d4a574 32px)`,
+                       backgroundSize: '100% 32px',
+                       backgroundPosition: '0 40px'
+                     }}>
+                  {/* Book edge effect */}
+                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-amber-900/20 to-transparent" />
+                  
+                  <div className="p-12 pt-16 flex flex-col">
+                    <h3 className="text-2xl font-bold text-amber-900 mb-8 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Index
+                    </h3>
+                    
+                    <div className="flex-1 overflow-y-auto space-y-3 mb-8">
+                      {entries.map((entry, idx) => (
+                        <motion.button
+                          key={entry.id}
+                          whileHover={{ scale: 1.02, x: 5 }}
+                          onClick={() => setCurrentPage(idx)}
+                          className={`w-full text-left p-3 rounded-lg transition-colors ${
+                            idx === currentPage 
+                              ? 'bg-amber-200 border-l-4 border-amber-700' 
+                              : 'hover:bg-amber-100 border-l-4 border-transparent'
+                          }`}
+                        >
+                          <p className="font-semibold text-amber-900 text-sm truncate" style={{ fontFamily: "'Courier New', monospace" }}>
+                            {entry.title || 'Untitled'}
+                          </p>
+                          <p className="text-xs text-amber-700">
+                            {format(new Date(entry.date), 'MMM d, yyyy')}
+                          </p>
+                        </motion.button>
+                      ))}
+                    </div>
+
+                    {entries.length > 0 && (
+                      <div className="flex items-center justify-center gap-4 pt-4 border-t-2 border-amber-300">
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handlePageFlip('prev')}
+                          disabled={currentPage === 0 || isFlipping}
+                          className="p-3 bg-amber-600 hover:bg-amber-700 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronLeft className="w-6 h-6 text-white" />
+                        </motion.button>
+                        <span className="text-amber-800 font-medium">
+                          {currentPage + 1} / {entries.length}
+                        </span>
+                        <motion.button
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => handlePageFlip('next')}
+                          disabled={currentPage >= entries.length - 1 || isFlipping}
+                          className="p-3 bg-amber-600 hover:bg-amber-700 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronRight className="w-6 h-6 text-white" />
+                        </motion.button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              key="read"
-              initial={{ opacity: 0, rotateY: -20 }}
-              animate={{ opacity: 1, rotateY: 0 }}
-              exit={{ opacity: 0, rotateY: 20 }}
-              className="w-full max-w-4xl"
-              style={{ perspective: '2000px' }}
-            >
-              {/* Open Book View */}
-              <div className="relative flex gap-4" style={{ transformStyle: 'preserve-3d' }}>
-                {/* Left Page */}
-                <motion.div
-                  className="flex-1 bg-purple-900/80 backdrop-blur-sm rounded-l-lg shadow-2xl p-8 min-h-[600px] border-r-2 border-amber-600/30"
-                  style={{
-                    backgroundImage: 'linear-gradient(to right, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.5))',
-                  }}
-                >
-                  {entries.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-white/40 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        No entries yet.<br/>Start writing to see them here.
-                      </p>
-                    </div>
-                  ) : currentEntry && !editingEntry ? (
-                    <div className="h-full flex flex-col">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-2xl font-bold text-amber-400 mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
-                            {currentEntry.title || 'Untitled'}
-                          </h3>
-                          <p className="text-purple-200 text-sm">
-                            {format(new Date(currentEntry.date), 'MMMM d, yyyy')}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setEditingEntry({ ...currentEntry })}
-                            className="p-1 hover:bg-white/10 rounded"
-                          >
-                            <Edit3 className="w-4 h-4 text-purple-300" />
-                          </button>
-                          <button
-                            onClick={() => deleteMutation.mutate(currentEntry.id)}
-                            className="p-1 hover:bg-white/10 rounded"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-400" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="flex-1 overflow-y-auto">
-                        <p className="text-white/90 whitespace-pre-wrap leading-relaxed" style={{ fontFamily: "'Courier New', monospace", fontSize: '14px' }}>
-                          {currentEntry.content}
-                        </p>
-                      </div>
-                    </div>
-                  ) : editingEntry ? (
-                    <div className="h-full flex flex-col">
-                      <div className="flex items-center justify-between mb-4">
-                        <input
-                          type="text"
-                          value={editingEntry.title}
-                          onChange={(e) => setEditingEntry({ ...editingEntry, title: e.target.value })}
-                          className="flex-1 px-3 py-1 bg-white/10 border border-white/20 rounded text-amber-400 text-xl"
-                          style={{ fontFamily: "'Playfair Display', serif" }}
-                        />
-                        <div className="flex gap-2 ml-2">
-                          <button onClick={handleSaveEdit} className="p-1 hover:bg-white/10 rounded">
-                            <Check className="w-5 h-5 text-green-400" />
-                          </button>
-                          <button onClick={() => setEditingEntry(null)} className="p-1 hover:bg-white/10 rounded">
-                            <X className="w-5 h-5 text-red-400" />
-                          </button>
-                        </div>
-                      </div>
-                      <textarea
-                        value={editingEntry.content}
-                        onChange={(e) => setEditingEntry({ ...editingEntry, content: e.target.value })}
-                        className="flex-1 px-3 py-2 bg-white/5 border border-white/20 rounded text-white resize-none"
-                        style={{ fontFamily: "'Courier New', monospace", fontSize: '14px' }}
-                      />
-                    </div>
-                  ) : null}
-                </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
 
-                {/* Right Page - Navigation */}
-                <motion.div
-                  className="flex-1 bg-purple-900/80 backdrop-blur-sm rounded-r-lg shadow-2xl p-8 min-h-[600px]"
-                  style={{
-                    backgroundImage: 'linear-gradient(to left, rgba(139, 92, 246, 0.3), rgba(109, 40, 217, 0.5))',
-                  }}
-                >
-                  <div className="flex flex-col items-center justify-center h-full">
-                    {entries.length > 0 ? (
+      {/* New Entry Modal */}
+      <AnimatePresence>
+        {showNewEntry && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowNewEntry(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 50 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 50 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl shadow-2xl p-8"
+              style={{
+                backgroundImage: `repeating-linear-gradient(transparent, transparent 31px, #d4a574 31px, #d4a574 32px)`,
+                backgroundSize: '100% 32px',
+                backgroundPosition: '0 40px'
+              }}
+            >
+              <h2 className="text-3xl font-bold text-amber-900 mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+                New Journal Entry
+              </h2>
+              
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Entry Title"
+                  value={newEntry.title}
+                  onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
+                  className="w-full px-4 py-3 bg-white/60 border-2 border-amber-300 rounded-lg text-amber-900 placeholder:text-amber-600/40 focus:outline-none focus:border-amber-600"
+                  style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}
+                />
+                
+                <input
+                  type="date"
+                  value={newEntry.date}
+                  onChange={(e) => setNewEntry({ ...newEntry, date: e.target.value })}
+                  className="px-4 py-2 bg-white/60 border-2 border-amber-300 rounded-lg text-amber-800"
+                />
+                
+                <textarea
+                  placeholder="Write your thoughts..."
+                  value={newEntry.content}
+                  onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
+                  className="w-full h-64 px-4 py-3 bg-white/40 border-2 border-amber-300 rounded-lg text-amber-900 placeholder:text-amber-600/40 focus:outline-none focus:border-amber-600 resize-none"
+                  style={{ fontFamily: "'Courier New', monospace", fontSize: '15px', lineHeight: '2' }}
+                />
+                
+                <div className="flex gap-3 justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowNewEntry(false)}
+                    className="px-6 py-2 bg-amber-200 hover:bg-amber-300 rounded-lg text-amber-900 font-medium"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSave}
+                    disabled={!newEntry.content.trim() || createMutation.isPending}
+                    className="px-6 py-2 bg-gradient-to-r from-amber-600 to-purple-600 hover:from-amber-700 hover:to-purple-700 rounded-lg text-white font-medium disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {createMutation.isPending ? (
                       <>
-                        <p className="text-white/60 mb-8 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          Page {currentPage + 1} of {entries.length}
-                        </p>
-                        <div className="flex gap-4">
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
-                            disabled={currentPage === 0}
-                            className="p-4 bg-white/10 hover:bg-white/20 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
-                            <ChevronLeft className="w-6 h-6 text-white" />
-                          </motion.button>
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => setCurrentPage(Math.min(entries.length - 1, currentPage + 1))}
-                            disabled={currentPage >= entries.length - 1}
-                            className="p-4 bg-white/10 hover:bg-white/20 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
-                          >
-                            <ChevronRight className="w-6 h-6 text-white" />
-                          </motion.button>
-                        </div>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
                       </>
                     ) : (
-                      <p className="text-white/40 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
-                        Switch to Write mode<br/>to create your first entry
-                      </p>
+                      <>
+                        <Plus className="w-4 h-4" />
+                        Save Entry
+                      </>
                     )}
-                  </div>
-                </motion.div>
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </CosmicBackground>
   );
 }
