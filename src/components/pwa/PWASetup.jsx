@@ -43,7 +43,7 @@ export default function PWASetup() {
     // Add apple touch icon
     const appleTouchIcon = document.createElement('link');
     appleTouchIcon.rel = 'apple-touch-icon';
-    appleTouchIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/04121c14b_50D0F128-6726-498A-8522-662B3B8BAAD5.png';
+    appleTouchIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/5ffac4ad0_Untitleddesign.png';
     document.head.appendChild(appleTouchIcon);
 
     return () => {
