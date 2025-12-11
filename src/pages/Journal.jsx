@@ -250,9 +250,12 @@ export default function GratitudeJournal() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="fixed inset-x-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 z-50 max-w-md mx-auto border-2 border-purple-500/30"
             >
-              <h2 className="text-2xl font-bold text-center mb-6 text-purple-300">
+              <h2 className="text-2xl font-bold text-center mb-2 text-purple-300">
                 Add Gratitude
               </h2>
+              <p className="text-center text-purple-200/60 text-sm mb-6">
+                {format(selectedDate, 'MMMM d, yyyy')}
+              </p>
 
               <div>
                 <textarea
