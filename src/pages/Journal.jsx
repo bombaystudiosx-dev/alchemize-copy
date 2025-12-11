@@ -12,11 +12,7 @@ export default function GratitudeJournal() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showEntryForm, setShowEntryForm] = useState(false);
-  const [formData, setFormData] = useState({
-    gratitude_1: '',
-    gratitude_2: '',
-    gratitude_3: ''
-  });
+  const [gratitudeText, setGratitudeText] = useState('');
   const queryClient = useQueryClient();
 
   const { data: entries = [] } = useQuery({
@@ -29,7 +25,7 @@ export default function GratitudeJournal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gratitude'] });
       setShowEntryForm(false);
-      setFormData({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+      setGratitudeText('');
     }
   });
 
@@ -41,13 +37,13 @@ export default function GratitudeJournal() {
   });
 
   const handleSave = () => {
-    if (!formData.gratitude_1.trim() && !formData.gratitude_2.trim() && !formData.gratitude_3.trim()) {
+    if (!gratitudeText.trim()) {
       setShowEntryForm(false);
       return;
     }
 
     createMutation.mutate({
-      ...formData,
+      gratitude_1: gratitudeText,
       date: format(selectedDate, 'yyyy-MM-dd')
     });
   };
@@ -212,41 +208,24 @@ export default function GratitudeJournal() {
               <p className="text-gray-400">No gratitude entries yet.</p>
             </div>
           ) : (
-            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
               {selectedDateEntries.map((entry, index) => (
                 <motion.div
                   key={entry.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-2xl p-5 border border-white/10"
+                  transition={{ delay: index * 0.05 }}
+                  className="group bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition-all"
                 >
-                  <div className="space-y-3">
-                    {entry.gratitude_1 && (
-                      <div className="flex gap-3">
-                        <span className="text-purple-400 font-semibold">1.</span>
-                        <p className="text-white flex-1">{entry.gratitude_1}</p>
-                      </div>
-                    )}
-                    {entry.gratitude_2 && (
-                      <div className="flex gap-3">
-                        <span className="text-purple-400 font-semibold">2.</span>
-                        <p className="text-white flex-1">{entry.gratitude_2}</p>
-                      </div>
-                    )}
-                    {entry.gratitude_3 && (
-                      <div className="flex gap-3">
-                        <span className="text-purple-400 font-semibold">3.</span>
-                        <p className="text-white flex-1">{entry.gratitude_3}</p>
-                      </div>
-                    )}
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-white flex-1 leading-relaxed">{entry.gratitude_1}</p>
+                    <button
+                      onClick={() => deleteMutation.mutate(entry.id)}
+                      className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-all text-sm px-2 py-1 rounded-lg hover:bg-red-500/10"
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <button
-                    onClick={() => deleteMutation.mutate(entry.id)}
-                    className="mt-4 text-sm text-red-400 hover:text-red-300 transition-colors"
-                  >
-                    Delete Entry
-                  </button>
                 </motion.div>
               ))}
             </div>
@@ -271,57 +250,37 @@ export default function GratitudeJournal() {
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="fixed inset-x-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 z-50 max-w-md mx-auto border-2 border-purple-500/30"
             >
-              <h2 className="text-2xl font-bold text-center mb-8 text-purple-300">
-                Gratitude Entry
+              <h2 className="text-2xl font-bold text-center mb-6 text-purple-300">
+                Add Gratitude
               </h2>
 
-              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 scrollbar-hide">
-                <div>
-                  <label className="text-purple-300 font-semibold mb-2 block">1.</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={formData.gratitude_1}
-                    onChange={(e) => setFormData({ ...formData, gratitude_1: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-purple-300 font-semibold mb-2 block">2.</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={formData.gratitude_2}
-                    onChange={(e) => setFormData({ ...formData, gratitude_2: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-purple-300 font-semibold mb-2 block">3.</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={formData.gratitude_3}
-                    onChange={(e) => setFormData({ ...formData, gratitude_3: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                  />
-                </div>
+              <div>
+                <textarea
+                  placeholder="I am grateful for..."
+                  value={gratitudeText}
+                  onChange={(e) => setGratitudeText(e.target.value)}
+                  className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                  rows={4}
+                  autoFocus
+                />
               </div>
 
-              <div className="flex gap-4 mt-8">
+              <div className="flex gap-4 mt-6">
                 <button
-                  onClick={() => setShowEntryForm(false)}
+                  onClick={() => {
+                    setShowEntryForm(false);
+                    setGratitudeText('');
+                  }}
                   className="flex-1 py-3 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/30"
+                  disabled={!gratitudeText.trim() || createMutation.isPending}
+                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50"
                 >
-                  Save
+                  {createMutation.isPending ? 'Saving...' : 'Save'}
                 </button>
               </div>
             </motion.div>
