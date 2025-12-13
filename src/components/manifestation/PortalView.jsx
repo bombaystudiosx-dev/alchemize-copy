@@ -104,9 +104,11 @@ export default function PortalView({
             <motion.img
               src={tile.image_url}
               alt={tile.title}
-              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+              className="w-full h-full object-contain rounded-2xl shadow-2xl"
               style={{
-                boxShadow: `0 0 60px ${moodColor.glow}, 0 0 120px ${moodColor.glow}`
+                boxShadow: `0 0 60px ${moodColor.glow}, 0 0 120px ${moodColor.glow}`,
+                maxWidth: '95vw',
+                maxHeight: '85vh'
               }}
               animate={{
                 scale: [1, 1.01, 1],
