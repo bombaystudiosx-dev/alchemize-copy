@@ -122,7 +122,6 @@ export default function GratitudeJournal() {
           </div>
         )}
       </div>
-    </div>
 
       {/* Entry Form Modal */}
       <AnimatePresence>
