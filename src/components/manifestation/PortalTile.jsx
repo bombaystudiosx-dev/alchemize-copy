@@ -52,7 +52,7 @@ export default function PortalTile({ tile, index, onClick, driftOffset = { x: 0,
           <motion.img 
             src={tile.image_url}
             alt={tile.title}
-            className="w-full h-full object-contain bg-black/20"
+            className="w-full h-full object-cover"
             animate={{
               scale: [1, 1.02, 1]
             }}
