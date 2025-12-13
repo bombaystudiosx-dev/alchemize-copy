@@ -8,7 +8,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
 export default function TodoList() {
-  const [newTodo, setNewTodo] = useState('');
+  const [newTodo, setNewTodo] = useState({ text: '', notes: '' });
+  const [showNotes, setShowNotes] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: todos = [], isLoading } = useQuery({
@@ -17,10 +18,11 @@ export default function TodoList() {
   });
 
   const addTodoMutation = useMutation({
-    mutationFn: (text) => base44.entities.TodoItem.create({ text, order: todos.length }),
+    mutationFn: (data) => base44.entities.TodoItem.create({ ...data, order: todos.length }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
-      setNewTodo('');
+      setNewTodo({ text: '', notes: '' });
+      setShowNotes(false);
     }
   });
 
@@ -30,14 +32,14 @@ export default function TodoList() {
   });
 
   const toggleTodoMutation = useMutation({
-    mutationFn: ({ id, completed }) => base44.entities.TodoItem.update(id, { completed: !completed }),
+    mutationFn: (id) => base44.entities.TodoItem.delete(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
   });
 
   const handleAddTodo = (e) => {
     e.preventDefault();
-    if (newTodo.trim()) {
-      addTodoMutation.mutate(newTodo.trim());
+    if (newTodo.text.trim()) {
+      addTodoMutation.mutate(newTodo);
     }
   };
 
@@ -86,21 +88,28 @@ export default function TodoList() {
           {/* Soft translucent overlay for task area */}
           <div className="relative backdrop-blur-md bg-amber-50/10 rounded-3xl p-6 shadow-2xl border border-amber-300/30 flex flex-col h-full max-h-[calc(100vh-200px)]">
             {/* Add todo form */}
-            <form onSubmit={handleAddTodo} className="mb-6 flex-shrink-0">
-              <div className="flex gap-3">
+            <form onSubmit={handleAddTodo} className="mb-6 flex-shrink-0 space-y-2">
+              <div className="flex gap-2">
                 <input
                   type="text"
-                  value={newTodo}
-                  onChange={(e) => setNewTodo(e.target.value)}
+                  value={newTodo.text}
+                  onChange={(e) => setNewTodo({ ...newTodo, text: e.target.value })}
                   placeholder="Add a new task…"
                   className="flex-1 px-5 py-3 bg-amber-50/90 border border-amber-800/40 rounded-full text-amber-900 placeholder:text-amber-700/60 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/30 shadow-lg backdrop-blur-sm"
                   style={{ fontFamily: "'Courier New', 'Lucida Console', monospace", fontSize: '15px' }}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowNotes(!showNotes)}
+                  className="px-4 py-2 bg-amber-600/20 hover:bg-amber-600/30 rounded-full text-amber-900 text-sm backdrop-blur-sm border border-amber-700/30 transition-all"
+                >
+                  {showNotes ? 'Hide' : 'Notes'}
+                </button>
                 <motion.button
                   type="submit"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  disabled={!newTodo.trim() || addTodoMutation.isPending}
+                  disabled={!newTodo.text.trim() || addTodoMutation.isPending}
                   className="w-12 h-12 bg-gradient-to-br from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 rounded-full text-white disabled:opacity-50 shadow-xl flex items-center justify-center transition-all"
                 >
                   {addTodoMutation.isPending ? (
@@ -110,6 +119,16 @@ export default function TodoList() {
                   )}
                 </motion.button>
               </div>
+              {showNotes && (
+                <input
+                  type="text"
+                  value={newTodo.notes}
+                  onChange={(e) => setNewTodo({ ...newTodo, notes: e.target.value })}
+                  placeholder="Optional notes…"
+                  className="w-full px-5 py-2 bg-amber-50/90 border border-amber-800/40 rounded-full text-amber-900 placeholder:text-amber-700/60 focus:outline-none focus:border-amber-600 focus:ring-2 focus:ring-amber-500/30 shadow-lg backdrop-blur-sm text-sm"
+                  style={{ fontFamily: "'Courier New', 'Lucida Console', monospace" }}
+                />
+              )}
             </form>
 
             {/* Todo items with infinite scroll */}
@@ -146,25 +165,26 @@ export default function TodoList() {
                       style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}
                     >
                       <button
-                        onClick={() => toggleTodoMutation.mutate({ id: todo.id, completed: todo.completed })}
-                        className={`mt-1 w-6 h-6 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                          todo.completed 
-                            ? 'bg-amber-600 border-amber-600 shadow-md' 
-                            : 'border-amber-800/50 hover:border-amber-600 hover:shadow-md'
-                        }`}
+                        onClick={() => toggleTodoMutation.mutate(todo.id)}
+                        className="mt-1 w-6 h-6 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all border-amber-800/50 hover:border-amber-600 hover:bg-amber-600 hover:shadow-md group"
                       >
-                        {todo.completed && (
-                          <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
+                        <svg className="w-4 h-4 text-amber-800/50 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
                       </button>
-                      <p 
-                        className={`flex-1 text-amber-900 leading-relaxed ${todo.completed ? 'line-through opacity-50' : ''}`}
-                        style={{ fontFamily: "'Courier New', 'Lucida Console', monospace", fontSize: '15px' }}
-                      >
-                        {todo.text}
-                      </p>
+                      <div className="flex-1">
+                        <p 
+                          className="text-amber-900 leading-relaxed"
+                          style={{ fontFamily: "'Courier New', 'Lucida Console', monospace", fontSize: '15px' }}
+                        >
+                          {todo.text}
+                        </p>
+                        {todo.notes && (
+                          <p className="text-amber-800/60 text-sm mt-1" style={{ fontFamily: "'Courier New', monospace" }}>
+                            {todo.notes}
+                          </p>
+                        )}
+                      </div>
                       <button
                         onClick={() => deleteTodoMutation.mutate(todo.id)}
                         className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 rounded-lg transition-all"

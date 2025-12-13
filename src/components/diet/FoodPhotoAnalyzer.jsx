@@ -11,6 +11,7 @@ export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [correctionNotes, setCorrectionNotes] = useState('');
+  const [cachedResults, setCachedResults] = useState({});
   const fileInputRef = useRef(null);
   const cameraInputRef = useRef(null);
 
@@ -26,6 +27,13 @@ export default function FoodPhotoAnalyzer({ onAnalyzed, onClose }) {
 
   const analyzeFood = async () => {
     if (!imageUrl) return;
+    
+    // Check cache for consistent results
+    if (cachedResults[imageUrl]) {
+      setResult(cachedResults[imageUrl]);
+      setShowConfirm(true);
+      return;
+    }
     
     setAnalyzing(true);
     try {
@@ -70,7 +78,9 @@ DO NOT guess random numbers. Use realistic nutrition ranges only.`,
         response.confidence_score = 0.3;
       }
 
-      setResult({ ...response, image_url: imageUrl });
+      const finalResult = { ...response, image_url: imageUrl };
+      setResult(finalResult);
+      setCachedResults(prev => ({ ...prev, [imageUrl]: finalResult }));
       setShowConfirm(true);
     } catch (error) {
       console.error('Analysis failed:', error);
@@ -192,12 +202,30 @@ DO NOT guess random numbers. Use realistic nutrition ranges only.`,
               <input type="text" value={result.food_name} onChange={(e) => setResult({...result, food_name: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Food name" />
               <input type="text" value={result.serving_description} onChange={(e) => setResult({...result, serving_description: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Serving" />
               <div className="grid grid-cols-2 gap-3">
-                <input type="number" value={result.calories} onChange={(e) => setResult({...result, calories: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Calories" />
-                <input type="number" value={result.protein_grams} onChange={(e) => setResult({...result, protein_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Protein (g)" />
-                <input type="number" value={result.carb_grams} onChange={(e) => setResult({...result, carb_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Carbs (g)" />
-                <input type="number" value={result.fat_grams} onChange={(e) => setResult({...result, fat_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Fat (g)" />
-                <input type="number" value={result.sugar_grams} onChange={(e) => setResult({...result, sugar_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Sugar (g)" />
-                <input type="number" value={result.fiber_grams} onChange={(e) => setResult({...result, fiber_grams: parseFloat(e.target.value) || 0})} className="px-3 py-2 border rounded-lg" placeholder="Fiber (g)" />
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Calories</label>
+                  <input type="number" value={result.calories} onChange={(e) => setResult({...result, calories: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Protein (g)</label>
+                  <input type="number" value={result.protein_grams} onChange={(e) => setResult({...result, protein_grams: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Carbs (g)</label>
+                  <input type="number" value={result.carb_grams} onChange={(e) => setResult({...result, carb_grams: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Fat (g)</label>
+                  <input type="number" value={result.fat_grams} onChange={(e) => setResult({...result, fat_grams: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Sugar (g)</label>
+                  <input type="number" value={result.sugar_grams} onChange={(e) => setResult({...result, sugar_grams: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 block mb-1">Fiber (g)</label>
+                  <input type="number" value={result.fiber_grams} onChange={(e) => setResult({...result, fiber_grams: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-lg" />
+                </div>
               </div>
               <textarea value={correctionNotes} onChange={(e) => setCorrectionNotes(e.target.value)} placeholder="Correction notes (what was wrong with this scan?)" className="w-full px-3 py-2 border rounded-lg resize-none" rows={3} />
               <button onClick={handleConfirm} className="w-full py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700">
