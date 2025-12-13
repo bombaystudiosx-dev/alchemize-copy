@@ -99,7 +99,7 @@ export default function GratitudeJournal() {
               </button>
             </div>
           ) : (
-            <div className="space-y-3 max-h-[calc(100vh-280px)] overflow-y-auto pr-2 scrollbar-hide pb-4">
+            <div className="space-y-3 pb-4">
               <AnimatePresence>
                 {entries.map((entry, index) => (
                   <motion.div
