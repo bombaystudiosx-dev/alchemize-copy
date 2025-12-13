@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Upload, X } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
+import { Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import GlowButton from '@/components/cosmic/GlowButton';
+import ImageUploader from '@/components/common/ImageUploader';
 import { moods } from './MoodSelector';
 
 export default function AddManifestationDialog({ 
@@ -19,8 +19,6 @@ export default function AddManifestationDialog({
     image_url: editingTile?.image_url || '',
     category: editingTile?.category || 'other'
   });
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef(null);
 
   React.useEffect(() => {
     if (editingTile) {
@@ -33,22 +31,6 @@ export default function AddManifestationDialog({
       setNewTile({ title: '', image_url: '', category: 'other' });
     }
   }, [editingTile, open]);
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    try {
-      setIsUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      setNewTile({ ...newTile, image_url: file_url });
-    } catch (error) {
-      console.error('Upload failed:', error);
-      alert('Failed to upload image. Please try again.');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleSubmit = () => {
     onSubmit(newTile, editingTile?.id);
@@ -70,44 +52,13 @@ export default function AddManifestationDialog({
           {/* Image Upload */}
           <div>
             <label className="text-sm text-purple-200/70 mb-2 block">Vision Image</label>
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept="image/*"
-              className="hidden"
+            <ImageUploader
+              currentImageUrl={newTile.image_url}
+              onImageUploaded={(url) => setNewTile({ ...newTile, image_url: url })}
+              onRemove={() => setNewTile({ ...newTile, image_url: '' })}
+              aspectRatio="wide"
+              showCamera={true}
             />
-            
-            {newTile.image_url ? (
-              <div className="relative aspect-video rounded-xl overflow-hidden">
-                <img 
-                  src={newTile.image_url} 
-                  alt="Preview" 
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={() => setNewTile({ ...newTile, image_url: '' })}
-                  className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center text-white"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="w-full aspect-video rounded-xl border-2 border-dashed border-purple-500/30 flex flex-col items-center justify-center gap-3 hover:border-purple-500/50 transition-colors"
-              >
-                {isUploading ? (
-                  <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Upload className="w-8 h-8 text-purple-400" />
-                    <span className="text-purple-200/70 text-sm">Tap to upload image</span>
-                  </>
-                )}
-              </button>
-            )}
           </div>
           
           {/* Intention Text */}
