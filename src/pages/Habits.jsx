@@ -257,12 +257,15 @@ export default function Habits() {
     }
   });
   
-  // Save to database whenever data changes
+  // Save to database whenever data changes (debounced)
   useEffect(() => {
-    if (!isLoading && gritData) {
-      saveMutation.mutate(gritData);
+    if (!isLoading && gritData && habitRecord !== undefined) {
+      const timer = setTimeout(() => {
+        saveMutation.mutate(gritData);
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [gritData]);
+  }, [gritData, isLoading, habitRecord]);
 
   // Timer effect with alarm
   useEffect(() => {
