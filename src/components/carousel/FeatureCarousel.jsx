@@ -9,15 +9,6 @@ import {
 
 const features = [
   {
-    id: 'progress',
-    title: 'Progress Tracker',
-    description: 'Visualize your growth across all areas of life',
-    icon: Target,
-    route: 'Progress',
-    gradient: 'from-indigo-600 to-purple-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/9f245f835_Photoshop12.jpg'
-  },
-  {
     id: 'manifestation',
     title: 'Manifestation Board',
     description: 'Visualize/feel your dreams until your reality becomes a reflection',

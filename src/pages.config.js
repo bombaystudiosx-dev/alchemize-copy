@@ -13,7 +13,6 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import TodoList from './pages/TodoList';
 import Journal from './pages/Journal';
-import Progress from './pages/Progress';
 import __Layout from './Layout.jsx';
 
 
@@ -33,7 +32,6 @@ export const PAGES = {
     "Privacy": Privacy,
     "TodoList": TodoList,
     "Journal": Journal,
-    "Progress": Progress,
 }
 
 export const pagesConfig = {
