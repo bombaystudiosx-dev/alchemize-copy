@@ -108,9 +108,7 @@ export default function GratitudeJournal() {
                     key={day}
                     onClick={() => {
                       const dayEntries = entries.filter(e => e.date === date);
-                      if (dayEntries.length > 0) {
-                        setSelectedDate({ date, entries: dayEntries });
-                      }
+                      setSelectedDate({ date, entries: dayEntries });
                     }}
                     className={`
                       aspect-square rounded-lg flex items-center justify-center text-sm transition-all
@@ -266,21 +264,37 @@ export default function GratitudeJournal() {
                 </button>
               </div>
               
-              <div className="space-y-3">
-                {selectedDate.entries.map((entry, idx) => (
-                  <div key={entry.id} className="bg-black/30 rounded-xl p-4 border border-white/10">
-                    {entry.gratitude_1 && (
-                      <p className="text-white leading-relaxed mb-2">{entry.gratitude_1}</p>
-                    )}
-                    {entry.gratitude_2 && (
-                      <p className="text-white/90 leading-relaxed text-sm mb-2">{entry.gratitude_2}</p>
-                    )}
-                    {entry.gratitude_3 && (
-                      <p className="text-white/80 leading-relaxed text-sm">{entry.gratitude_3}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {selectedDate.entries.length > 0 ? (
+                <div className="space-y-3">
+                  {selectedDate.entries.map((entry) => (
+                    <div key={entry.id} className="bg-black/30 rounded-xl p-4 border border-white/10">
+                      {entry.gratitude_1 && (
+                        <p className="text-white leading-relaxed mb-2">{entry.gratitude_1}</p>
+                      )}
+                      {entry.gratitude_2 && (
+                        <p className="text-white/90 leading-relaxed text-sm mb-2">{entry.gratitude_2}</p>
+                      )}
+                      {entry.gratitude_3 && (
+                        <p className="text-white/80 leading-relaxed text-sm">{entry.gratitude_3}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Heart className="w-12 h-12 text-purple-400/50 mx-auto mb-3" />
+                  <p className="text-white/50 text-sm">No entries for this day</p>
+                  <button
+                    onClick={() => {
+                      setSelectedDate(null);
+                      setShowEntryForm(true);
+                    }}
+                    className="mt-4 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm transition-colors"
+                  >
+                    Add Entry
+                  </button>
+                </div>
+              )}
             </motion.div>
           </>
         )}
