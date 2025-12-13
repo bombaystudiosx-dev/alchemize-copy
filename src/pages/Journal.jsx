@@ -6,7 +6,7 @@ import { ArrowLeft, Plus, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
-import CosmicBackground from '@/components/cosmic/CosmicBackground';
+
 
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
@@ -44,10 +44,10 @@ export default function GratitudeJournal() {
   };
 
   return (
-    <CosmicBackground>
-      <div className="min-h-screen pb-8">
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4 flex items-center justify-between">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]">
+      {/* Fixed Header */}
+      <div className="sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between mb-4">
           <Link to={createPageUrl('Home')}>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -67,76 +67,62 @@ export default function GratitudeJournal() {
         </div>
 
         {/* Inspirational Message */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="px-6 pb-6"
-        >
-          <div className="relative bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
-            <p className="text-sm text-white text-center leading-relaxed italic drop-shadow-lg">
-              Even on hard days, there's always something to be grateful for — health, home, or the small moments. Focus on the good, and the universe will give you more reasons to be grateful.
-            </p>
-          </div>
-        </motion.div>
-
-        {/* All Entries - Infinite Scroll */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="px-6"
-        >
-          <h3 className="text-lg font-semibold text-white mb-4">All Gratitude Entries</h3>
-
-          {entries.length === 0 ? (
-            <div className="text-center py-20">
-              <Heart className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
-              <p className="text-white/60 mb-6">Start your gratitude journey</p>
-              <button
-                onClick={() => setShowEntryForm(true)}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30"
-              >
-                Add Your First Entry
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-3 pb-4">
-              <AnimatePresence>
-                {entries.map((entry, index) => (
-                  <motion.div
-                    key={entry.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ delay: index * 0.02 }}
-                    className="group bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition-all"
-                  >
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <p className="text-xs text-purple-300/60">{format(new Date(entry.date), 'MMM d, yyyy')}</p>
-                      <button
-                        onClick={() => deleteMutation.mutate(entry.id)}
-                        className="opacity-0 group-hover:opacity-100 text-xs text-red-400 hover:text-red-300 transition-all px-2 py-1 rounded-lg hover:bg-red-500/10"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                    <div className="space-y-2">
-                      {entry.gratitude_1 && (
-                        <p className="text-white leading-relaxed">{entry.gratitude_1}</p>
-                      )}
-                      {entry.gratitude_2 && (
-                        <p className="text-white/90 leading-relaxed text-sm">{entry.gratitude_2}</p>
-                      )}
-                      {entry.gratitude_3 && (
-                        <p className="text-white/80 leading-relaxed text-sm">{entry.gratitude_3}</p>
-                      )}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          )}
-        </motion.div>
+        <div className="bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+          <p className="text-sm text-white text-center leading-relaxed italic">
+            Even on hard days, there's always something to be grateful for — health, home, or the small moments. Focus on the good, and the universe will give you more reasons to be grateful.
+          </p>
+        </div>
       </div>
+
+      {/* Scrollable Content */}
+      <div className="px-6 pb-20">
+        {entries.length === 0 ? (
+          <div className="text-center py-20">
+            <Heart className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
+            <p className="text-white/60 mb-6">Start your gratitude journey</p>
+            <button
+              onClick={() => setShowEntryForm(true)}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30"
+            >
+              Add Your First Entry
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {entries.map((entry, index) => (
+              <motion.div
+                key={entry.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.02 }}
+                className="group bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-2xl p-4 border border-white/10 hover:border-purple-500/30 transition-all"
+              >
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <p className="text-xs text-purple-300/60">{format(new Date(entry.date), 'MMM d, yyyy')}</p>
+                  <button
+                    onClick={() => deleteMutation.mutate(entry.id)}
+                    className="opacity-0 group-hover:opacity-100 text-xs text-red-400 hover:text-red-300 transition-all px-2 py-1 rounded-lg hover:bg-red-500/10"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {entry.gratitude_1 && (
+                    <p className="text-white leading-relaxed">{entry.gratitude_1}</p>
+                  )}
+                  {entry.gratitude_2 && (
+                    <p className="text-white/90 leading-relaxed text-sm">{entry.gratitude_2}</p>
+                  )}
+                  {entry.gratitude_3 && (
+                    <p className="text-white/80 leading-relaxed text-sm">{entry.gratitude_3}</p>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
 
       {/* Entry Form Modal */}
       <AnimatePresence>
@@ -193,6 +179,6 @@ export default function GratitudeJournal() {
           </>
         )}
       </AnimatePresence>
-    </CosmicBackground>
+    </div>
   );
 }
