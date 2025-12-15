@@ -13,6 +13,7 @@ import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import TodoList from './pages/TodoList';
 import Journal from './pages/Journal';
+import AgentChat from './pages/AgentChat';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Privacy": Privacy,
     "TodoList": TodoList,
     "Journal": Journal,
+    "AgentChat": AgentChat,
 }
 
 export const pagesConfig = {
