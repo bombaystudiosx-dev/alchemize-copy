@@ -10,14 +10,14 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   ArrowLeft, Settings as SettingsIcon, User, Mail, 
-  Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield
+  Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [showAbout, setShowAbout] = useState(false);
-  // Removed unused queryClient
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,6 +30,23 @@ export default function Settings() {
     };
     fetchUser();
   }, []);
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      await base44.auth.updateMe({ profile_photo: file_url });
+      const updatedUser = await base44.auth.me();
+      setUser(updatedUser);
+    } catch (error) {
+      console.error('Upload failed:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleLogout = () => {
     base44.auth.logout();
@@ -60,8 +77,32 @@ export default function Settings() {
             className="mb-8"
           >
             <CosmicCard className="text-center py-8">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center mx-auto mb-4">
-                <User className="w-10 h-10 text-white" />
+              <div className="relative inline-block mb-4">
+                {user?.profile_photo ? (
+                  <img 
+                    src={user.profile_photo} 
+                    alt="Profile" 
+                    className="w-20 h-20 rounded-full object-cover border-2 border-purple-500/50"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
+                    <User className="w-10 h-10 text-white" />
+                  </div>
+                )}
+                <label className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center cursor-pointer hover:bg-purple-700 transition-colors border-2 border-[#0a0118]">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handlePhotoUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                  {uploading ? (
+                    <Loader2 className="w-4 h-4 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4 text-white" />
+                  )}
+                </label>
               </div>
               <h2 className="text-xl font-bold text-white mb-1">
                 {user?.full_name || 'Cosmic Seeker'}
