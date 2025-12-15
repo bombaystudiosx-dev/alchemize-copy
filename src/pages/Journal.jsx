@@ -10,7 +10,7 @@ import { format } from 'date-fns';
 
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
-  const [newEntry, setNewEntry] = useState('');
+  const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
   const [selectedDate, setSelectedDate] = useState(null);
   const queryClient = useQueryClient();
 
@@ -24,7 +24,8 @@ export default function GratitudeJournal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gratitude'] });
       setShowEntryForm(false);
-      setNewEntry('');
+      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+      setSelectedDate(null);
     }
   });
 
@@ -36,11 +37,13 @@ export default function GratitudeJournal() {
   });
 
   const handleSave = () => {
-    if (!newEntry.trim()) return;
+    if (!newEntry.gratitude_1?.trim()) return;
 
     const dateToUse = selectedDate ? selectedDate.date : format(new Date(), 'yyyy-MM-dd');
     createMutation.mutate({
-      gratitude_1: newEntry,
+      gratitude_1: newEntry.gratitude_1,
+      gratitude_2: newEntry.gratitude_2 || null,
+      gratitude_3: newEntry.gratitude_3 || null,
       date: dateToUse
     });
   };
@@ -112,7 +115,7 @@ export default function GratitudeJournal() {
                       setSelectedDate({ date, entries: dayEntries });
                     }}
                     className={`
-                      aspect-square rounded-lg flex items-center justify-center text-sm transition-all
+                      aspect-square rounded-lg flex flex-col items-center justify-center text-sm transition-all relative
                       ${hasEntry 
                         ? 'bg-gradient-to-br from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30' 
                         : 'bg-white/5 text-white/50 hover:bg-white/10'
@@ -120,7 +123,10 @@ export default function GratitudeJournal() {
                       ${isToday ? 'ring-2 ring-amber-400' : ''}
                     `}
                   >
-                    {day}
+                    <span>{day}</span>
+                    {hasEntry && (
+                      <span className="text-xs mt-0.5">❤️</span>
+                    )}
                   </button>
                 );
               }
@@ -201,23 +207,49 @@ export default function GratitudeJournal() {
                 Add Gratitude
               </h2>
               <p className="text-center text-purple-200/60 text-sm mb-6">
-                What are you grateful for today?
+                {selectedDate ? `For ${format(new Date(selectedDate.date), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
               </p>
 
-              <textarea
-                placeholder="I am grateful for..."
-                value={newEntry}
-                onChange={(e) => setNewEntry(e.target.value)}
-                className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                rows={5}
-                autoFocus
-              />
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 1</label>
+                  <textarea
+                    placeholder="I am grateful for..."
+                    value={newEntry.gratitude_1}
+                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_1: e.target.value })}
+                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                    rows={3}
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 2 (optional)</label>
+                  <textarea
+                    placeholder="I am grateful for..."
+                    value={newEntry.gratitude_2}
+                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_2: e.target.value })}
+                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 3 (optional)</label>
+                  <textarea
+                    placeholder="I am grateful for..."
+                    value={newEntry.gratitude_3}
+                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_3: e.target.value })}
+                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                    rows={3}
+                  />
+                </div>
+              </div>
 
               <div className="flex gap-4 mt-6">
                 <button
                   onClick={() => {
                     setShowEntryForm(false);
-                    setNewEntry('');
+                    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+                    setSelectedDate(null);
                   }}
                   className="flex-1 py-3 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
                 >
@@ -225,7 +257,7 @@ export default function GratitudeJournal() {
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={!newEntry.trim() || createMutation.isPending}
+                  disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending}
                   className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50"
                 >
                   {createMutation.isPending ? 'Saving...' : 'Save'}
@@ -287,7 +319,6 @@ export default function GratitudeJournal() {
                   <p className="text-white/50 text-sm">No entries for this day</p>
                   <button
                     onClick={() => {
-                      setSelectedDate(null);
                       setShowEntryForm(true);
                     }}
                     className="mt-4 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm transition-colors"

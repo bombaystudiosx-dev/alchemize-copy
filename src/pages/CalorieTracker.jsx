@@ -290,8 +290,14 @@ export default function CalorieTracker() {
             <DialogTitle>Add Food Manually</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 mt-4">
-            <Input placeholder="Food name" value={manualFood.food_name} onChange={(e) => setManualFood({ ...manualFood, food_name: e.target.value })} />
-            <Input placeholder="Serving (e.g., 1 cup)" value={manualFood.serving_description} onChange={(e) => setManualFood({ ...manualFood, serving_description: e.target.value })} />
+            <div>
+              <label className="text-xs text-gray-600 mb-1 block">Food Name</label>
+              <Input placeholder="e.g., Grilled Chicken" value={manualFood.food_name} onChange={(e) => setManualFood({ ...manualFood, food_name: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs text-gray-600 mb-1 block">Serving</label>
+              <Input placeholder="e.g., 1 cup, 100g" value={manualFood.serving_description} onChange={(e) => setManualFood({ ...manualFood, serving_description: e.target.value })} />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-gray-600 mb-1 block">Calories (kcal)</label>
