@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 import PWASetup from '@/components/pwa/PWASetup';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
+import FloatingChatBubble from '@/components/chat/FloatingChatBubble';
 
 export default function Layout({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -60,6 +61,7 @@ export default function Layout({ children }) {
     <>
       <PWASetup />
       <InstallPrompt />
+      <FloatingChatBubble />
       <div className="min-h-screen">
         {children}
       </div>

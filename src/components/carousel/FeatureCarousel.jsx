@@ -99,15 +99,6 @@ const features = [
     image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/c7635531d_Photoshoprender2.jpg'
   },
   {
-    id: 'ai-assistant',
-    title: 'AI Assistant',
-    description: 'Your personal guide for transformation',
-    icon: Bot,
-    route: 'AgentChat?agent=assistant',
-    gradient: 'from-purple-500 to-indigo-600',
-    image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/fb4acda75_20250831_0307_VibrantCelestialGlow_remix_01k3zse7f3fjxse4jt9v4t8vyh.jpg'
-  },
-  {
     id: 'settings',
     title: 'Settings',
     description: 'Customize your Alchemize experience',
