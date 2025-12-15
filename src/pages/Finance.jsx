@@ -34,17 +34,26 @@ export default function Finance() {
 
   const { data: incomes = [] } = useQuery({
     queryKey: ['financialIncomes'],
-    queryFn: () => base44.entities.FinancialIncome.list('-income_date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.FinancialIncome.filter({ created_by: user.email }, '-income_date');
+    }
   });
 
   const { data: expenses = [] } = useQuery({
     queryKey: ['financialExpenses'],
-    queryFn: () => base44.entities.FinancialExpense.list('-expense_date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.FinancialExpense.filter({ created_by: user.email }, '-expense_date');
+    }
   });
 
   const { data: notesData = [] } = useQuery({
     queryKey: ['financialNotes'],
-    queryFn: () => base44.entities.FinancialNote.list()
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.FinancialNote.filter({ created_by: user.email });
+    }
   });
 
   const financialNote = notesData[0] || { note_login_info: '', note_total_debt: '', debt_amount: 0, savings_amount: 0, emergency_fund: 0 };

@@ -28,7 +28,10 @@ export default function Goals() {
 
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ['goals'],
-    queryFn: () => base44.entities.Goal.list('-created_date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.Goal.filter({ created_by: user.email }, '-created_date');
+    }
   });
 
   const createMutation = useMutation({

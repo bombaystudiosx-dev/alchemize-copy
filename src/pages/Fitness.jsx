@@ -54,12 +54,18 @@ export default function Fitness() {
 
   const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
     queryKey: ['workouts'],
-    queryFn: () => base44.entities.Workout.list('-date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.Workout.filter({ created_by: user.email }, '-date');
+    }
   });
 
   const { data: metrics = [], isLoading: loadingMetrics } = useQuery({
     queryKey: ['bodyMetrics'],
-    queryFn: () => base44.entities.BodyMetrics.list('-date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.BodyMetrics.filter({ created_by: user.email }, '-date');
+    }
   });
 
   const createWorkoutMutation = useMutation({
