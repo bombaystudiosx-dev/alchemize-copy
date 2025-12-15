@@ -35,7 +35,10 @@ export default function ManifestationBoard() {
 
   const { data: tiles = [], isLoading } = useQuery({
     queryKey: ['manifestations'],
-    queryFn: () => base44.entities.ManifestationTile.list('-created_date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.ManifestationTile.filter({ created_by: user.email }, '-created_date');
+    }
   });
 
   // Filter tiles by mood

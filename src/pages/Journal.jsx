@@ -16,7 +16,10 @@ export default function GratitudeJournal() {
 
   const { data: entries = [] } = useQuery({
     queryKey: ['gratitude'],
-    queryFn: () => base44.entities.GratitudeEntry.list('-date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.GratitudeEntry.filter({ created_by: user.email }, '-date');
+    }
   });
 
   const createMutation = useMutation({

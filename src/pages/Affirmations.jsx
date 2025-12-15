@@ -31,7 +31,10 @@ export default function Affirmations() {
 
   const { data: affirmations = [], isLoading } = useQuery({
     queryKey: ['affirmations'],
-    queryFn: () => base44.entities.Affirmation.list('-created_date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.Affirmation.filter({ created_by: user.email }, '-created_date');
+    }
   });
 
   const createMutation = useMutation({

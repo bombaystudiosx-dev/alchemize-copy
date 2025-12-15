@@ -48,17 +48,26 @@ export default function CalorieTracker() {
 
   const { data: foodLogs = [] } = useQuery({
     queryKey: ['foodLogs'],
-    queryFn: () => base44.entities.FoodLog.list('-date')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.FoodLog.filter({ created_by: user.email }, '-date');
+    }
   });
 
   const { data: savedFoods = [] } = useQuery({
     queryKey: ['savedFoods'],
-    queryFn: () => base44.entities.SavedFood.list()
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.SavedFood.filter({ created_by: user.email });
+    }
   });
 
   const { data: goalsData = [] } = useQuery({
     queryKey: ['nutritionGoals'],
-    queryFn: () => base44.entities.NutritionGoal.list()
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.NutritionGoal.filter({ created_by: user.email });
+    }
   });
 
   const goals = goalsData[0] || DEFAULT_GOALS;

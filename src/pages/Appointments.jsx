@@ -30,7 +30,10 @@ export default function Appointments() {
 
   const { data: appointments = [], isLoading } = useQuery({
     queryKey: ['appointments'],
-    queryFn: () => base44.entities.Appointment.list('date,time')
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.Appointment.filter({ created_by: user.email }, 'date,time');
+    }
   });
 
   const createMutation = useMutation({
