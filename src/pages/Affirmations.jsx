@@ -8,7 +8,7 @@ import GlowButton from '@/components/cosmic/GlowButton';
 // Removed unused CosmicInput import
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, Heart, Star, Trash2, Pin } from 'lucide-react';
+import { ArrowLeft, Plus, Heart, Star, Trash2, Pin, Edit2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +24,7 @@ const categoryEmojis = {
 
 export default function Affirmations() {
   const [showDialog, setShowDialog] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState(null);
   const [newAffirmation, setNewAffirmation] = useState({ text: '', category: 'self-love' });
   const [filter, setFilter] = useState('all');
   const queryClient = useQueryClient();
@@ -38,13 +39,19 @@ export default function Affirmations() {
     onSuccess: () => {
       queryClient.invalidateQueries(['affirmations']);
       setShowDialog(false);
+      setEditingAppointment(null);
       setNewAffirmation({ text: '', category: 'self-love' });
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Affirmation.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries(['affirmations'])
+    onSuccess: () => {
+      queryClient.invalidateQueries(['affirmations']);
+      setShowDialog(false);
+      setEditingAppointment(null);
+      setNewAffirmation({ text: '', category: 'self-love' });
+    }
   });
 
   const deleteMutation = useMutation({
@@ -194,6 +201,16 @@ export default function Affirmations() {
                       <p className="flex-1 text-white/90">{affirmation.text}</p>
                       <div className="flex items-center gap-2">
                         <button
+                          onClick={() => {
+                            setEditingAppointment(affirmation);
+                            setNewAffirmation({ text: affirmation.text, category: affirmation.category });
+                            setShowDialog(true);
+                          }}
+                          className="p-2 rounded-full hover:bg-white/10 transition-colors"
+                        >
+                          <Edit2 className="w-5 h-5 text-white/60" />
+                        </button>
+                        <button
                           onClick={() => updateMutation.mutate({
                             id: affirmation.id,
                             data: { is_favorite: !affirmation.is_favorite }
@@ -223,7 +240,7 @@ export default function Affirmations() {
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <Heart className="w-5 h-5 text-pink-400" />
-                Add Affirmation
+                {editingAppointment ? 'Edit Affirmation' : 'Add Affirmation'}
               </DialogTitle>
             </DialogHeader>
             
@@ -258,11 +275,17 @@ export default function Affirmations() {
               </div>
               
               <GlowButton
-                onClick={() => createMutation.mutate(newAffirmation)}
-                disabled={!newAffirmation.text || createMutation.isPending}
+                onClick={() => {
+                  if (editingAppointment) {
+                    updateMutation.mutate({ id: editingAppointment.id, data: newAffirmation });
+                  } else {
+                    createMutation.mutate(newAffirmation);
+                  }
+                }}
+                disabled={!newAffirmation.text || createMutation.isPending || updateMutation.isPending}
                 className="w-full"
               >
-                {createMutation.isPending ? 'Adding...' : 'Add Affirmation'}
+                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingAppointment ? 'Update Affirmation' : 'Add Affirmation'}
               </GlowButton>
             </div>
           </DialogContent>

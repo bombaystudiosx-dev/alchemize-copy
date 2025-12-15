@@ -38,9 +38,10 @@ export default function GratitudeJournal() {
   const handleSave = () => {
     if (!newEntry.trim()) return;
 
+    const dateToUse = selectedDate ? selectedDate.date : format(new Date(), 'yyyy-MM-dd');
     createMutation.mutate({
       gratitude_1: newEntry,
-      date: format(new Date(), 'yyyy-MM-dd')
+      date: dateToUse
     });
   };
 

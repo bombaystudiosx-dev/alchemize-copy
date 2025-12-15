@@ -293,12 +293,30 @@ export default function CalorieTracker() {
             <Input placeholder="Food name" value={manualFood.food_name} onChange={(e) => setManualFood({ ...manualFood, food_name: e.target.value })} />
             <Input placeholder="Serving (e.g., 1 cup)" value={manualFood.serving_description} onChange={(e) => setManualFood({ ...manualFood, serving_description: e.target.value })} />
             <div className="grid grid-cols-2 gap-3">
-              <Input type="number" placeholder="Calories" value={manualFood.calories} onChange={(e) => setManualFood({ ...manualFood, calories: e.target.value })} />
-              <Input type="number" placeholder="Protein (g)" value={manualFood.protein_grams} onChange={(e) => setManualFood({ ...manualFood, protein_grams: e.target.value })} />
-              <Input type="number" placeholder="Carbs (g)" value={manualFood.carb_grams} onChange={(e) => setManualFood({ ...manualFood, carb_grams: e.target.value })} />
-              <Input type="number" placeholder="Fat (g)" value={manualFood.fat_grams} onChange={(e) => setManualFood({ ...manualFood, fat_grams: e.target.value })} />
-              <Input type="number" placeholder="Sugar (g)" value={manualFood.sugar_grams} onChange={(e) => setManualFood({ ...manualFood, sugar_grams: e.target.value })} />
-              <Input type="number" placeholder="Fiber (g)" value={manualFood.fiber_grams} onChange={(e) => setManualFood({ ...manualFood, fiber_grams: e.target.value })} />
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Calories (kcal)</label>
+                <Input type="number" placeholder="0" value={manualFood.calories} onChange={(e) => setManualFood({ ...manualFood, calories: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Protein (g)</label>
+                <Input type="number" placeholder="0" value={manualFood.protein_grams} onChange={(e) => setManualFood({ ...manualFood, protein_grams: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Carbs (g)</label>
+                <Input type="number" placeholder="0" value={manualFood.carb_grams} onChange={(e) => setManualFood({ ...manualFood, carb_grams: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Fat (g)</label>
+                <Input type="number" placeholder="0" value={manualFood.fat_grams} onChange={(e) => setManualFood({ ...manualFood, fat_grams: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Sugar (g)</label>
+                <Input type="number" placeholder="0" value={manualFood.sugar_grams} onChange={(e) => setManualFood({ ...manualFood, sugar_grams: e.target.value })} />
+              </div>
+              <div>
+                <label className="text-xs text-gray-600 mb-1 block">Fiber (g)</label>
+                <Input type="number" placeholder="0" value={manualFood.fiber_grams} onChange={(e) => setManualFood({ ...manualFood, fiber_grams: e.target.value })} />
+              </div>
             </div>
             <button onClick={handleManualAdd} disabled={!manualFood.food_name || !manualFood.calories} className="w-full py-3 rounded-xl bg-green-600 text-white font-medium disabled:opacity-50">
               Add Food
