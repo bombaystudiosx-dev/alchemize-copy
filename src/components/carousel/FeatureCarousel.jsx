@@ -233,7 +233,7 @@ export default function FeatureCarousel() {
                   key={feature.id}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{
-                    x: offset * 280,
+                    x: offset * 320,
                     scale: isActive ? 1 : 0.75,
                     opacity: isActive ? 1 : 0.5,
                   }}
