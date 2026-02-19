@@ -208,7 +208,7 @@ export default function FeatureCarousel() {
       {/* Carousel Container */}
       <div 
         ref={containerRef}
-        className="relative w-full flex items-center justify-center h-[500px] overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative w-full flex items-center justify-center h-[65vh] overflow-hidden cursor-grab active:cursor-grabbing"
         onMouseDown={handleDragStart}
         onMouseMove={handleDragMove}
         onMouseUp={handleDragEnd}
