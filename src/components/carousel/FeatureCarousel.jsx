@@ -262,7 +262,7 @@ export default function FeatureCarousel() {
                       whileHover={isActive ? { scale: 1.02 } : {}}
                       whileTap={isActive ? { scale: 0.98 } : {}}
                       className={`
-                        relative w-[280px] h-[380px] rounded-3xl overflow-hidden
+                        relative w-[85vw] max-w-[360px] h-[55vh] rounded-3xl overflow-hidden
                         bg-gradient-to-br from-white/15 to-white/5
                         backdrop-blur-xl border border-white/20
                         ${isActive ? 'shadow-2xl shadow-purple-500/30' : 'shadow-lg'}
