@@ -1,59 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-// Removed unused react-query imports
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
-import CosmicCard from '@/components/cosmic/CosmicCard';
-import GlowButton from '@/components/cosmic/GlowButton';
-// Removed unused CosmicInput import
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-// Back nav handled by bottom tab bar
 import { 
-  User, Mail, 
-  Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2, Trash2, AlertTriangle
+  User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
+  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
+import FeatureManager from '@/components/home/FeatureManager';
+import BluetoothDialog from '@/components/settings/BluetoothDialog';
+import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
+import ThemeDialog from '@/components/settings/ThemeDialog';
+import ResetDataDialog from '@/components/settings/ResetDataDialog';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [showAbout, setShowAbout] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
+  const [showBluetooth, setShowBluetooth] = useState(false);
+  const [showHealth, setShowHealth] = useState(false);
+  const [showTheme, setShowTheme] = useState(false);
+  const [showResetData, setShowResetData] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(() => {
+    return localStorage.getItem('show_calendar') !== 'false';
+  });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const userData = await base44.auth.me();
-        setUser(userData);
-      } catch (e) {
-        // Not logged in
-      }
+      const userData = await base44.auth.me();
+      setUser(userData);
     };
     fetchUser();
   }, []);
 
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setUploading(true);
-      const { file_url } = await base44.integrations.Core.UploadFile({ file });
-      await base44.auth.updateMe({ profile_photo: file_url });
-      const updatedUser = await base44.auth.me();
-      setUser(updatedUser);
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setUploading(false);
-    }
+  const handleCalendarToggle = (val) => {
+    setShowCalendar(val);
+    localStorage.setItem('show_calendar', val.toString());
   };
 
   const handleLogout = () => {
     base44.auth.logout();
   };
+
+  const currentTheme = localStorage.getItem('app_theme') || 'cosmic-dark';
+  const themeLabel = {
+    'cosmic-dark': 'Cosmic Dark',
+    'midnight-blue': 'Midnight Blue',
+    'aurora': 'Aurora',
+    'rose-gold': 'Rose Gold'
+  }[currentTheme] || 'Cosmic Dark';
 
   return (
     <CosmicBackground>
@@ -62,196 +63,181 @@ export default function Settings() {
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent"
+          className="flex items-center px-4 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118]/95 to-transparent backdrop-blur-sm"
         >
-          <div className="w-10" />
-          <h1 className="text-xl font-bold text-white">Settings</h1>
-          <div className="w-10" />
+          <button 
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-1 text-white"
+          >
+            <ChevronLeft className="w-6 h-6" />
+            <span className="text-base font-medium">Back</span>
+          </button>
+          <h1 className="text-xl font-bold text-white flex-1 text-center mr-16">Settings</h1>
         </motion.header>
 
-        <div className="px-6">
-          {/* Profile Section */}
+        <div className="px-4 space-y-6">
+          {/* ACCOUNT Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            transition={{ delay: 0.1 }}
           >
-            <CosmicCard className="text-center py-8">
-              <div className="relative inline-block mb-4">
-                {user?.profile_photo ? (
-                  <img 
-                    src={user.profile_photo} 
-                    alt="Profile" 
-                    className="w-20 h-20 rounded-full object-cover border-2 border-purple-500/50"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                    <User className="w-10 h-10 text-white" />
-                  </div>
-                )}
-                <label className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center cursor-pointer hover:bg-purple-700 transition-colors border-2 border-[#0a0118]">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                  {uploading ? (
-                    <Loader2 className="w-4 h-4 text-white animate-spin" />
-                  ) : (
-                    <Camera className="w-4 h-4 text-white" />
-                  )}
-                </label>
-              </div>
-              <h2 className="text-xl font-bold text-white mb-1">
-                {user?.full_name || 'Cosmic Seeker'}
-              </h2>
-              <p className="text-sm text-white/50">
-                {user?.email || 'Exploring the universe'}
-              </p>
-            </CosmicCard>
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Account</h3>
+            <div className="space-y-2">
+              <SettingsRow
+                icon={User}
+                iconBg="bg-purple-500/20"
+                iconColor="text-purple-400"
+                title="Profile"
+                subtitle="Manage your profile details"
+                onClick={() => {}}
+              />
+              <SettingsRow
+                icon={Mail}
+                iconBg="bg-blue-500/20"
+                iconColor="text-blue-400"
+                title="Email"
+                subtitle={user?.email || 'Not set'}
+              />
+            </div>
           </motion.div>
 
-          {/* Settings Options */}
+          {/* APP Section */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-3"
           >
-            <h3 className="text-sm text-white/50 uppercase tracking-wider mb-4">Account</h3>
-            
-            <CosmicCard className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <User className="w-5 h-5 text-purple-400" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-white">Profile</p>
-                <p className="text-xs text-white/50">Manage your profile details</p>
-              </div>
-            </CosmicCard>
-            
-            <CosmicCard className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <Mail className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-white">Email</p>
-                <p className="text-xs text-white/50">{user?.email || 'Not set'}</p>
-              </div>
-            </CosmicCard>
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">App</h3>
+            <div className="space-y-2">
+              <SettingsRow
+                icon={Info}
+                iconBg="bg-purple-500/20"
+                iconColor="text-purple-400"
+                title="About Alchemize"
+                subtitle="Learn more about the app"
+                onClick={() => setShowAbout(true)}
+              />
+              <Link to={createPageUrl('Terms')}>
+                <SettingsRow
+                  icon={FileText}
+                  iconBg="bg-blue-500/20"
+                  iconColor="text-blue-400"
+                  title="Terms & Conditions"
+                  subtitle="Read our terms of service"
+                  onClick={() => {}}
+                />
+              </Link>
+              <Link to={createPageUrl('Privacy')}>
+                <SettingsRow
+                  icon={Shield}
+                  iconBg="bg-purple-500/20"
+                  iconColor="text-purple-400"
+                  title="Privacy Policy"
+                  subtitle="How we handle your data"
+                  onClick={() => {}}
+                />
+              </Link>
+              <SettingsRow
+                icon={Eye}
+                iconBg="bg-pink-500/20"
+                iconColor="text-pink-400"
+                title="Manage Features"
+                subtitle="Choose which features to display"
+                onClick={() => setShowFeatures(true)}
+              />
+              <SettingsRow
+                icon={Bluetooth}
+                iconBg="bg-blue-600/20"
+                iconColor="text-blue-400"
+                title="Bluetooth Devices"
+                subtitle="Scan and connect to devices"
+                onClick={() => setShowBluetooth(true)}
+              />
+              <SettingsRow
+                icon={Heart}
+                iconBg="bg-red-500/20"
+                iconColor="text-red-400"
+                title="Apple Health"
+                subtitle="Sync workouts from Apple Watch & Ring"
+                onClick={() => setShowHealth(true)}
+              />
+              <SettingsRow
+                icon={Palette}
+                iconBg="bg-indigo-500/20"
+                iconColor="text-indigo-400"
+                title="Theme"
+                subtitle={themeLabel}
+                onClick={() => setShowTheme(true)}
+              />
+              <SettingsRow
+                icon={Calendar}
+                iconBg="bg-purple-500/20"
+                iconColor="text-purple-400"
+                title="Show Calendar"
+                subtitle="Display unified calendar on home screen"
+                toggle
+                checked={showCalendar}
+                onToggle={handleCalendarToggle}
+              />
+            </div>
           </motion.div>
 
+          {/* DATA Section */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="space-y-3 mt-8"
           >
-            <h3 className="text-sm text-white/50 uppercase tracking-wider mb-4">App</h3>
-            
-            <CosmicCard 
-              onClick={() => setShowAbout(true)}
-              className="flex items-center gap-4 cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-                <Info className="w-5 h-5 text-purple-400" />
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Data</h3>
+            <div className="space-y-2">
+              <div onClick={() => setShowResetData(true)}>
+                <SettingsRow
+                  icon={Trash2}
+                  iconBg="bg-red-500/20"
+                  iconColor="text-red-400"
+                  title="Reset All Data"
+                  subtitle="Permanently delete all app data"
+                  onClick={() => setShowResetData(true)}
+                />
               </div>
-              <div className="flex-1">
-                <p className="font-medium text-white">About Alchemize</p>
-                <p className="text-xs text-white/50">Learn about the app</p>
-              </div>
-            </CosmicCard>
-
-            <Link to={createPageUrl('Terms')}>
-              <CosmicCard className="flex items-center gap-4 cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-blue-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-white">Terms & Conditions</p>
-                  <p className="text-xs text-white/50">Legal terms of use</p>
-                </div>
-              </CosmicCard>
-            </Link>
-
-            <Link to={createPageUrl('Privacy')}>
-              <CosmicCard className="flex items-center gap-4 cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-green-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-white">Privacy Policy</p>
-                  <p className="text-xs text-white/50">How we protect your data</p>
-                </div>
-              </CosmicCard>
-            </Link>
-            
-            <CosmicCard className="flex items-center gap-4 opacity-50">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center">
-                <Moon className="w-5 h-5 text-indigo-400" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-white">Theme</p>
-                <p className="text-xs text-white/50">Cosmic Dark (Default)</p>
-              </div>
-            </CosmicCard>
+            </div>
           </motion.div>
 
-          {/* Danger Zone */}
+          {/* Sign Out */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="space-y-3 mt-8"
+            className="pt-2"
           >
-            <h3 className="text-sm text-red-400/70 uppercase tracking-wider mb-4">Danger Zone</h3>
-            <CosmicCard 
-              onClick={() => setShowDeleteAccount(true)}
-              className="flex items-center gap-4 cursor-pointer border-red-500/20 hover:border-red-500/40"
-            >
-              <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
-                <Trash2 className="w-5 h-5 text-red-400" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-red-400">Delete Account</p>
-                <p className="text-xs text-white/50">Permanently delete your account and all data</p>
-              </div>
-            </CosmicCard>
-          </motion.div>
-
-          {/* Logout */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="mt-8"
-          >
-            <GlowButton 
+            <button
               onClick={handleLogout}
-              variant="secondary"
-              className="w-full flex items-center justify-center gap-2"
+              className="w-full py-4 rounded-2xl border border-red-500/30 bg-red-500/10 flex items-center justify-center gap-2 text-red-400 font-semibold text-base hover:bg-red-500/20 transition-colors"
             >
               <LogOut className="w-5 h-5" />
               Sign Out
-            </GlowButton>
+            </button>
           </motion.div>
 
           {/* Version */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="text-center mt-8"
+            transition={{ delay: 0.4 }}
+            className="text-center pb-4"
           >
-            <p className="text-xs text-white/30">Alchemize v1.0</p>
-            <p className="text-xs text-white/20 mt-1">Made with ✨ and 💜</p>
+            <p className="text-xs text-white/30">Alchemize v1.0.0</p>
           </motion.div>
         </div>
 
-        {/* Delete Account Flow */}
+        {/* Dialogs */}
         <DeleteAccountFlow open={showDeleteAccount} onOpenChange={setShowDeleteAccount} />
+        <FeatureManager open={showFeatures} onOpenChange={setShowFeatures} />
+        <BluetoothDialog open={showBluetooth} onOpenChange={setShowBluetooth} />
+        <AppleHealthDialog open={showHealth} onOpenChange={setShowHealth} />
+        <ThemeDialog open={showTheme} onOpenChange={setShowTheme} />
+        <ResetDataDialog open={showResetData} onOpenChange={setShowResetData} />
 
         {/* About Dialog */}
         <Dialog open={showAbout} onOpenChange={setShowAbout}>
@@ -259,7 +245,7 @@ export default function Settings() {
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2 justify-center">
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                  <KeyRound className="w-6 h-6 text-white" />
+                  <Sparkles className="w-6 h-6 text-white" />
                 </div>
               </DialogTitle>
             </DialogHeader>
