@@ -2,6 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme tokens */
+:root {
+  --app-bg: var(--color-bg, #0a0118);
+  --app-fg: var(--color-fg, #f3f3f7);
+  --surface: var(--color-surface, rgba(10, 1, 24, 0.98));
+  --border: var(--color-border, rgba(255,255,255,0.10));
+  --muted: var(--color-muted, rgba(255,255,255,0.35));
+  --brand: var(--color-brand, #a855f7);
+  --danger: var(--color-danger, #ff3b30);
+}
+
 /* Optimized animations - reduced motion for better performance */
 @media (prefers-reduced-motion: reduce) {
   * {

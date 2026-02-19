@@ -115,18 +115,22 @@ export default function BottomTabBar({ currentPageName }) {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10"
+      className="fixed bottom-0 left-0 right-0 z-50"
       style={{
         minHeight: TAB_BAR_HEIGHT,
         paddingBottom: 'env(safe-area-inset-bottom)',
-        background: 'linear-gradient(to top, rgba(10, 1, 24, 0.98), rgba(10, 1, 24, 0.92))',
+        paddingLeft: 'env(safe-area-inset-left)',
+        paddingRight: 'env(safe-area-inset-right)',
+        background: 'var(--surface)',
+        borderTop: '1px solid var(--border)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
+        touchAction: 'manipulation',
       }}
       role="tablist"
       aria-label="Primary navigation"
     >
-      <div className="flex items-center justify-around h-14 max-w-lg mx-auto">
+      <div className="flex items-center justify-around h-[52px] max-w-lg mx-auto">
         {TABS.map(t => {
           const active = t.key === currentTab;
           const Icon = t.icon;
@@ -137,24 +141,28 @@ export default function BottomTabBar({ currentPageName }) {
               type="button"
               role="tab"
               aria-selected={active}
-              className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full relative"
+              className="flex flex-col items-center justify-center flex-1 h-full relative"
+              style={{
+                minHeight: 52,
+                padding: '8px 6px',
+                gap: 3,
+                background: 'transparent',
+                border: 0,
+                color: active ? 'var(--brand)' : 'var(--muted)',
+              }}
             >
               {active && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                  className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{ background: 'var(--brand)' }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
-              <Icon
-                className={`w-5 h-5 transition-colors duration-200 ${
-                  active ? 'text-purple-400' : 'text-white/35'
-                }`}
-              />
+              <Icon className="w-5 h-5 transition-colors duration-200" style={{ color: 'inherit' }} />
               <span
-                className={`text-[10px] font-medium transition-colors duration-200 ${
-                  active ? 'text-purple-300' : 'text-white/35'
-                }`}
+                className="font-medium transition-colors duration-200"
+                style={{ fontSize: 12, lineHeight: '14px', color: 'inherit' }}
               >
                 {t.label}
               </span>
