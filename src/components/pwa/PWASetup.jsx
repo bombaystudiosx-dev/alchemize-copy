@@ -46,12 +46,30 @@ export default function PWASetup() {
     appleTouchIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/5ffac4ad0_Untitleddesign.png';
     document.head.appendChild(appleTouchIcon);
 
+    // Viewport for native feel — disable user scaling
+    const existingViewport = document.querySelector('meta[name="viewport"]');
+    if (existingViewport) {
+      existingViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+    } else {
+      const viewport = document.createElement('meta');
+      viewport.name = 'viewport';
+      viewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+      document.head.appendChild(viewport);
+    }
+
+    // Mobile web app title
+    const appTitle = document.createElement('meta');
+    appTitle.name = 'apple-mobile-web-app-title';
+    appTitle.content = 'Alchemize';
+    document.head.appendChild(appTitle);
+
     return () => {
       document.head.removeChild(manifestLink);
       document.head.removeChild(themeColorMeta);
       document.head.removeChild(appleMeta);
       document.head.removeChild(appleStatusBar);
       document.head.removeChild(appleTouchIcon);
+      document.head.removeChild(appTitle);
     };
   }, []);
 

@@ -103,6 +103,9 @@ export default function BottomTabBar({ currentPageName }) {
   }, [location.pathname, location.search]);
 
   const onTabPress = (tab) => {
+    // Haptic feedback
+    if (navigator.vibrate) navigator.vibrate(8);
+    
     if (tab.key === currentTab) {
       // Re-tap active tab → pop to root
       navigate(createPageUrl(tab.rootPage));
@@ -121,10 +124,10 @@ export default function BottomTabBar({ currentPageName }) {
         paddingBottom: 'env(safe-area-inset-bottom)',
         paddingLeft: 'env(safe-area-inset-left)',
         paddingRight: 'env(safe-area-inset-right)',
-        background: 'var(--surface)',
-        borderTop: '1px solid var(--border)',
-        backdropFilter: 'blur(12px)',
-        WebkitBackdropFilter: 'blur(12px)',
+        background: 'rgba(10, 1, 24, 0.85)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(24px) saturate(1.8)',
+        WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
         touchAction: 'manipulation',
       }}
       role="tablist"
