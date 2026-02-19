@@ -6,6 +6,7 @@ import { ArrowLeft, Plus, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 
 export default function GratitudeJournal() {
@@ -52,7 +53,7 @@ export default function GratitudeJournal() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]">
+    <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['gratitude'])} className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]">
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm px-6 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
@@ -334,6 +335,6 @@ export default function GratitudeJournal() {
           </>
         )}
       </AnimatePresence>
-    </div>
+    </PullToRefresh>
   );
 }
