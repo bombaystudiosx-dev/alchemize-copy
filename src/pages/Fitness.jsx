@@ -788,6 +788,19 @@ export default function Fitness() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <BottomSheet
+          open={showWorkoutTypeSheet}
+          onOpenChange={setShowWorkoutTypeSheet}
+          title="Workout Type"
+          value={newWorkout.type}
+          onSelect={(val) => setNewWorkout({ ...newWorkout, type: val })}
+          options={Object.entries(workoutTypes).map(([key, { emoji }]) => ({
+            value: key,
+            label: key.charAt(0).toUpperCase() + key.slice(1),
+            icon: emoji
+          }))}
+        />
       </div>
     </CosmicBackground>
   );

@@ -12,9 +12,9 @@ import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, Lock, Al
 import IncomeCalendar from '@/components/finance/IncomeCalendar';
 import ExpenseCalendar from '@/components/finance/ExpenseCalendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import BottomSheet from '@/components/native/BottomSheet';
 
 export default function Finance() {
   const [viewMode, setViewMode] = useState('monthly');
@@ -31,6 +31,8 @@ export default function Finance() {
   const [incomeCategories, setIncomeCategories] = useState(['Salary', 'Freelance', 'Business', 'Investment', 'Bonus', 'Other']);
   const [expenseCategories, setExpenseCategories] = useState(['Bills', 'Business', 'Personal', 'Food', 'Transport', 'Entertainment', 'Shopping', 'Health', 'Education', 'Other']);
   
+  const [showIncomeCatSheet, setShowIncomeCatSheet] = useState(false);
+  const [showExpenseCatSheet, setShowExpenseCatSheet] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: incomes = [] } = useQuery({
@@ -122,12 +124,26 @@ export default function Finance() {
 
   const deleteExpenseMutation = useMutation({
     mutationFn: (id) => base44.entities.FinancialExpense.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['financialExpenses'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['financialExpenses'] });
+      const prev = queryClient.getQueryData(['financialExpenses']);
+      queryClient.setQueryData(['financialExpenses'], old => (old || []).filter(e => e.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['financialExpenses'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['financialExpenses'])
   });
 
   const deleteIncomeMutation = useMutation({
     mutationFn: (id) => base44.entities.FinancialIncome.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['financialIncomes'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['financialIncomes'] });
+      const prev = queryClient.getQueryData(['financialIncomes']);
+      queryClient.setQueryData(['financialIncomes'], old => (old || []).filter(i => i.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['financialIncomes'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['financialIncomes'])
   });
 
   const clearAllIncomesMutation = useMutation({
@@ -457,18 +473,14 @@ export default function Finance() {
             <div className="space-y-4 mt-4">
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Income Category</label>
-                <div className="flex gap-2">
-                  <Select value={newIncome.income_category} onValueChange={(val) => setNewIncome({ ...newIncome, income_category: val })}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30 text-white">
-                      {incomeCategories.map(cat => (
-                        <SelectItem key={cat} value={cat} className="text-white focus:bg-purple-500/30 focus:text-white">{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowIncomeCatSheet(true)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+                >
+                  <span>{newIncome.income_category}</span>
+                  <span className="text-white/40">▾</span>
+                </button>
                 <div className="flex gap-2 mt-2">
                   <CosmicInput placeholder="New category" value={customIncomeCategory} onChange={(e) => setCustomIncomeCategory(e.target.value)} />
                   <button onClick={() => { if(customIncomeCategory) { setIncomeCategories([...incomeCategories, customIncomeCategory]); setNewIncome({...newIncome, income_category: customIncomeCategory}); setCustomIncomeCategory(''); }}} className="px-3 py-2 rounded-lg bg-purple-500/30 text-white text-sm">Add</button>
@@ -534,18 +546,14 @@ export default function Finance() {
               </div>
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
-                <div className="flex gap-2">
-                  <Select value={newExpense.expense_category} onValueChange={(val) => setNewExpense({ ...newExpense, expense_category: val })}>
-                    <SelectTrigger className="bg-white/10 border-white/20 text-white flex-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1a0a2e] border-purple-500/30 text-white">
-                      {expenseCategories.map(cat => (
-                        <SelectItem key={cat} value={cat} className="text-white focus:bg-purple-500/30 focus:text-white">{cat}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowExpenseCatSheet(true)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+                >
+                  <span>{newExpense.expense_category}</span>
+                  <span className="text-white/40">▾</span>
+                </button>
                 <div className="flex gap-2 mt-2">
                   <CosmicInput placeholder="New category" value={customExpenseCategory} onChange={(e) => setCustomExpenseCategory(e.target.value)} />
                   <button onClick={() => { if(customExpenseCategory) { setExpenseCategories([...expenseCategories, customExpenseCategory]); setNewExpense({...newExpense, expense_category: customExpenseCategory}); setCustomExpenseCategory(''); }}} className="px-3 py-2 rounded-lg bg-purple-500/30 text-white text-sm">Add</button>
