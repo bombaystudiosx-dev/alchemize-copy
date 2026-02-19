@@ -7,7 +7,6 @@ import { Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2, Edit, X } fro
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CosmicInput from '@/components/cosmic/CosmicInput';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import TimerView from '@/components/habits/TimerView';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

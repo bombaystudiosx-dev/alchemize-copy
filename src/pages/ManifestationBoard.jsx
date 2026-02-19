@@ -97,6 +97,13 @@ export default function ManifestationBoard() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.ManifestationTile.delete(id),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['manifestations'] });
+      const prev = queryClient.getQueryData(['manifestations']);
+      queryClient.setQueryData(['manifestations'], old => (old || []).filter(t => t.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['manifestations'], ctx.prev); },
     onSuccess: () => {
       queryClient.invalidateQueries(['manifestations']);
       setPortalViewIndex(null);
