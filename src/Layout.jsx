@@ -4,8 +4,9 @@ import { Loader2 } from 'lucide-react';
 import PWASetup from '@/components/pwa/PWASetup';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import FloatingChatBubble from '@/components/chat/FloatingChatBubble';
+import BottomTabBar, { TAB_BAR_HEIGHT, HIDDEN_TAB_PAGES } from '@/components/navigation/BottomTabBar';
 
-export default function Layout({ children }) {
+export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [authError, setAuthError] = useState(false);
 
@@ -61,10 +62,13 @@ export default function Layout({ children }) {
     <>
       <PWASetup />
       <InstallPrompt />
-      <FloatingChatBubble />
-      <div className="min-h-screen">
+      <FloatingChatBubble showTabBar={!HIDDEN_TAB_PAGES.includes(currentPageName)} />
+      <div className="min-h-screen" style={{
+        paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
+      }}>
         {children}
       </div>
+      <BottomTabBar currentPageName={currentPageName} />
     </>
   );
 }
