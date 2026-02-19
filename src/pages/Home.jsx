@@ -211,6 +211,29 @@ export default function Home() {
             <span>→</span>
           </motion.div>
         </motion.div>
+
+        {/* Carousel */}
+        <div className="flex-1 flex items-center">
+          <FeatureCarousel />
+        </div>
+
+        {/* Bottom hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="text-center pb-4 relative z-10"
+        >
+          <motion.div 
+            className="flex items-center justify-center gap-2 text-white/40 text-sm"
+            animate={{ x: [-3, 3, -3] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <span>←</span>
+            <span>Swipe to navigate</span>
+            <span>→</span>
+          </motion.div>
+        </motion.div>
       </PullToRefresh>
 
       {/* Feature Manager */}
