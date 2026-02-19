@@ -13,7 +13,9 @@
   --danger: var(--color-danger, #ff3b30);
 }
 
-/* Optimized animations - reduced motion for better performance */
+/* ===== PERFORMANCE & MOTION ===== */
+
+/* Reduced motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0.01ms !important;
@@ -22,47 +24,54 @@
   }
 }
 
-/* Smooth scrolling */
+/* GPU-accelerated smooth scrolling */
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* Hide scrollbar but allow scrolling */
+/* ===== SCROLLBAR ===== */
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-/* Performance optimizations */
-.will-change-transform {
-  will-change: transform;
-}
+/* ===== COSMIC THEME ===== */
 
-/* Cosmic theme base */
 body {
   background: linear-gradient(135deg, #0a0118 0%, #1a0a2e 50%, #0d0620 100%);
   min-height: 100vh;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-/* Input styling for date/time on mobile */
+/* ===== NATIVE INPUT STYLING ===== */
+
+/* Dark color scheme for native date/time pickers */
 input[type="date"],
 input[type="time"] {
   -webkit-appearance: none;
   color-scheme: dark;
 }
 
-/* Range slider styling */
+/* Prevent zoom on input focus (iOS) — 16px minimum */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Custom range slider */
 input[type="range"] {
   -webkit-appearance: none;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 9999px;
   height: 8px;
 }
-
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 20px;
@@ -73,47 +82,23 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
 }
 
-/* Prevent text selection on buttons */
-button {
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-}
+/* ===== SAFE AREAS ===== */
 
-/* Responsive font sizes */
-@media (max-width: 640px) {
-  html {
-    font-size: 14px;
-  }
-}
-
-/* Safe area padding for mobile */
 .safe-area-bottom {
   padding-bottom: max(env(safe-area-inset-bottom), 20px);
 }
-
 .safe-area-top {
   padding-top: max(env(safe-area-inset-top), 20px);
 }
 
-/* Minimum tap target size for mobile (44x44 points) */
-button, a, [role="button"] {
-  min-height: 44px;
-  min-width: 44px;
-}
+/* ===== UTILITIES ===== */
 
-/* Prevent zoom on input focus (iOS) */
-input, select, textarea {
-  font-size: 16px !important;
-}
-
-/* Line clamp utilities */
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
 }
-
 .line-clamp-2 {
   overflow: hidden;
   display: -webkit-box;
@@ -130,4 +115,52 @@ input, select, textarea {
 /* Cosmic glow effect */
 .cosmic-glow {
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.1);
+}
+
+/* ===== NATIVE-FEEL SPRING ANIMATION ===== */
+
+@keyframes spring-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-spring-in {
+  animation: spring-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* iOS-style sheet slide up */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* Fade scale for modals */
+@keyframes fade-scale {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-scale {
+  animation: fade-scale 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+/* ===== GLASS MORPHISM ===== */
+
+.glass {
+  background: rgba(10, 1, 24, 0.75);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

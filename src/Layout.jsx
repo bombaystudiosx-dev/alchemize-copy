@@ -5,6 +5,8 @@ import PWASetup from '@/components/pwa/PWASetup';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
 import FloatingChatBubble from '@/components/chat/FloatingChatBubble';
 import BottomTabBar, { TAB_BAR_HEIGHT, HIDDEN_TAB_PAGES } from '@/components/navigation/BottomTabBar';
+import NativeFeelProvider from '@/components/native/NativeFeelProvider';
+import PageTransition from '@/components/native/PageTransition';
 
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -60,6 +62,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <>
+      <NativeFeelProvider />
       <PWASetup />
       <InstallPrompt />
       <FloatingChatBubble showTabBar={!HIDDEN_TAB_PAGES.includes(currentPageName)} />
@@ -67,7 +70,9 @@ export default function Layout({ children, currentPageName }) {
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
       }}>
-        {children}
+        <PageTransition pageKey={currentPageName}>
+          {children}
+        </PageTransition>
       </div>
       <BottomTabBar currentPageName={currentPageName} />
     </>
