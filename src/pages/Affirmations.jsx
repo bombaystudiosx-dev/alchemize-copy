@@ -12,6 +12,7 @@ import { ArrowLeft, Plus, Heart, Star, Trash2, Pin, Edit2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 const categoryEmojis = {
   'self-love': '💖',
@@ -78,7 +79,7 @@ export default function Affirmations() {
 
   return (
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['affirmations'])} className="min-h-screen pb-8">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -237,6 +238,8 @@ export default function Affirmations() {
           )}
         </div>
 
+      </PullToRefresh>
+
         {/* Add Dialog */}
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-pink-500/30 text-white max-w-md">
@@ -293,7 +296,6 @@ export default function Affirmations() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
     </CosmicBackground>
   );
 }

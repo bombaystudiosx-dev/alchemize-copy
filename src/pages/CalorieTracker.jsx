@@ -15,6 +15,7 @@ import WeekCalendar from '@/components/diet/WeekCalendar';
 import MealSection from '@/components/diet/MealSection';
 import FoodPhotoAnalyzer from '@/components/diet/FoodPhotoAnalyzer';
 import MealPlanDialog from '@/components/diet/MealPlanDialog';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 const DEFAULT_GOALS = {
   daily_calories: 2000,
@@ -205,8 +206,16 @@ export default function CalorieTracker() {
     setShowSavedFoods(false);
   };
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries(['foodLogs']),
+      queryClient.invalidateQueries(['savedFoods']),
+      queryClient.invalidateQueries(['nutritionGoals']),
+    ]);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-gray-50">
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -399,6 +408,6 @@ export default function CalorieTracker() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </PullToRefresh>
   );
 }

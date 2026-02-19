@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 const statusConfig = {
   not_started: { label: 'Not Started', icon: Clock, color: 'text-gray-400', bg: 'bg-gray-500/20' },
@@ -83,7 +84,7 @@ export default function Goals() {
 
   return (
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['goals'])} className="min-h-screen pb-8">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -211,6 +212,8 @@ export default function Goals() {
           )}
         </div>
 
+      </PullToRefresh>
+
         {/* Add/Edit Dialog */}
         <Dialog open={showDialog} onOpenChange={closeDialog}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-amber-500/30 text-white max-w-md">
@@ -299,7 +302,6 @@ export default function Goals() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
     </CosmicBackground>
   );
 }
