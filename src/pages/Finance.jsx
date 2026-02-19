@@ -572,102 +572,101 @@ export default function Finance() {
 
       </PullToRefresh>
 
-        {/* Edit Notes Dialog */}
-        <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-white">Edit Financial Notes</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 mt-4">
-              <div>
-                <label className="text-sm text-yellow-400 mb-2 block flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  Important Login Info
-                </label>
-                <textarea
-                  value={notesForm.note_login_info}
-                  onChange={(e) => setNotesForm({...notesForm, note_login_info: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 resize-none"
-                  rows={4}
-                  placeholder="Store sensitive login information here..."
-                />
-              </div>
-              <div>
-                <label className="text-sm text-red-400 mb-2 block flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4" />
-                  Total Debt Notes
-                </label>
-                <textarea
-                  value={notesForm.note_total_debt}
-                  onChange={(e) => setNotesForm({...notesForm, note_total_debt: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 resize-none"
-                  rows={4}
-                  placeholder="List debts, interest rates, etc..."
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
-                  <input
-                    type="number"
-                    value={notesForm.debt_amount || ''} 
-                    onChange={(e) => setNotesForm({...notesForm, debt_amount: e.target.value})} 
-                    placeholder="0.00"
-                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Due Date</label>
-                  <input
-                    type="date"
-                    value={notesForm.debt_due_date || ''} 
-                    onChange={(e) => setNotesForm({...notesForm, debt_due_date: e.target.value})}
-                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
-                  <input
-                    type="number"
-                    value={notesForm.savings_amount || ''} 
-                    onChange={(e) => setNotesForm({...notesForm, savings_amount: e.target.value})} 
-                    placeholder="0.00"
-                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
-                  <input
-                    type="number"
-                    value={notesForm.emergency_fund || ''} 
-                    onChange={(e) => setNotesForm({...notesForm, emergency_fund: e.target.value})} 
-                    placeholder="0.00"
-                    className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
-                  />
-                </div>
-              </div>
-              <GlowButton 
-                onClick={() => {
-                  updateNotesMutation.mutate({
-                    note_login_info: notesForm.note_login_info,
-                    note_total_debt: notesForm.note_total_debt,
-                    debt_amount: parseFloat(notesForm.debt_amount) || 0,
-                    debt_due_date: notesForm.debt_due_date,
-                    savings_amount: parseFloat(notesForm.savings_amount) || 0,
-                    emergency_fund: parseFloat(notesForm.emergency_fund) || 0
-                  });
-                }} 
-                disabled={updateNotesMutation.isPending}
-                className="w-full"
-              >
-                {updateNotesMutation.isPending ? 'Saving...' : 'Save Notes'}
-              </GlowButton>
+      {/* Edit Notes Dialog */}
+      <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+        <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white">Edit Financial Notes</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <label className="text-sm text-yellow-400 mb-2 block flex items-center gap-2">
+                <Lock className="w-4 h-4" />
+                Important Login Info
+              </label>
+              <textarea
+                value={notesForm.note_login_info}
+                onChange={(e) => setNotesForm({...notesForm, note_login_info: e.target.value})}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-yellow-500/50 resize-none"
+                rows={4}
+                placeholder="Store sensitive login information here..."
+              />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <div>
+              <label className="text-sm text-red-400 mb-2 block flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                Total Debt Notes
+              </label>
+              <textarea
+                value={notesForm.note_total_debt}
+                onChange={(e) => setNotesForm({...notesForm, note_total_debt: e.target.value})}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/30 focus:outline-none focus:border-red-500/50 resize-none"
+                rows={4}
+                placeholder="List debts, interest rates, etc..."
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
+                <input
+                  type="number"
+                  value={notesForm.debt_amount || ''} 
+                  onChange={(e) => setNotesForm({...notesForm, debt_amount: e.target.value})} 
+                  placeholder="0.00"
+                  className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Due Date</label>
+                <input
+                  type="date"
+                  value={notesForm.debt_due_date || ''} 
+                  onChange={(e) => setNotesForm({...notesForm, debt_due_date: e.target.value})}
+                  className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
+                <input
+                  type="number"
+                  value={notesForm.savings_amount || ''} 
+                  onChange={(e) => setNotesForm({...notesForm, savings_amount: e.target.value})} 
+                  placeholder="0.00"
+                  className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
+                <input
+                  type="number"
+                  value={notesForm.emergency_fund || ''} 
+                  onChange={(e) => setNotesForm({...notesForm, emergency_fund: e.target.value})} 
+                  placeholder="0.00"
+                  className="w-full rounded-xl py-3 px-4 bg-white/10 backdrop-blur-md border border-white/20 focus:border-purple-400/50 text-white placeholder:text-white/40 outline-none transition-all duration-300 focus:ring-2 focus:ring-purple-500/30"
+                />
+              </div>
+            </div>
+            <GlowButton 
+              onClick={() => {
+                updateNotesMutation.mutate({
+                  note_login_info: notesForm.note_login_info,
+                  note_total_debt: notesForm.note_total_debt,
+                  debt_amount: parseFloat(notesForm.debt_amount) || 0,
+                  debt_due_date: notesForm.debt_due_date,
+                  savings_amount: parseFloat(notesForm.savings_amount) || 0,
+                  emergency_fund: parseFloat(notesForm.emergency_fund) || 0
+                });
+              }} 
+              disabled={updateNotesMutation.isPending}
+              className="w-full"
+            >
+              {updateNotesMutation.isPending ? 'Saving...' : 'Save Notes'}
+            </GlowButton>
+          </div>
+        </DialogContent>
+      </Dialog>
     </CosmicBackground>
   );
 }
