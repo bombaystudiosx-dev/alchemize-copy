@@ -8,6 +8,7 @@ import GlowButton from '@/components/cosmic/GlowButton';
 // Removed unused CosmicInput import
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+// Back nav handled by bottom tab bar
 import { 
   User, Mail, 
   Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2
