@@ -578,6 +578,24 @@ export default function Finance() {
           </DialogContent>
         </Dialog>
 
+        <BottomSheet
+          open={showIncomeCatSheet}
+          onOpenChange={setShowIncomeCatSheet}
+          title="Income Category"
+          value={newIncome.income_category}
+          onSelect={(val) => setNewIncome({ ...newIncome, income_category: val })}
+          options={incomeCategories.map(cat => ({ value: cat, label: cat }))}
+        />
+
+        <BottomSheet
+          open={showExpenseCatSheet}
+          onOpenChange={setShowExpenseCatSheet}
+          title="Expense Category"
+          value={newExpense.expense_category}
+          onSelect={(val) => setNewExpense({ ...newExpense, expense_category: val })}
+          options={expenseCategories.map(cat => ({ value: cat, label: cat }))}
+        />
+
       </PullToRefresh>
     </CosmicBackground>
   );

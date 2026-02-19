@@ -53,7 +53,14 @@ export default function Goals() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Goal.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['goals'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['goals'] });
+      const prev = queryClient.getQueryData(['goals']);
+      queryClient.setQueryData(['goals'], old => (old || []).filter(g => g.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['goals'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['goals'])
   });
 
   const closeDialog = () => {

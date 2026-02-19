@@ -28,12 +28,26 @@ export default function TodoList() {
 
   const deleteTodoMutation = useMutation({
     mutationFn: (id) => base44.entities.TodoItem.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const prev = queryClient.getQueryData(['todos']);
+      queryClient.setQueryData(['todos'], old => (old || []).filter(t => t.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['todos'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
   });
 
   const toggleTodoMutation = useMutation({
     mutationFn: (id) => base44.entities.TodoItem.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const prev = queryClient.getQueryData(['todos']);
+      queryClient.setQueryData(['todos'], old => (old || []).filter(t => t.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['todos'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
   });
 
   const handleAddTodo = (e) => {

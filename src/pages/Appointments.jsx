@@ -54,7 +54,14 @@ export default function Appointments() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Appointment.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['appointments'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const prev = queryClient.getQueryData(['appointments']);
+      queryClient.setQueryData(['appointments'], old => (old || []).filter(a => a.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['appointments'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['appointments'])
   });
 
   const closeDialog = () => {
