@@ -9,7 +9,7 @@ import GlowButton from '@/components/cosmic/GlowButton';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
-  ArrowLeft, Settings as SettingsIcon, User, Mail, 
+  User, Mail, 
   Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
