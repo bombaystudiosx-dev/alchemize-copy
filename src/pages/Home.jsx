@@ -211,8 +211,6 @@ export default function Home() {
             <span>→</span>
           </motion.div>
         </motion.div>
-      </div>
-
       </PullToRefresh>
 
       {/* Feature Manager */}
