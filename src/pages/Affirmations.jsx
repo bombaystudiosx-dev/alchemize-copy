@@ -10,9 +10,9 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, Heart, Star, Trash2, Pin, Edit2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import BottomSheet from '@/components/native/BottomSheet';
 
 const categoryEmojis = {
   'self-love': '💖',
@@ -28,6 +28,7 @@ export default function Affirmations() {
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [newAffirmation, setNewAffirmation] = useState({ text: '', category: 'self-love' });
   const [filter, setFilter] = useState('all');
+  const [showCategorySheet, setShowCategorySheet] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: affirmations = [], isLoading } = useQuery({
@@ -50,7 +51,16 @@ export default function Affirmations() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Affirmation.update(id, data),
-    onSuccess: () => {
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['affirmations'] });
+      const prev = queryClient.getQueryData(['affirmations']);
+      queryClient.setQueryData(['affirmations'], old => 
+        (old || []).map(a => a.id === id ? { ...a, ...data } : a)
+      );
+      return { prev };
+    },
+    onError: (err, vars, ctx) => { if (ctx?.prev) queryClient.setQueryData(['affirmations'], ctx.prev); },
+    onSettled: () => {
       queryClient.invalidateQueries(['affirmations']);
       setShowDialog(false);
       setEditingAppointment(null);
@@ -60,7 +70,14 @@ export default function Affirmations() {
 
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Affirmation.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['affirmations'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['affirmations'] });
+      const prev = queryClient.getQueryData(['affirmations']);
+      queryClient.setQueryData(['affirmations'], old => (old || []).filter(a => a.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['affirmations'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['affirmations'])
   });
 
   const filteredAffirmations = filter === 'all' 
@@ -263,21 +280,14 @@ export default function Affirmations() {
               
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
-                <Select
-                  value={newAffirmation.category}
-                  onValueChange={(value) => setNewAffirmation({ ...newAffirmation, category: value })}
+                <button
+                  type="button"
+                  onClick={() => setShowCategorySheet(true)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
-                    {Object.entries(categoryEmojis).map(([key, emoji]) => (
-                      <SelectItem key={key} value={key}>
-                        {emoji} {key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' ')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <span>{categoryEmojis[newAffirmation.category]} {newAffirmation.category.charAt(0).toUpperCase() + newAffirmation.category.slice(1).replace('-', ' ')}</span>
+                  <span className="text-white/40">▾</span>
+                </button>
               </div>
               
               <GlowButton
@@ -296,6 +306,19 @@ export default function Affirmations() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <BottomSheet
+          open={showCategorySheet}
+          onOpenChange={setShowCategorySheet}
+          title="Select Category"
+          value={newAffirmation.category}
+          onSelect={(val) => setNewAffirmation({ ...newAffirmation, category: val })}
+          options={Object.entries(categoryEmojis).map(([key, emoji]) => ({
+            value: key,
+            label: key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' '),
+            icon: emoji
+          }))}
+        />
     </CosmicBackground>
   );
 }
