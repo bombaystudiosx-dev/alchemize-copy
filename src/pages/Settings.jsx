@@ -11,14 +11,16 @@ import { createPageUrl } from '@/utils';
 // Back nav handled by bottom tab bar
 import { 
   User, Mail, 
-  Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2
+  Moon, KeyRound, Sparkles, Heart, LogOut, Info, FileText, Shield, Camera, Loader2, Trash2, AlertTriangle
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
   const [showAbout, setShowAbout] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [showDeleteAccount, setShowDeleteAccount] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -197,6 +199,28 @@ export default function Settings() {
             </CosmicCard>
           </motion.div>
 
+          {/* Danger Zone */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="space-y-3 mt-8"
+          >
+            <h3 className="text-sm text-red-400/70 uppercase tracking-wider mb-4">Danger Zone</h3>
+            <CosmicCard 
+              onClick={() => setShowDeleteAccount(true)}
+              className="flex items-center gap-4 cursor-pointer border-red-500/20 hover:border-red-500/40"
+            >
+              <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-red-400">Delete Account</p>
+                <p className="text-xs text-white/50">Permanently delete your account and all data</p>
+              </div>
+            </CosmicCard>
+          </motion.div>
+
           {/* Logout */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -225,6 +249,9 @@ export default function Settings() {
             <p className="text-xs text-white/20 mt-1">Made with ✨ and 💜</p>
           </motion.div>
         </div>
+
+        {/* Delete Account Flow */}
+        <DeleteAccountFlow open={showDeleteAccount} onOpenChange={setShowDeleteAccount} />
 
         {/* About Dialog */}
         <Dialog open={showAbout} onOpenChange={setShowAbout}>
