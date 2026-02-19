@@ -367,10 +367,7 @@ export default function Habits() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
-          </Link>
+          <div className="w-10" />
           <h1 className="text-xl font-bold text-white">Habit Tracker</h1>
           <button 
             onClick={() => setShowAddDialog(true)}
