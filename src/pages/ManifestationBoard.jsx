@@ -4,8 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import GlowButton from '@/components/cosmic/GlowButton';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
+// Navigation handled by bottom tab bar
 import { Plus, Sparkles, Sun } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 
