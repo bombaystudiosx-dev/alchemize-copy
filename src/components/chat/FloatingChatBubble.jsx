@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { X, Send, Sparkles, Loader2, MessageCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-export default function FloatingChatBubble() {
+export default function FloatingChatBubble({ showTabBar = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -81,7 +81,8 @@ export default function FloatingChatBubble() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/50 flex items-center justify-center"
+            className="fixed right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/50 flex items-center justify-center"
+            style={{ bottom: showTabBar ? 'calc(76px + env(safe-area-inset-bottom))' : '24px' }}
           >
             <Sparkles className="w-6 h-6 text-white" />
           </motion.button>
