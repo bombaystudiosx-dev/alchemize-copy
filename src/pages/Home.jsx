@@ -190,7 +190,7 @@ export default function Home() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-center pb-8 relative z-10"
+          className="text-center pb-4 relative z-10"
         >
           <motion.div 
             className="flex items-center justify-center gap-2 text-white/40 text-sm"
