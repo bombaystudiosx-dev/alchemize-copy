@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import FeatureCarousel from '@/components/carousel/FeatureCarousel';
 import FeatureManager from '@/components/home/FeatureManager';
+import PullToRefresh from '@/components/common/PullToRefresh';
 import { Moon, Sparkles, Settings } from 'lucide-react';
 
 export default function Home() {
@@ -50,9 +51,17 @@ export default function Home() {
 
   const firstName = user?.full_name?.split(' ')[0] || 'Seeker';
 
+  const handleRefresh = useCallback(async () => {
+    try {
+      const userData = await base44.auth.me();
+      setUser(userData);
+    } catch (e) {}
+    window.dispatchEvent(new Event('features-updated'));
+  }, []);
+
   return (
     <CosmicBackground>
-      <div className="min-h-screen flex flex-col">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
         {/* Floating particles - memoized */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           {particles.map((p) => (
@@ -204,13 +213,14 @@ export default function Home() {
         </motion.div>
       </div>
 
+      </PullToRefresh>
+
       {/* Feature Manager */}
       <FeatureManager 
         open={showFeatureManager} 
         onOpenChange={(open) => {
           setShowFeatureManager(open);
           if (!open) {
-            // Trigger carousel update
             window.dispatchEvent(new Event('features-updated'));
           }
         }} 
