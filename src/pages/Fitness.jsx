@@ -13,8 +13,8 @@ import {
   Ruler, Weight, TrendingUp, Activity, User, Award, Zap, Target, Calendar 
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import BottomSheet from '@/components/native/BottomSheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { format, startOfWeek, isWithinInterval, addDays } from 'date-fns';
 
@@ -50,6 +50,7 @@ export default function Fitness() {
     muscle_mass: '',
     notes: ''
   });
+  const [showWorkoutTypeSheet, setShowWorkoutTypeSheet] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
@@ -121,12 +122,26 @@ export default function Fitness() {
 
   const deleteWorkoutMutation = useMutation({
     mutationFn: (id) => base44.entities.Workout.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['workouts'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['workouts'] });
+      const prev = queryClient.getQueryData(['workouts']);
+      queryClient.setQueryData(['workouts'], old => (old || []).filter(w => w.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['workouts'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['workouts'])
   });
 
   const deleteMetricsMutation = useMutation({
     mutationFn: (id) => base44.entities.BodyMetrics.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['bodyMetrics'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['bodyMetrics'] });
+      const prev = queryClient.getQueryData(['bodyMetrics']);
+      queryClient.setQueryData(['bodyMetrics'], old => (old || []).filter(m => m.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['bodyMetrics'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['bodyMetrics'])
   });
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -583,21 +598,14 @@ export default function Fitness() {
             <div className="space-y-4 mt-4">
               <div>
                 <label className="text-sm text-purple-200/70 mb-2 block">Workout Type</label>
-                <Select
-                  value={newWorkout.type}
-                  onValueChange={(value) => setNewWorkout({ ...newWorkout, type: value })}
+                <button
+                  type="button"
+                  onClick={() => setShowWorkoutTypeSheet(true)}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
                 >
-                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a0a2e] border-purple-500/30">
-                    {Object.entries(workoutTypes).map(([key, { emoji }]) => (
-                      <SelectItem key={key} value={key}>
-                        {emoji} {key.charAt(0).toUpperCase() + key.slice(1)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <span>{workoutTypes[newWorkout.type]?.emoji} {newWorkout.type.charAt(0).toUpperCase() + newWorkout.type.slice(1)}</span>
+                  <span className="text-white/40">▾</span>
+                </button>
               </div>
               
               <div className="grid grid-cols-2 gap-3">
