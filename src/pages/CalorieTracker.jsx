@@ -85,7 +85,14 @@ export default function CalorieTracker() {
 
   const deleteFoodMutation = useMutation({
     mutationFn: (id) => base44.entities.FoodLog.delete(id),
-    onSuccess: () => queryClient.invalidateQueries(['foodLogs'])
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey: ['foodLogs'] });
+      const prev = queryClient.getQueryData(['foodLogs']);
+      queryClient.setQueryData(['foodLogs'], old => (old || []).filter(f => f.id !== id));
+      return { prev };
+    },
+    onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['foodLogs'], ctx.prev); },
+    onSettled: () => queryClient.invalidateQueries(['foodLogs'])
   });
 
   const saveFoodMutation = useMutation({
