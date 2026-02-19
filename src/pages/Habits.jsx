@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import TimerView from '@/components/habits/TimerView';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 // Default habits structure
 const getDefaultHabitsData = () => {
@@ -357,9 +358,13 @@ export default function Habits() {
     );
   }
 
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ['habitProgress'] });
+  };
+
   return (
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-8">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -529,7 +534,7 @@ export default function Habits() {
             </AnimatePresence>
           </div>
         </div>
-      </div>
+      </PullToRefresh>
 
       {/* Add Habit Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>

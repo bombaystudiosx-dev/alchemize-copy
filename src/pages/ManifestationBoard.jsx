@@ -13,6 +13,7 @@ import PortalTile from '@/components/manifestation/PortalTile';
 import PortalView from '@/components/manifestation/PortalView';
 import AddManifestationDialog from '@/components/manifestation/AddManifestationDialog';
 import DailyRitualModal from '@/components/manifestation/DailyRitualModal';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function ManifestationBoard() {
   const [showDialog, setShowDialog] = useState(false);
@@ -177,7 +178,7 @@ export default function ManifestationBoard() {
           transition={{ duration: 1 }}
         />
 
-        <div className="min-h-screen flex flex-col relative z-10">
+        <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['manifestations'])} className="min-h-screen flex flex-col relative z-10">
           {/* Header */}
           <motion.header
             initial={{ opacity: 0, y: -20 }}
@@ -311,7 +312,7 @@ export default function ManifestationBoard() {
               Know that there is a version of you in the quantum field that already has all of this and you are now colliding with it
             </p>
           </motion.div>
-        </div>
+        </PullToRefresh>
       </CosmicBackground>
 
       {/* Add/Edit Dialog */}

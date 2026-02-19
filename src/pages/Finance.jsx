@@ -14,6 +14,7 @@ import ExpenseCalendar from '@/components/finance/ExpenseCalendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
+import PullToRefresh from '@/components/common/PullToRefresh';
 
 export default function Finance() {
   const [viewMode, setViewMode] = useState('monthly');
@@ -218,9 +219,17 @@ export default function Finance() {
   const { grossIncome, netIncome, totalExpenses, moneyLeft, label, categoryBreakdown, periodExpenses } = getPeriodData();
   const totalDebt = financialNote.debt_amount || 0;
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries(['financialIncomes']),
+      queryClient.invalidateQueries(['financialExpenses']),
+      queryClient.invalidateQueries(['financialNotes']),
+    ]);
+  };
+
   return (
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-8">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -560,6 +569,8 @@ export default function Finance() {
             </div>
           </DialogContent>
         </Dialog>
+
+      </PullToRefresh>
 
         {/* Edit Notes Dialog */}
         <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
