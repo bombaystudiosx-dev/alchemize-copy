@@ -19,7 +19,8 @@ export default function Splash() {
     if (rememberMe) {
       localStorage.setItem('remember_me', 'true');
     }
-    window.location.href = createPageUrl('Premium');
+    const onboarded = localStorage.getItem('onboarding_complete');
+    window.location.href = createPageUrl(onboarded ? 'Premium' : 'Onboarding');
   };
 
   const text = {

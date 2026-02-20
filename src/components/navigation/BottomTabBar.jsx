@@ -47,7 +47,7 @@ const TABS = [
   }
 ];
 
-export const HIDDEN_TAB_PAGES = ['Splash', 'Terms', 'Privacy', 'AgentChat', 'Premium', 'Paywall', 'Profile'];
+export const HIDDEN_TAB_PAGES = ['Splash', 'Terms', 'Privacy', 'AgentChat', 'Premium', 'Paywall', 'Profile', 'Onboarding'];
 
 export default function BottomTabBar({ currentPageName }) {
   const location = useLocation();

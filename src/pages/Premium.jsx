@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { FREE_FEATURE_IDS } from '@/components/subscription/subscriptionHelper';
 
 const PLANS = [
   {
@@ -173,6 +174,17 @@ export default function Premium() {
               Then $15.55/month after trial. Cancel anytime.
             </p>
           )}
+
+          {/* Skip / Free tier */}
+          <button
+            onClick={() => {
+              localStorage.setItem('skipped_premium', 'true');
+              window.location.href = createPageUrl('Home');
+            }}
+            className="w-full py-3 text-white/40 text-sm font-medium hover:text-white/60 transition-colors"
+          >
+            Continue with Free Plan (3 features)
+          </button>
 
           {/* Footer */}
           <div className="text-center text-white/30 text-xs space-y-1 pt-2">
