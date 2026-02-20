@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon
+  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
@@ -99,6 +99,27 @@ export default function Settings() {
                 title="Email"
                 subtitle={user?.email || 'Not set'}
               />
+            </div>
+          </motion.div>
+
+          {/* PREMIUM Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Premium</h3>
+            <div className="space-y-2">
+              <Link to={createPageUrl('Premium')}>
+                <SettingsRow
+                  icon={Crown}
+                  iconBg="bg-amber-500/20"
+                  iconColor="text-amber-400"
+                  title="Alchemize Premium"
+                  subtitle="Unlock advanced manifestation tools"
+                  onClick={() => {}}
+                />
+              </Link>
             </div>
           </motion.div>
 
