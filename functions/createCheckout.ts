@@ -39,6 +39,7 @@ Deno.serve(async (req) => {
       metadata: {
         base44_app_id: Deno.env.get("BASE44_APP_ID"),
         plan,
+        user_email: customerEmail || '',
       },
     };
 
