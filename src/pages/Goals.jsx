@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import PremiumGate from '@/components/subscription/PremiumGate';
 
 const statusConfig = {
   not_started: { label: 'Not Started', icon: Clock, color: 'text-gray-400', bg: 'bg-gray-500/20' },
@@ -90,6 +91,7 @@ export default function Goals() {
   };
 
   return (
+    <PremiumGate featureId="goals">
     <CosmicBackground>
       <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['goals'])} className="min-h-screen pb-8">
         {/* Header */}
@@ -310,5 +312,6 @@ export default function Goals() {
           </DialogContent>
         </Dialog>
     </CosmicBackground>
+    </PremiumGate>
   );
 }

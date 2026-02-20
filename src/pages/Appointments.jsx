@@ -9,6 +9,7 @@ import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2, Briefcase, User } from 'lucide-react';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -117,6 +118,7 @@ export default function Appointments() {
   const filteredPast = pastAppointments.filter(a => (a.category || 'personal') === activeTab);
 
   return (
+    <PremiumGate featureId="appointments">
     <CosmicBackground>
       <div className="min-h-screen pb-8">
         {/* Header */}
@@ -408,5 +410,6 @@ export default function Appointments() {
         </Dialog>
       </div>
     </CosmicBackground>
+    </PremiumGate>
   );
 }

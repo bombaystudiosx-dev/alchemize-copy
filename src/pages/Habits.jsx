@@ -4,6 +4,7 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 // Navigation handled by bottom tab bar
 import { Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2, Edit, X } from 'lucide-react';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { format } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import CosmicInput from '@/components/cosmic/CosmicInput';
@@ -362,6 +363,7 @@ export default function Habits() {
   };
 
   return (
+    <PremiumGate featureId="habits">
     <CosmicBackground>
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-8">
         {/* Header */}
@@ -662,5 +664,6 @@ export default function Habits() {
         )}
       </AnimatePresence>
     </CosmicBackground>
+    </PremiumGate>
   );
 }

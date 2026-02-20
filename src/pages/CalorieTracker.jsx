@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import { ArrowLeft, Camera, Settings, Plus, CalendarDays, BookMarked, Save } from 'lucide-react';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -222,6 +223,7 @@ export default function CalorieTracker() {
   };
 
   return (
+    <PremiumGate featureId="calories">
     <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-gray-50">
       <motion.header
         initial={{ opacity: 0, y: -20 }}
@@ -416,5 +418,6 @@ export default function CalorieTracker() {
         </DialogContent>
       </Dialog>
     </PullToRefresh>
+    </PremiumGate>
   );
 }

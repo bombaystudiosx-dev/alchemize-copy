@@ -6,6 +6,7 @@ import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import PremiumGate from '@/components/subscription/PremiumGate';
 
 export default function TodoList() {
   const [newTodo, setNewTodo] = useState({ text: '', notes: '' });
@@ -58,6 +59,7 @@ export default function TodoList() {
   };
 
   return (
+    <PremiumGate featureId="todo">
     <div 
       className="min-h-screen flex flex-col items-center relative overflow-hidden"
       style={{
@@ -214,5 +216,6 @@ export default function TodoList() {
         </motion.div>
       </div>
     </div>
+    </PremiumGate>
   );
 }

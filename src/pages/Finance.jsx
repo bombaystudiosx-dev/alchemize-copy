@@ -9,6 +9,7 @@ import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import IncomeCalendar from '@/components/finance/IncomeCalendar';
 import ExpenseCalendar from '@/components/finance/ExpenseCalendar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -244,6 +245,7 @@ export default function Finance() {
   };
 
   return (
+    <PremiumGate featureId="finance">
     <CosmicBackground>
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-8">
         <motion.header
@@ -598,5 +600,6 @@ export default function Finance() {
 
       </PullToRefresh>
     </CosmicBackground>
+    </PremiumGate>
   );
 }

@@ -12,6 +12,7 @@ import {
   ArrowLeft, Plus, Dumbbell, Flame, Clock, Trash2, 
   Ruler, Weight, TrendingUp, Activity, User, Award, Zap, Target, Calendar 
 } from 'lucide-react';
+import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import BottomSheet from '@/components/native/BottomSheet';
@@ -199,6 +200,7 @@ export default function Fitness() {
   };
 
   return (
+    <PremiumGate featureId="fitness">
     <CosmicBackground>
       <div className="min-h-screen pb-8">
         {/* Header */}
@@ -803,5 +805,6 @@ export default function Fitness() {
         />
       </div>
     </CosmicBackground>
+    </PremiumGate>
   );
 }
