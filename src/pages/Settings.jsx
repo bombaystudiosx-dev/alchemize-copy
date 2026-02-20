@@ -84,14 +84,16 @@ export default function Settings() {
           >
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Account</h3>
             <div className="space-y-2">
-              <SettingsRow
-                icon={User}
-                iconBg="bg-purple-500/20"
-                iconColor="text-purple-400"
-                title="Profile"
-                subtitle="Manage your profile details"
-                onClick={() => {}}
-              />
+              <Link to={createPageUrl('Profile')}>
+                <SettingsRow
+                  icon={User}
+                  iconBg="bg-purple-500/20"
+                  iconColor="text-purple-400"
+                  title="Profile"
+                  subtitle="Manage your profile details"
+                  onClick={() => {}}
+                />
+              </Link>
               <SettingsRow
                 icon={Mail}
                 iconBg="bg-blue-500/20"
