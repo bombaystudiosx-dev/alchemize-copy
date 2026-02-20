@@ -164,3 +164,12 @@ input[type="range"]::-webkit-slider-thumb {
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* ===== PERFORMANCE: CSS-only float animation ===== */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(-8px); opacity: 0.3; }
+  50% { transform: translateY(8px); opacity: 0.6; }
+}
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}

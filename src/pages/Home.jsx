@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
@@ -13,16 +13,7 @@ export default function Home() {
   const [showFeatureManager, setShowFeatureManager] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Memoize particles to prevent re-renders
-  const particles = useMemo(() => 
-    [...Array(6)].map((_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      duration: 3 + Math.random() * 2,
-      delay: Math.random() * 2,
-    })), []
-  );
+  // Removed heavy JS particles — using CSS-only sparkles instead
 
   useEffect(() => {
     const loadUser = async () => {
@@ -62,25 +53,11 @@ export default function Home() {
   return (
     <CosmicBackground>
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
-        {/* Floating particles - memoized */}
+        {/* Lightweight CSS-only particles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          {particles.map((p) => (
-            <motion.div
-              key={p.id}
-              className="absolute w-1 h-1 bg-purple-400/30 rounded-full"
-              style={{ left: p.left, top: p.top }}
-              animate={{
-                y: [-20, 20, -20],
-                opacity: [0.3, 0.7, 0.3],
-                scale: [1, 1.5, 1],
-              }}
-              transition={{
-                duration: p.duration,
-                repeat: Infinity,
-                delay: p.delay,
-              }}
-            />
-          ))}
+          <div className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-float-slow" style={{ left: '15%', top: '20%' }} />
+          <div className="absolute w-1 h-1 bg-purple-400/20 rounded-full animate-float-slow" style={{ left: '75%', top: '35%', animationDelay: '1s' }} />
+          <div className="absolute w-1 h-1 bg-purple-400/25 rounded-full animate-float-slow" style={{ left: '45%', top: '60%', animationDelay: '2s' }} />
         </div>
 
         {/* Header */}
