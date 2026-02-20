@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import PlanCard from '@/components/subscription/PlanCard';
 import { 
-  ChevronLeft, Crown, Sparkles, Star, Wand2, Eye, 
+  Crown, Sparkles, Star, Wand2, Eye, 
   Infinity, Loader2 
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 const PLANS = [
   {
@@ -47,10 +47,8 @@ const FEATURES = [
 export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState('annual');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleSubscribe = async () => {
-    // Block checkout from iframe
     if (window.self !== window.top) {
       alert('Checkout works only from the published app. Please open the app directly.');
       return;
@@ -70,123 +68,128 @@ export default function Premium() {
   };
 
   return (
-    <CosmicBackground>
-      <div className="min-h-screen pb-8">
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Background */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/ce90c0d9f_B28AA351-FB07-478A-8B1E-FB90E998F0B7.png)'
+        }}
+      />
+      <div className="absolute inset-0 bg-black/60" />
+
+      <div className="relative z-10 min-h-screen flex flex-col px-5 pt-12 pb-8 safe-area-top safe-area-bottom">
+        {/* Hero */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center px-4 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118]/95 to-transparent backdrop-blur-sm"
+          className="text-center space-y-3 mb-6"
         >
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-white"
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-purple-500/30">
+            <Crown className="w-8 h-8 text-white" />
+          </div>
+          <h1 
+            className="text-3xl font-bold"
+            style={{
+              background: 'linear-gradient(135deg, #ffd700, #a855f7)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
           >
-            <ChevronLeft className="w-6 h-6" />
-            <span className="text-base font-medium">Back</span>
-          </button>
-        </motion.header>
+            Alchemize Premium
+          </h1>
+          <p className="text-white/60 text-sm">
+            Unlock the full power of transformation
+          </p>
+        </motion.div>
 
-        <div className="px-5 space-y-6">
-          {/* Hero */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center space-y-3"
-          >
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-400 to-purple-600 flex items-center justify-center mx-auto shadow-lg shadow-purple-500/30">
-              <Crown className="w-8 h-8 text-white" />
-            </div>
-            <h1 
-              className="text-3xl font-bold"
-              style={{
-                background: 'linear-gradient(135deg, #ffd700, #a855f7)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-              }}
-            >
-              Alchemize Premium
-            </h1>
-            <p className="text-white/60 text-sm">
-              Unlock the full power of transformation
-            </p>
-          </motion.div>
-
-          {/* Features */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white/5 rounded-2xl border border-white/10 p-4 space-y-3"
-          >
-            {FEATURES.map((feature, i) => {
-              const Icon = feature.icon;
-              return (
-                <div key={i} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-purple-400" />
-                  </div>
-                  <span className="text-white/90 text-sm">{feature.text}</span>
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4 space-y-3 mb-6"
+        >
+          {FEATURES.map((feature, i) => {
+            const Icon = feature.icon;
+            return (
+              <div key={i} className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <Icon className="w-4 h-4 text-purple-400" />
                 </div>
-              );
-            })}
-          </motion.div>
+                <span className="text-white/90 text-sm">{feature.text}</span>
+              </div>
+            );
+          })}
+        </motion.div>
 
-          {/* Plans */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-3"
-          >
-            <h2 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest px-1">
-              Choose Your Plan
-            </h2>
-            {PLANS.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                selected={selectedPlan === plan.id}
-                onSelect={setSelectedPlan}
-                popular={plan.popular}
-              />
-            ))}
-          </motion.div>
+        {/* Plans */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="space-y-3 mb-6"
+        >
+          <h2 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest px-1">
+            Choose Your Plan
+          </h2>
+          {PLANS.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              selected={selectedPlan === plan.id}
+              onSelect={setSelectedPlan}
+              popular={plan.popular}
+            />
+          ))}
+        </motion.div>
 
-          {/* Subscribe Button */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Subscribe Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="space-y-3"
+        >
+          <button
+            onClick={handleSubscribe}
+            disabled={loading}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg shadow-lg shadow-purple-500/30 hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            <button
-              onClick={handleSubscribe}
-              disabled={loading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg shadow-lg shadow-purple-500/30 hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  {selectedPlan === 'monthly' ? 'Start 7-Day Free Trial' : 'Subscribe Now'}
-                </>
-              )}
-            </button>
-            {selectedPlan === 'monthly' && (
-              <p className="text-center text-white/40 text-xs mt-2">
-                Then $15.55/month after trial. Cancel anytime.
-              </p>
+            {loading ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>
+                <Sparkles className="w-5 h-5" />
+                {selectedPlan === 'monthly' ? 'Start 7-Day Free Trial' : 'Subscribe Now'}
+              </>
             )}
-          </motion.div>
+          </button>
+          {selectedPlan === 'monthly' && (
+            <p className="text-center text-white/40 text-xs">
+              Then $15.55/month after trial. Cancel anytime.
+            </p>
+          )}
 
           {/* Footer */}
-          <div className="text-center text-white/30 text-xs space-y-1 pb-4">
+          <div className="text-center text-white/30 text-xs space-y-1 pt-2">
             <p>Subscriptions auto-renew. Cancel anytime.</p>
             <p>Payments processed securely by Stripe.</p>
+            <div className="flex items-center justify-center gap-3 pt-1">
+              <Link to={createPageUrl('Terms')} className="hover:text-white/60 transition-colors">
+                Terms
+              </Link>
+              <span>•</span>
+              <Link to={createPageUrl('Privacy')} className="hover:text-white/60 transition-colors">
+                Privacy
+              </Link>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </CosmicBackground>
+    </div>
   );
 }

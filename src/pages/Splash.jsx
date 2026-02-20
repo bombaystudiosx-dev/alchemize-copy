@@ -19,7 +19,7 @@ export default function Splash() {
     if (rememberMe) {
       localStorage.setItem('remember_me', 'true');
     }
-    window.location.href = createPageUrl('Home');
+    window.location.href = createPageUrl('Premium');
   };
 
   const text = {

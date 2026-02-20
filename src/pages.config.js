@@ -58,12 +58,12 @@ import Habits from './pages/Habits';
 import Home from './pages/Home';
 import Journal from './pages/Journal';
 import ManifestationBoard from './pages/ManifestationBoard';
+import Premium from './pages/Premium';
 import Privacy from './pages/Privacy';
 import Settings from './pages/Settings';
 import Splash from './pages/Splash';
 import Terms from './pages/Terms';
 import TodoList from './pages/TodoList';
-import Premium from './pages/Premium';
 import __Layout from './Layout.jsx';
 
 
@@ -79,12 +79,12 @@ export const PAGES = {
     "Home": Home,
     "Journal": Journal,
     "ManifestationBoard": ManifestationBoard,
+    "Premium": Premium,
     "Privacy": Privacy,
     "Settings": Settings,
     "Splash": Splash,
     "Terms": Terms,
     "TodoList": TodoList,
-    "Premium": Premium,
 }
 
 export const pagesConfig = {
