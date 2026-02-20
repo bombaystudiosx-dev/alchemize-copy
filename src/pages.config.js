@@ -63,6 +63,7 @@ import Settings from './pages/Settings';
 import Splash from './pages/Splash';
 import Terms from './pages/Terms';
 import TodoList from './pages/TodoList';
+import Premium from './pages/Premium';
 import __Layout from './Layout.jsx';
 
 
@@ -83,6 +84,7 @@ export const PAGES = {
     "Splash": Splash,
     "Terms": Terms,
     "TodoList": TodoList,
+    "Premium": Premium,
 }
 
 export const pagesConfig = {
