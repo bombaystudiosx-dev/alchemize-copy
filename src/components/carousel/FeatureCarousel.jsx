@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { base44 } from '@/api/base44Client';
 import { 
   Sparkles, Heart, Target, CheckSquare, DollarSign, 
   Dumbbell, Apple, Calendar, Settings, Scroll, BookOpen
 } from 'lucide-react';
+import { isFeatureLocked } from '@/components/subscription/subscriptionHelper';
+import LockedFeatureOverlay from '@/components/subscription/LockedFeatureOverlay';
 
 const features = [
   { id: 'manifestation', title: 'Manifestation Board', description: 'Visualize/feel your dreams until your reality becomes a reflection', icon: Sparkles, route: 'ManifestationBoard', gradient: 'from-violet-600 to-purple-600', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/76aebc03e_3980621C-E6F5-4042-A813-8669BB08CC22.png' },
@@ -23,9 +26,15 @@ const features = [
 export default function FeatureCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleFeatures, setVisibleFeatures] = useState(features);
+  const [user, setUser] = useState(null);
   const touchStartX = useRef(0);
   const touchStartTime = useRef(0);
   const isSwiping = useRef(false);
+
+  // Load user for premium check
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
 
   // Load enabled features
   useEffect(() => {
@@ -90,6 +99,7 @@ export default function FeatureCarousel() {
 
             const isActive = offset === 0;
             const Icon = feature.icon;
+            const locked = feature.id !== 'settings' && isFeatureLocked(feature.id, user);
 
             return (
               <div
@@ -103,7 +113,7 @@ export default function FeatureCarousel() {
                 }}
               >
                 <Link
-                  to={createPageUrl(feature.route)}
+                  to={locked ? createPageUrl('Premium') : createPageUrl(feature.route)}
                   className="block"
                   onClick={(e) => {
                     if (isSwiping.current) e.preventDefault();
@@ -133,8 +143,11 @@ export default function FeatureCarousel() {
                       <p className="text-sm text-white/60 leading-relaxed">{feature.description}</p>
                     </div>
 
+                    {/* Locked overlay */}
+                    {locked && <LockedFeatureOverlay />}
+
                     {/* Glow border */}
-                    {isActive && (
+                    {isActive && !locked && (
                       <div className={`absolute inset-0 rounded-3xl border-2 border-purple-500/30 pointer-events-none`} />
                     )}
                   </div>
