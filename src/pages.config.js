@@ -65,6 +65,7 @@ import Splash from './pages/Splash';
 import Terms from './pages/Terms';
 import TodoList from './pages/TodoList';
 import Profile from './pages/Profile';
+import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
@@ -87,6 +88,7 @@ export const PAGES = {
     "Terms": Terms,
     "TodoList": TodoList,
     "Profile": Profile,
+    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {
