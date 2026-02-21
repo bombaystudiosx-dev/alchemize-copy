@@ -186,6 +186,29 @@ export default function Premium() {
             Continue with Free Plan (3 features)
           </button>
 
+          {/* Restore Purchase */}
+          <button
+            onClick={async () => {
+              try {
+                setLoading(true);
+                const res = await base44.functions.invoke('restorePurchase');
+                if (res.data?.found) {
+                  alert('Subscription restored! Redirecting...');
+                  window.location.href = createPageUrl('Home');
+                } else {
+                  alert(res.data?.message || 'No active subscription found.');
+                }
+              } catch (e) {
+                alert('Could not restore purchase. Please try again.');
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="w-full py-2 text-white/30 text-xs font-medium hover:text-white/50 transition-colors"
+          >
+            Restore Purchase
+          </button>
+
           {/* Footer */}
           <div className="text-center text-white/30 text-xs space-y-1 pt-2">
             <p>Subscriptions auto-renew. Cancel anytime.</p>
