@@ -58,14 +58,14 @@ import Habits from './pages/Habits';
 import Home from './pages/Home';
 import Journal from './pages/Journal';
 import ManifestationBoard from './pages/ManifestationBoard';
+import Onboarding from './pages/Onboarding';
 import Premium from './pages/Premium';
 import Privacy from './pages/Privacy';
+import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Splash from './pages/Splash';
 import Terms from './pages/Terms';
 import TodoList from './pages/TodoList';
-import Profile from './pages/Profile';
-import Onboarding from './pages/Onboarding';
 import __Layout from './Layout.jsx';
 
 
@@ -81,14 +81,14 @@ export const PAGES = {
     "Home": Home,
     "Journal": Journal,
     "ManifestationBoard": ManifestationBoard,
+    "Onboarding": Onboarding,
     "Premium": Premium,
     "Privacy": Privacy,
+    "Profile": Profile,
     "Settings": Settings,
     "Splash": Splash,
     "Terms": Terms,
     "TodoList": TodoList,
-    "Profile": Profile,
-    "Onboarding": Onboarding,
 }
 
 export const pagesConfig = {

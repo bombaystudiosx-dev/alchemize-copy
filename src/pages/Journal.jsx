@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
 
 
+// Journal is a FREE feature (gratitude) - no PremiumGate needed
+
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });

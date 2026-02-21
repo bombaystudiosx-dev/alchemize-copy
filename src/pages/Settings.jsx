@@ -112,16 +112,38 @@ export default function Settings() {
           >
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Premium</h3>
             <div className="space-y-2">
-              <Link to={createPageUrl('Premium')}>
+              {user?.subscription_status === 'active' || user?.subscription_status === 'trialing' ? (
                 <SettingsRow
                   icon={Crown}
                   iconBg="bg-amber-500/20"
                   iconColor="text-amber-400"
                   title="Alchemize Premium"
-                  subtitle="Unlock advanced manifestation tools"
-                  onClick={() => {}}
+                  subtitle={user?.subscription_status === 'trialing' ? 'Free Trial Active' : 'Active Subscription'}
+                  onClick={async () => {
+                    if (window.self !== window.top) {
+                      alert('Manage subscription from the published app.');
+                      return;
+                    }
+                    try {
+                      const res = await base44.functions.invoke('createPortalSession');
+                      if (res.data?.url) window.location.href = res.data.url;
+                    } catch (e) {
+                      alert('Could not open subscription management.');
+                    }
+                  }}
                 />
-              </Link>
+              ) : (
+                <Link to={createPageUrl('Premium')}>
+                  <SettingsRow
+                    icon={Crown}
+                    iconBg="bg-amber-500/20"
+                    iconColor="text-amber-400"
+                    title="Alchemize Premium"
+                    subtitle="Unlock advanced manifestation tools"
+                    onClick={() => {}}
+                  />
+                </Link>
+              )}
             </div>
           </motion.div>
 

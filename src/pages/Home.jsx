@@ -4,8 +4,11 @@ import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import FeatureCarousel from '@/components/carousel/FeatureCarousel';
 import FeatureManager from '@/components/home/FeatureManager';
+import DailyAffirmationWidget from '@/components/home/DailyAffirmationWidget';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import { Moon, Sparkles, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -66,8 +69,8 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 relative z-10"
         >
-          {/* Left - Crystal Ball / Logo */}
-          <div className="flex items-center">
+          {/* Left - Logo + Profile */}
+          <div className="flex items-center gap-3">
             <motion.img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png" 
               alt="Alchemize"
@@ -76,6 +79,15 @@ export default function Home() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.5 }}
             />
+            {user?.profile_picture && (
+              <Link to={createPageUrl('Profile')}>
+                <img 
+                  src={user.profile_picture} 
+                  alt="" 
+                  className="w-8 h-8 rounded-full object-cover border-2 border-purple-500/50"
+                />
+              </Link>
+            )}
           </div>
 
           {/* Right - Time, Settings, Moon */}
@@ -165,6 +177,9 @@ export default function Home() {
             Transform your reality by transforming yourself
           </p>
         </motion.div>
+
+        {/* Daily Affirmation Widget */}
+        <DailyAffirmationWidget />
 
         {/* Carousel */}
         <div className="flex-1 flex items-center">

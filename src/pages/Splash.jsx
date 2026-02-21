@@ -19,8 +19,17 @@ export default function Splash() {
     if (rememberMe) {
       localStorage.setItem('remember_me', 'true');
     }
+    // Auth is handled by Layout - redirectToLogin.
+    // After login, user lands on Home. We check onboarding there via useEffect.
     const onboarded = localStorage.getItem('onboarding_complete');
-    window.location.href = createPageUrl(onboarded ? 'Premium' : 'Onboarding');
+    const skipped = localStorage.getItem('skipped_premium');
+    if (onboarded && skipped) {
+      window.location.href = createPageUrl('Home');
+    } else if (onboarded) {
+      window.location.href = createPageUrl('Premium');
+    } else {
+      window.location.href = createPageUrl('Onboarding');
+    }
   };
 
   const text = {
