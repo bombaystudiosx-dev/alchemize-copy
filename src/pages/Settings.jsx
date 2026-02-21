@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
+import { isDevMode, setDevMode } from '@/components/subscription/subscriptionHelper';
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
@@ -26,6 +27,7 @@ export default function Settings() {
   const [showHealth, setShowHealth] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
+  const [devModeOn, setDevModeOn] = useState(() => isDevMode());
   const [showCalendar, setShowCalendar] = useState(() => {
     return localStorage.getItem('show_calendar') !== 'false';
   });
@@ -224,6 +226,16 @@ export default function Settings() {
                 toggle
                 checked={showCalendar}
                 onToggle={handleCalendarToggle}
+              />
+              <SettingsRow
+                icon={Shield}
+                iconBg="bg-amber-500/20"
+                iconColor="text-amber-400"
+                title="Dev Mode (Bypass Paywalls)"
+                subtitle={devModeOn ? 'All features unlocked' : 'Paywalls active'}
+                toggle
+                checked={devModeOn}
+                onToggle={(val) => { setDevMode(val); setDevModeOn(val); }}
               />
             </div>
           </motion.div>
