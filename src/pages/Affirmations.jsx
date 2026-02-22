@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import BottomSheet from '@/components/native/BottomSheet';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
 
 const categoryEmojis = {
   'self-love': '💖',
@@ -30,6 +32,7 @@ export default function Affirmations() {
   const [filter, setFilter] = useState('all');
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const queryClient = useQueryClient();
+  const goBack = useBackNav('Home', 'Affirmations');
 
   const { data: affirmations = [], isLoading } = useQuery({
     queryKey: ['affirmations'],
@@ -46,7 +49,9 @@ export default function Affirmations() {
       setShowDialog(false);
       setEditingAppointment(null);
       setNewAffirmation({ text: '', category: 'self-love' });
-    }
+      toast('Affirmation saved ✓');
+    },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const updateMutation = useMutation({
@@ -103,10 +108,10 @@ export default function Affirmations() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
+          <button onClick={goBack} className="flex items-center gap-2 text-white/80 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
-          </Link>
+          </button>
           <h1 className="text-xl font-bold text-white">Affirmations</h1>
           <button 
             onClick={() => setShowDialog(true)}
