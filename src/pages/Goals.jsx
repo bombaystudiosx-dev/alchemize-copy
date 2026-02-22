@@ -15,6 +15,8 @@ import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import PremiumGate from '@/components/subscription/PremiumGate';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
 
 const statusConfig = {
   not_started: { label: 'Not Started', icon: Clock, color: 'text-gray-400', bg: 'bg-gray-500/20' },
@@ -27,6 +29,7 @@ export default function Goals() {
   const [editingGoal, setEditingGoal] = useState(null);
   const [newGoal, setNewGoal] = useState({ title: '', description: '', target_date: '', status: 'not_started', progress: 0 });
   const queryClient = useQueryClient();
+  const goBack = useBackNav('Home', 'Goals');
 
   const { data: goals = [], isLoading } = useQuery({
     queryKey: ['goals'],
@@ -38,18 +41,14 @@ export default function Goals() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Goal.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['goals']);
-      closeDialog();
-    }
+    onSuccess: () => { queryClient.invalidateQueries(['goals']); closeDialog(); toast('Goal created ✓'); },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Goal.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['goals']);
-      closeDialog();
-    }
+    onSuccess: () => { queryClient.invalidateQueries(['goals']); closeDialog(); toast('Goal updated ✓'); },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const deleteMutation = useMutation({
@@ -100,10 +99,10 @@ export default function Goals() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
+          <button onClick={goBack} className="flex items-center gap-2 text-white/80 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
-          </Link>
+          </button>
           <h1 className="text-xl font-bold text-white">Goal Setting</h1>
           <button 
             onClick={() => setShowDialog(true)}

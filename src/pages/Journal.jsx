@@ -75,15 +75,14 @@ export default function GratitudeJournal() {
       {/* Fixed Header */}
       <div className="sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm px-6 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <Link to={createPageUrl('Home')}>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-white" />
-            </motion.button>
-          </Link>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={goBack}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 text-white" />
+          </motion.button>
           <h1 className="text-xl font-bold text-white">Gratitude Journal</h1>
           <button
             onClick={() => openForm()}
