@@ -10,53 +10,29 @@ export default function Splash() {
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('app_language') || 'en';
   });
-  const [rememberMe, setRememberMe] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('app_language', language);
     window.dispatchEvent(new Event('language-changed'));
   }, [language]);
 
-  const handleAuth = (mode = 'login') => {
-    if (rememberMe) {
-      localStorage.setItem('remember_me', 'true');
-    }
+  const getNextUrl = () => {
     const onboarded = localStorage.getItem('onboarding_complete');
     const skipped = localStorage.getItem('skipped_premium');
-    let nextUrl;
-    if (isDevMode() || (onboarded && skipped)) {
-      nextUrl = createPageUrl('Home');
-    } else if (onboarded) {
-      nextUrl = createPageUrl('Premium');
-    } else {
-      nextUrl = createPageUrl('Onboarding');
-    }
-    base44.auth.redirectToLogin(nextUrl, { mode });
+    if (isDevMode() || (onboarded && skipped)) return createPageUrl('Home');
+    if (onboarded) return createPageUrl('Premium');
+    return createPageUrl('Onboarding');
   };
 
-  const text = {
-    en: {
-      signIn: 'Sign In',
-      signUp: 'Create Account',
-      continueWith: 'Or continue with',
-      rememberMe: 'Remember me',
-      unlockSelf: 'Unlock Your Highest Self',
-      noAccount: "Don't have an account?",
-      hasAccount: 'Already have an account?'
-    },
-    es: {
-      signIn: 'Iniciar Sesión',
-      signUp: 'Crear Cuenta',
-      continueWith: 'O continuar con',
-      rememberMe: 'Recuérdame',
-      unlockSelf: 'Desbloquea Tu Mejor Versión',
-      noAccount: '¿No tienes cuenta?',
-      hasAccount: '¿Ya tienes cuenta?'
-    }
+  const handleGoogle = () => {
+    base44.auth.loginWithGoogle(getNextUrl());
   };
 
-  const t = text[language];
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
+  const handleApple = () => {
+    base44.auth.loginWithApple(getNextUrl());
+  };
+
+  const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
 
   return (
     <div className="relative min-h-screen overflow-hidden">
