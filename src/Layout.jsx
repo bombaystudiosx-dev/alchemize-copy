@@ -7,6 +7,8 @@ import FloatingChatBubble from '@/components/chat/FloatingChatBubble';
 import BottomTabBar, { TAB_BAR_HEIGHT, HIDDEN_TAB_PAGES } from '@/components/navigation/BottomTabBar';
 import NativeFeelProvider from '@/components/native/NativeFeelProvider';
 import PageTransition from '@/components/native/PageTransition';
+import { AppToastProvider } from '@/components/common/AppToast';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -61,20 +63,22 @@ export default function Layout({ children, currentPageName }) {
   }
 
   return (
-    <>
-      <NativeFeelProvider />
-      <PWASetup />
-      <InstallPrompt />
-      <FloatingChatBubble showTabBar={!HIDDEN_TAB_PAGES.includes(currentPageName)} />
-      <div className="min-h-screen" style={{
-        paddingTop: 'env(safe-area-inset-top)',
-        paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
-      }}>
-        <PageTransition pageKey={currentPageName}>
-          {children}
-        </PageTransition>
-      </div>
-      <BottomTabBar currentPageName={currentPageName} />
-    </>
+    <ErrorBoundary>
+      <AppToastProvider>
+        <NativeFeelProvider />
+        <PWASetup />
+        <InstallPrompt />
+        <FloatingChatBubble showTabBar={!HIDDEN_TAB_PAGES.includes(currentPageName)} />
+        <div className="min-h-screen" style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
+        }}>
+          <PageTransition pageKey={currentPageName}>
+            {children}
+          </PageTransition>
+        </div>
+        <BottomTabBar currentPageName={currentPageName} />
+      </AppToastProvider>
+    </ErrorBoundary>
   );
 }
