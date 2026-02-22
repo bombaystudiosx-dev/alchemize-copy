@@ -202,7 +202,7 @@ export default function Fitness() {
   return (
     <PremiumGate featureId="fitness">
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <div className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}

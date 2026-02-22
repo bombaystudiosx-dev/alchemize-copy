@@ -93,7 +93,7 @@ export default function Goals() {
   return (
     <PremiumGate featureId="goals">
     <CosmicBackground>
-      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['goals'])} className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['goals'])} className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}

@@ -247,7 +247,7 @@ export default function Finance() {
   return (
     <PremiumGate featureId="finance">
     <CosmicBackground>
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen pb-32">
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -397,7 +397,7 @@ export default function Finance() {
               <p className="text-white/50 text-sm text-center py-4">No expenses for this period</p>
             ) : (
               <div className="space-y-2">
-                {periodExpenses.slice(0, 10).map(expense => (
+                {periodExpenses.map(expense => (
                   <div key={expense.id} className="flex items-center justify-between py-2 border-b border-white/10">
                     <div className="flex-1">
                       <p className="text-white text-sm">{expense.expense_name}</p>

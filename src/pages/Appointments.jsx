@@ -120,7 +120,7 @@ export default function Appointments() {
   return (
     <PremiumGate featureId="appointments">
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <div className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -285,7 +285,7 @@ export default function Appointments() {
                 >
                   <h2 className="text-lg font-semibold text-white/50 mb-4">Past {activeTab === 'business' ? 'Business' : 'Personal'}</h2>
                   <div className="space-y-3">
-                    {filteredPast.slice(0, 5).map((appointment) => (
+                    {filteredPast.map((appointment) => (
                       <CosmicCard key={appointment.id} className="opacity-50 group">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">

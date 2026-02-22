@@ -382,7 +382,7 @@ export default function Habits() {
           </button>
         </motion.header>
 
-        <div className="px-6 pb-24">
+        <div className="px-6 pb-32">
           {/* Stats Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

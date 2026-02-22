@@ -96,7 +96,7 @@ export default function Affirmations() {
 
   return (
     <CosmicBackground>
-      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['affirmations'])} className="min-h-screen pb-8">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['affirmations'])} className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}

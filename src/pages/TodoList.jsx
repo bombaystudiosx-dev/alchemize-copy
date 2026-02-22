@@ -73,7 +73,7 @@ export default function TodoList() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/30" />
 
       {/* Content */}
-      <div className="relative z-10 w-full min-h-screen flex flex-col px-6 py-8">
+      <div className="relative z-10 w-full min-h-screen flex flex-col px-6 py-8 pb-32">
         {/* Header */}
         <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-8">
           <Link to={createPageUrl('Home')}>
@@ -102,7 +102,7 @@ export default function TodoList() {
           className="w-full max-w-2xl mx-auto flex-1 flex flex-col"
         >
           {/* Soft translucent overlay for task area */}
-          <div className="relative backdrop-blur-md bg-amber-50/10 rounded-3xl p-6 shadow-2xl border border-amber-300/30 flex flex-col h-full max-h-[calc(100vh-200px)]">
+          <div className="relative backdrop-blur-md bg-amber-50/10 rounded-3xl p-6 shadow-2xl border border-amber-300/30 flex flex-col">
             {/* Add todo form */}
             <form onSubmit={handleAddTodo} className="mb-6 flex-shrink-0 space-y-2">
               <div className="flex gap-2">
@@ -147,8 +147,8 @@ export default function TodoList() {
               )}
             </form>
 
-            {/* Todo items with infinite scroll */}
-            <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide space-y-3">
+            {/* Todo items */}
+            <div className="space-y-3 pb-8">
               {isLoading ? (
                 <div className="text-center py-12">
                   <Loader2 className="w-10 h-10 animate-spin mx-auto text-amber-400" />

@@ -144,7 +144,7 @@ export default function GratitudeJournal() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="px-6 pb-20">
+      <div className="px-6 pb-32">
         {entries.length === 0 ? (
           <div className="text-center py-12">
             <Heart className="w-12 h-12 text-purple-400 mx-auto mb-3 opacity-50" />
@@ -163,7 +163,7 @@ export default function GratitudeJournal() {
                 key={entry.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.02 }}
+                transition={{ delay: Math.min(index * 0.02, 0.3) }}
                 className="group bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-xl p-3 border border-white/10 hover:border-purple-500/30 transition-all"
               >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
