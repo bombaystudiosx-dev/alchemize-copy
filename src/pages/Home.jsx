@@ -6,7 +6,7 @@ import FeatureCarousel from '@/components/carousel/FeatureCarousel';
 import FeatureManager from '@/components/home/FeatureManager';
 import DailyAffirmationWidget from '@/components/home/DailyAffirmationWidget';
 import PullToRefresh from '@/components/common/PullToRefresh';
-import { Moon, Sparkles, Settings } from 'lucide-react';
+import { Moon, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { isDevMode } from '@/components/subscription/subscriptionHelper';

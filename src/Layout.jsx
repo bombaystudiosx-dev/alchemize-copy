@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { Loader2 } from 'lucide-react';
 import PWASetup from '@/components/pwa/PWASetup';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
-import FloatingChatBubble from '@/components/chat/FloatingChatBubble';
 import BottomTabBar, { TAB_BAR_HEIGHT, HIDDEN_TAB_PAGES } from '@/components/navigation/BottomTabBar';
 import NativeFeelProvider from '@/components/native/NativeFeelProvider';
 import PageTransition from '@/components/native/PageTransition';
