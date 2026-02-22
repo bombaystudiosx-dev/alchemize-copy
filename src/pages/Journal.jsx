@@ -45,14 +45,20 @@ export default function GratitudeJournal() {
 
   const handleSave = () => {
     if (!newEntry.gratitude_1?.trim()) return;
-
-    const dateToUse = selectedDate ? selectedDate.date : format(new Date(), 'yyyy-MM-dd');
+    const dateToUse = formDate || format(new Date(), 'yyyy-MM-dd');
     createMutation.mutate({
       gratitude_1: newEntry.gratitude_1,
       gratitude_2: newEntry.gratitude_2 || null,
       gratitude_3: newEntry.gratitude_3 || null,
       date: dateToUse
     });
+  };
+
+  const openForm = (date = null) => {
+    setFormDate(date);
+    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+    setDayDialog(null);
+    setShowEntryForm(true);
   };
 
   return (
