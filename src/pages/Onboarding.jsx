@@ -52,18 +52,9 @@ export default function Onboarding() {
           backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/ce90c0d9f_B28AA351-FB07-478A-8B1E-FB90E998F0B7.png)'
         }} />
 
-      <div className="absolute inset-0 bg-black/70" />
+      
 
-      <div className="relative z-10 min-h-screen flex flex-col px-6 pt-16 pb-10 safe-area-top safe-area-bottom">
-        {/* Skip */}
-        <div className="flex justify-end">
-          
-
-
-        </div>
-
-        {/* Content */}
-        
+      
 
 
 
@@ -95,27 +86,36 @@ export default function Onboarding() {
 
 
 
-        {/* Dots */}
-        <div className="flex items-center justify-center gap-2 mb-8">
-          {SLIDES.map((_, i) =>
-          <div
-            key={i}
-            className={`rounded-full transition-all duration-300 ${
-            i === current ? 'w-8 h-2 bg-purple-500' : 'w-2 h-2 bg-white/30'}`
-            } />
-
-          )}
-        </div>
-
-        {/* Next button */}
-        
 
 
 
 
 
 
-      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>);
 
 }
