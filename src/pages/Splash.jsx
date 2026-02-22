@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Apple, Check } from 'lucide-react';
+import { Apple } from 'lucide-react';
 import { isDevMode } from '@/components/subscription/subscriptionHelper';
 import { base44 } from '@/api/base44Client';
 
