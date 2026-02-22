@@ -100,6 +100,8 @@ export default function BottomTabBar({ currentPageName }) {
     }
   }, [location.pathname, location.search]);
 
+  if (hidden) return null;
+
   const onTabPress = (tab) => {
     // Haptic feedback
     if (navigator.vibrate) navigator.vibrate(8);
