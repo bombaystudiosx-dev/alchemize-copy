@@ -81,7 +81,7 @@ export default function Splash() {
         </button>
       </motion.div>
 
-      <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-6 pt-16 pb-32">
+      <div className="relative z-10 min-h-screen flex flex-col items-center justify-end px-6 pt-16 pb-12">
         
         {/* Tagline */}
         <motion.p
