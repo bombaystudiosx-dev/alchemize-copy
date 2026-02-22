@@ -13,7 +13,6 @@ import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
 import { isDevMode, setDevMode } from '@/components/subscription/subscriptionHelper';
-import { Link } from 'react-router-dom';
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
