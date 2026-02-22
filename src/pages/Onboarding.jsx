@@ -50,7 +50,9 @@ export default function Onboarding() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/ce90c0d9f_B28AA351-FB07-478A-8B1E-FB90E998F0B7.png)'
-        }} />
+        }}
+      />
+      <div className="absolute inset-0 bg-black/70" />
 
       
 
