@@ -56,6 +56,7 @@ export default function Splash() {
   };
 
   const t = text[language];
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
 
   return (
     <div className="relative min-h-screen overflow-hidden">
