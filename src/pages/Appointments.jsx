@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2, Briefcase, User } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -28,6 +30,7 @@ export default function Appointments() {
   });
   const [activeTab, setActiveTab] = useState('personal');
   const queryClient = useQueryClient();
+  const goBack = useBackNav('Home', 'Appointments');
 
   const { data: appointments = [], isLoading } = useQuery({
     queryKey: ['appointments'],
@@ -39,18 +42,14 @@ export default function Appointments() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Appointment.create(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['appointments']);
-      closeDialog();
-    }
+    onSuccess: () => { queryClient.invalidateQueries(['appointments']); closeDialog(); toast('Appointment saved ✓'); },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Appointment.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries(['appointments']);
-      closeDialog();
-    }
+    onSuccess: () => { queryClient.invalidateQueries(['appointments']); closeDialog(); toast('Appointment updated ✓'); },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const deleteMutation = useMutation({
@@ -127,10 +126,10 @@ export default function Appointments() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
+          <button onClick={goBack} className="flex items-center gap-2 text-white/80 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
-          </Link>
+          </button>
           <h1 className="text-xl font-bold text-white">Appointments</h1>
           <button 
             onClick={() => setShowDialog(true)}
