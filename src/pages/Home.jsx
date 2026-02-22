@@ -9,6 +9,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import { Moon, Sparkles, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
+import { isDevMode } from '@/components/subscription/subscriptionHelper';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -99,14 +100,16 @@ export default function Home() {
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
-            <motion.button
-              onClick={() => setShowFeatureManager(true)}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              <Settings className="w-5 h-5 text-purple-300" />
-            </motion.button>
+            {!isDevMode() && (
+              <motion.button
+                onClick={() => setShowFeatureManager(true)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <Settings className="w-5 h-5 text-purple-300" />
+              </motion.button>
+            )}
 
             <motion.div
               animate={{ 

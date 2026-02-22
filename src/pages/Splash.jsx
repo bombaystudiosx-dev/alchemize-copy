@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Apple, Check } from 'lucide-react';
+import { isDevMode } from '@/components/subscription/subscriptionHelper';
 
 export default function Splash() {
   const [language, setLanguage] = useState(() => {
@@ -23,7 +24,7 @@ export default function Splash() {
     // After login, user lands on Home. We check onboarding there via useEffect.
     const onboarded = localStorage.getItem('onboarding_complete');
     const skipped = localStorage.getItem('skipped_premium');
-    if (onboarded && skipped) {
+    if (isDevMode() || (onboarded && skipped)) {
       window.location.href = createPageUrl('Home');
     } else if (onboarded) {
       window.location.href = createPageUrl('Premium');
