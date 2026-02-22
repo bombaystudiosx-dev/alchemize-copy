@@ -37,15 +37,21 @@ export default function Splash() {
   const text = {
     en: {
       signIn: 'Sign In',
+      signUp: 'Create Account',
       continueWith: 'Or continue with',
       rememberMe: 'Remember me',
-      unlockSelf: 'Unlock Your Highest Self'
+      unlockSelf: 'Unlock Your Highest Self',
+      noAccount: "Don't have an account?",
+      hasAccount: 'Already have an account?'
     },
     es: {
       signIn: 'Iniciar Sesión',
+      signUp: 'Crear Cuenta',
       continueWith: 'O continuar con',
       rememberMe: 'Recuérdame',
-      unlockSelf: 'Desbloquea Tu Mejor Versión'
+      unlockSelf: 'Desbloquea Tu Mejor Versión',
+      noAccount: '¿No tienes cuenta?',
+      hasAccount: '¿Ya tienes cuenta?'
     }
   };
 
