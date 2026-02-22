@@ -77,7 +77,7 @@ export default function GratitudeJournal() {
           </Link>
           <h1 className="text-xl font-bold text-white">Gratitude Journal</h1>
           <button
-            onClick={() => setShowEntryForm(true)}
+            onClick={() => openForm()}
             className="p-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30"
           >
             <Plus className="w-5 h-5 text-white" />
@@ -125,7 +125,7 @@ export default function GratitudeJournal() {
                     key={day}
                     onClick={() => {
                       const dayEntries = entries.filter(e => e.date === date);
-                      setSelectedDate({ date, entries: dayEntries });
+                      setDayDialog({ date, entries: dayEntries });
                     }}
                     className={`
                       aspect-square rounded-lg flex flex-col items-center justify-center text-xs transition-all relative
@@ -157,7 +157,7 @@ export default function GratitudeJournal() {
             <Heart className="w-12 h-12 text-purple-400 mx-auto mb-3 opacity-50" />
             <p className="text-white/60 text-sm mb-4">Start your gratitude journey</p>
             <button
-              onClick={() => setShowEntryForm(true)}
+              onClick={() => openForm()}
               className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-semibold shadow-lg shadow-purple-500/30"
             >
               Add Your First Entry
@@ -229,7 +229,7 @@ export default function GratitudeJournal() {
                   Add Gratitude
                 </h2>
                 <p className="text-center text-purple-200/60 text-sm mb-5">
-                  {selectedDate ? `For ${format(new Date(selectedDate.date), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
+                  {formDate ? `For ${format(new Date(formDate), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
                 </p>
 
                 <div className="space-y-4">
@@ -267,16 +267,18 @@ export default function GratitudeJournal() {
 
                 <div className="flex gap-4 mt-6 pb-safe">
                   <button
+                    type="button"
                     onClick={() => {
                       setShowEntryForm(false);
                       setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
-                      setSelectedDate(null);
+                      setFormDate(null);
                     }}
                     className="flex-1 py-4 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={handleSave}
                     disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending}
                     className="flex-1 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30 disabled:opacity-50"
