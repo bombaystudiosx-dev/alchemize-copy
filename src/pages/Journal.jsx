@@ -3,10 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Plus, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
+import { logEvent } from '@/components/common/appLogger';
 
 
 // Journal is a FREE feature (gratitude) - no PremiumGate needed
@@ -14,9 +15,10 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
-  const [formDate, setFormDate] = useState(null); // date string for the form
-  const [dayDialog, setDayDialog] = useState(null); // { date, entries }
+  const [formDate, setFormDate] = useState(null);
+  const [dayDialog, setDayDialog] = useState(null);
   const queryClient = useQueryClient();
+  const goBack = useBackNav('Home', 'Journal');
 
   const { data: entries = [] } = useQuery({
     queryKey: ['gratitude'],
@@ -32,7 +34,13 @@ export default function GratitudeJournal() {
       queryClient.invalidateQueries({ queryKey: ['gratitude'] });
       setShowEntryForm(false);
       setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
-      setSelectedDate(null);
+      setFormDate(null);
+      toast('Entry saved ✓', 'success');
+      logEvent('save', 'Journal', 'save_result', 'success');
+    },
+    onError: (e) => {
+      toast(e?.message || 'Save failed', 'error');
+      logEvent('save', 'Journal', 'save_result', 'fail', { error: e?.message });
     }
   });
 
@@ -46,6 +54,7 @@ export default function GratitudeJournal() {
   const handleSave = () => {
     if (!newEntry.gratitude_1?.trim()) return;
     const dateToUse = formDate || format(new Date(), 'yyyy-MM-dd');
+    logEvent('save', 'Journal', 'save_attempt', 'pending');
     createMutation.mutate({
       gratitude_1: newEntry.gratitude_1,
       gratitude_2: newEntry.gratitude_2 || null,
