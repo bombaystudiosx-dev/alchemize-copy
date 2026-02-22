@@ -115,7 +115,7 @@ export default function Splash() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
-          className="relative w-full max-w-xs"
+          className="relative w-full max-w-xs mt-4"
         >
           {/* Glow Effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-amber-500 to-purple-600 rounded-2xl blur-lg opacity-50 animate-pulse" />
