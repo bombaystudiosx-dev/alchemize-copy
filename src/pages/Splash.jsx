@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Apple, Check } from 'lucide-react';
 import { isDevMode } from '@/components/subscription/subscriptionHelper';
+import { base44 } from '@/api/base44Client';
 
 export default function Splash() {
   const [language, setLanguage] = useState(() => {
