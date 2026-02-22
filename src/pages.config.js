@@ -51,6 +51,7 @@ import Affirmations from './pages/Affirmations';
 import AgentChat from './pages/AgentChat';
 import Appointments from './pages/Appointments';
 import CalorieTracker from './pages/CalorieTracker';
+import Diagnostics from './pages/Diagnostics';
 import Finance from './pages/Finance';
 import Fitness from './pages/Fitness';
 import Goals from './pages/Goals';
@@ -66,7 +67,6 @@ import Settings from './pages/Settings';
 import Splash from './pages/Splash';
 import Terms from './pages/Terms';
 import TodoList from './pages/TodoList';
-import Diagnostics from './pages/Diagnostics';
 import __Layout from './Layout.jsx';
 
 
@@ -75,6 +75,7 @@ export const PAGES = {
     "AgentChat": AgentChat,
     "Appointments": Appointments,
     "CalorieTracker": CalorieTracker,
+    "Diagnostics": Diagnostics,
     "Finance": Finance,
     "Fitness": Fitness,
     "Goals": Goals,
@@ -90,11 +91,10 @@ export const PAGES = {
     "Splash": Splash,
     "Terms": Terms,
     "TodoList": TodoList,
-    "Diagnostics": Diagnostics,
 }
 
 export const pagesConfig = {
-    mainPage: "Splash",
+    mainPage: "Home",
     Pages: PAGES,
     Layout: __Layout,
 };
