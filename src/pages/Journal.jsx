@@ -14,7 +14,8 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
   const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [formDate, setFormDate] = useState(null); // date string for the form
+  const [dayDialog, setDayDialog] = useState(null); // { date, entries }
   const queryClient = useQueryClient();
 
   const { data: entries = [] } = useQuery({
