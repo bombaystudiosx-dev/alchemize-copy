@@ -8,7 +8,6 @@ import NativeFeelProvider from '@/components/native/NativeFeelProvider';
 import PageTransition from '@/components/native/PageTransition';
 import { AppToastProvider } from '@/components/common/AppToast';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
-import { isDevMode } from '@/components/subscription/subscriptionHelper';
 
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -68,7 +67,6 @@ export default function Layout({ children, currentPageName }) {
         <NativeFeelProvider />
         <PWASetup />
         <InstallPrompt />
-        {isDevMode() && <FloatingChatBubble showTabBar={!HIDDEN_TAB_PAGES.includes(currentPageName)} />}
         <div className="min-h-screen" style={{
           paddingTop: 'env(safe-area-inset-top)',
           paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
