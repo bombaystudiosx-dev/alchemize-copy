@@ -25,11 +25,11 @@ export default function Splash() {
   };
 
   const handleGoogle = () => {
-    base44.auth.loginWithGoogle(getNextUrl());
+    base44.auth.redirectToLogin(getNextUrl(), { provider: 'google' });
   };
 
   const handleApple = () => {
-    base44.auth.loginWithApple(getNextUrl());
+    base44.auth.redirectToLogin(getNextUrl(), { provider: 'apple' });
   };
 
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
