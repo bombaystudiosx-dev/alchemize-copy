@@ -9,11 +9,19 @@ import PageTransition from '@/components/native/PageTransition';
 import { AppToastProvider } from '@/components/common/AppToast';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 
+const PUBLIC_PAGES = ['Splash', 'Terms', 'Privacy', 'Onboarding', 'Premium'];
+
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [authError, setAuthError] = useState(false);
 
+  const isPublicPage = PUBLIC_PAGES.includes(currentPageName);
+
   const checkAuth = useCallback(async () => {
+    if (isPublicPage) {
+      setIsAuthenticated(true);
+      return;
+    }
     try {
       const authenticated = await base44.auth.isAuthenticated();
       if (!authenticated) {
@@ -24,7 +32,7 @@ export default function Layout({ children, currentPageName }) {
     } catch (e) {
       setAuthError(true);
     }
-  }, []);
+  }, [isPublicPage]);
 
   useEffect(() => {
     checkAuth();
