@@ -294,13 +294,13 @@ export default function GratitudeJournal() {
 
       {/* Day Details Dialog */}
       <AnimatePresence>
-        {selectedDate && (
+        {dayDialog && (
           <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedDate(null)}
+              onClick={() => setDayDialog(null)}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             />
             <motion.div
@@ -311,19 +311,19 @@ export default function GratitudeJournal() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-purple-300">
-                  {format(new Date(selectedDate.date), 'MMMM d, yyyy')}
+                  {format(new Date(dayDialog.date), 'MMMM d, yyyy')}
                 </h3>
                 <button
-                  onClick={() => setSelectedDate(null)}
+                  onClick={() => setDayDialog(null)}
                   className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
                 >
                   <span className="text-white text-xl">×</span>
                 </button>
               </div>
               
-              {selectedDate.entries.length > 0 ? (
+              {dayDialog.entries.length > 0 ? (
                 <div className="space-y-3">
-                  {selectedDate.entries.map((entry) => (
+                  {dayDialog.entries.map((entry) => (
                     <div key={entry.id} className="bg-black/30 rounded-xl p-4 border border-white/10">
                       {entry.gratitude_1 && (
                         <p className="text-white leading-relaxed mb-2">{entry.gratitude_1}</p>
@@ -342,9 +342,7 @@ export default function GratitudeJournal() {
                   <Heart className="w-12 h-12 text-purple-400/50 mx-auto mb-3" />
                   <p className="text-white/50 text-sm">No entries for this day</p>
                   <button
-                    onClick={() => {
-                      setShowEntryForm(true);
-                    }}
+                    onClick={() => openForm(dayDialog.date)}
                     className="mt-4 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm transition-colors"
                   >
                     Add Entry
