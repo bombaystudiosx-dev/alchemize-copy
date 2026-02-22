@@ -113,11 +113,6 @@ export default function Onboarding() {
           {current === SLIDES.length - 1 ? 'Get Started' : 'Next'}
           <ChevronRight className="w-5 h-5" />
         </button>
-      </div>
-
-
-
-
 
 
 
