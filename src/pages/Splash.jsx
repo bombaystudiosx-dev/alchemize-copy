@@ -122,15 +122,31 @@ export default function Splash() {
           
           {/* Box Content */}
           <div className="relative bg-black/60 backdrop-blur-md rounded-xl p-6 border border-white/10">
-            
-            {/* Main Sign In Button */}
+
+            {/* Mode Toggle */}
+            <div className="flex rounded-lg bg-white/10 p-1 mb-5">
+              <button
+                onClick={() => setAuthMode('login')}
+                className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${authMode === 'login' ? 'bg-purple-600 text-white' : 'text-white/60'}`}
+              >
+                {t.signIn}
+              </button>
+              <button
+                onClick={() => setAuthMode('signup')}
+                className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-all ${authMode === 'signup' ? 'bg-purple-600 text-white' : 'text-white/60'}`}
+              >
+                {t.signUp}
+              </button>
+            </div>
+
+            {/* Main Auth Button */}
             <motion.button
-              onClick={handleSignIn}
+              onClick={() => handleAuth(authMode)}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 px-6 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-lg text-white font-semibold text-lg shadow-lg shadow-purple-500/30 transition-all mb-4"
             >
-              {t.signIn}
+              {authMode === 'login' ? t.signIn : t.signUp}
             </motion.button>
 
             {/* Divider */}
@@ -140,10 +156,10 @@ export default function Splash() {
               <div className="flex-1 h-px bg-white/20" />
             </div>
 
-            {/* Social Sign In Buttons */}
+            {/* Social Buttons */}
             <div className="flex gap-3 mb-4">
               <motion.button
-                onClick={handleSignIn}
+                onClick={() => handleAuth(authMode)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex-1 py-2.5 px-4 bg-white rounded-lg flex items-center justify-center gap-2 text-black font-medium hover:bg-gray-100 transition-colors"
@@ -153,7 +169,7 @@ export default function Splash() {
               </motion.button>
               
               <motion.button
-                onClick={handleSignIn}
+                onClick={() => handleAuth(authMode)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="flex-1 py-2.5 px-4 bg-white rounded-lg flex items-center justify-center gap-2 text-black font-medium hover:bg-gray-100 transition-colors"
@@ -178,9 +194,7 @@ export default function Splash() {
               >
                 {rememberMe && <Check className="w-3 h-3 text-white" />}
               </div>
-              <span className="text-white/70 text-sm">
-                {t.rememberMe}
-              </span>
+              <span className="text-white/70 text-sm">{t.rememberMe}</span>
             </label>
 
             {/* Terms and Privacy Links */}
