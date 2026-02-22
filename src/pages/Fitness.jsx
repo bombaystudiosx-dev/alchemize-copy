@@ -13,6 +13,8 @@ import {
   Ruler, Weight, TrendingUp, Activity, User, Award, Zap, Target, Calendar 
 } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import BottomSheet from '@/components/native/BottomSheet';
@@ -53,6 +55,7 @@ export default function Fitness() {
   });
   const [showWorkoutTypeSheet, setShowWorkoutTypeSheet] = useState(false);
   const queryClient = useQueryClient();
+  const goBack = useBackNav('Home', 'Fitness');
 
   const { data: workouts = [], isLoading: loadingWorkouts } = useQuery({
     queryKey: ['workouts'],
@@ -79,17 +82,14 @@ export default function Fitness() {
     onSuccess: () => {
       queryClient.invalidateQueries(['workouts']);
       setShowWorkoutDialog(false);
-      setNewWorkout({ 
-        type: 'strength', 
-        duration_minutes: '', 
-        notes: '', 
-        date: format(new Date(), 'yyyy-MM-dd'),
-        calories_burned: ''
-      });
-    }
+      setNewWorkout({ type: 'strength', duration_minutes: '', notes: '', date: format(new Date(), 'yyyy-MM-dd'), calories_burned: '' });
+      toast('Workout logged ✓');
+    },
+    onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const createMetricsMutation = useMutation({
+    onError: (e) => toast(e?.message || 'Save failed', 'error'),
     mutationFn: (data) => {
       const cleaned = { date: data.date };
       if (data.weight) cleaned.weight = parseFloat(data.weight);
@@ -106,6 +106,7 @@ export default function Fitness() {
     onSuccess: () => {
       queryClient.invalidateQueries(['bodyMetrics']);
       setShowMetricsDialog(false);
+      toast('Metrics saved ✓');
       setNewMetrics({
         date: format(new Date(), 'yyyy-MM-dd'),
         weight: '',
@@ -209,10 +210,10 @@ export default function Fitness() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
+          <button onClick={goBack} className="flex items-center gap-2 text-white/80 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
-          </Link>
+          </button>
           <h1 className="text-xl font-bold text-white">Fitness Hub</h1>
           <div className="w-10" />
         </motion.header>
