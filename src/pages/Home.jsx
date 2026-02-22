@@ -100,7 +100,7 @@ export default function Home() {
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
 
-            {!isDevMode() && (
+            {isDevMode() && (
               <motion.button
                 onClick={() => setShowFeatureManager(true)}
                 whileHover={{ scale: 1.1 }}
