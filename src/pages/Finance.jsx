@@ -9,6 +9,8 @@ import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { ArrowLeft, Plus, DollarSign, TrendingUp, TrendingDown, Trash2, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import useBackNav from '@/components/common/useBackNav';
+import { toast } from '@/components/common/AppToast';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import IncomeCalendar from '@/components/finance/IncomeCalendar';
 import ExpenseCalendar from '@/components/finance/ExpenseCalendar';
@@ -18,6 +20,7 @@ import PullToRefresh from '@/components/common/PullToRefresh';
 import BottomSheet from '@/components/native/BottomSheet';
 
 export default function Finance() {
+  const goBack = useBackNav('Home', 'Finance');
   const [viewMode, setViewMode] = useState('monthly');
   const [showIncomeDialog, setShowIncomeDialog] = useState(false);
   const [showExpenseDialog, setShowExpenseDialog] = useState(false);
@@ -63,6 +66,7 @@ export default function Finance() {
   const financialNote = notesData[0] || { note_login_info: '', note_total_debt: '', debt_amount: 0, savings_amount: 0, emergency_fund: 0 };
 
   const createIncomeMutation = useMutation({
+    onError: (e) => toast(e?.message || 'Save failed', 'error'),
     mutationFn: (data) => {
       const income_gross = parseFloat(data.income_gross) || 0;
       const tax_percentage = parseFloat(data.tax_percentage) || 0;
@@ -97,10 +101,12 @@ export default function Finance() {
       setShowIncomeDialog(false);
       setEditingIncome(null);
       setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
+      toast('Income saved ✓');
     }
   });
 
   const createExpenseMutation = useMutation({
+    onError: (e) => toast(e?.message || 'Save failed', 'error'),
     mutationFn: (data) => {
       const expenseData = {
         expense_name: data.expense_name,
@@ -120,6 +126,7 @@ export default function Finance() {
       setShowExpenseDialog(false);
       setEditingExpense(null);
       setNewExpense({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
+      toast('Expense saved ✓');
     }
   });
 
@@ -253,10 +260,10 @@ export default function Finance() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between px-6 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118] to-transparent"
         >
-          <Link to={createPageUrl('Home')} className="flex items-center gap-2 text-white/80 hover:text-white">
+          <button onClick={goBack} className="flex items-center gap-2 text-white/80 hover:text-white">
             <ArrowLeft className="w-5 h-5" />
             <span>Back</span>
-          </Link>
+          </button>
           <h1 className="text-xl font-bold text-white">Financial Tracker</h1>
           <div className="w-10" />
         </motion.header>
