@@ -52,14 +52,12 @@ export const HIDDEN_TAB_PAGES = ['Splash', 'Terms', 'Privacy', 'AgentChat', 'Pre
 export default function BottomTabBar({ currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const hidden = HIDDEN_TAB_PAGES.includes(currentPageName);
 
   const [lastRouteByTab, setLastRouteByTab] = useState(() => ({
     home: '', streaks: '', explore: '', profile: '',
     ...loadRecord(STORAGE_KEY_LAST)
   }));
-
-  // Don't render on hidden pages
-  if (HIDDEN_TAB_PAGES.includes(currentPageName)) return null;
 
   // Determine current tab from page name
   const currentTab = useMemo(() => {
