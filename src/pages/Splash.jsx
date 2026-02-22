@@ -16,21 +16,21 @@ export default function Splash() {
     window.dispatchEvent(new Event('language-changed'));
   }, [language]);
 
-  const handleSignIn = () => {
+  const handleAuth = (mode = 'login') => {
     if (rememberMe) {
       localStorage.setItem('remember_me', 'true');
     }
-    // Auth is handled by Layout - redirectToLogin.
-    // After login, user lands on Home. We check onboarding there via useEffect.
     const onboarded = localStorage.getItem('onboarding_complete');
     const skipped = localStorage.getItem('skipped_premium');
+    let nextUrl;
     if (isDevMode() || (onboarded && skipped)) {
-      window.location.href = createPageUrl('Home');
+      nextUrl = createPageUrl('Home');
     } else if (onboarded) {
-      window.location.href = createPageUrl('Premium');
+      nextUrl = createPageUrl('Premium');
     } else {
-      window.location.href = createPageUrl('Onboarding');
+      nextUrl = createPageUrl('Onboarding');
     }
+    base44.auth.redirectToLogin(nextUrl, { mode });
   };
 
   const text = {
