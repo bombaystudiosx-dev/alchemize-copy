@@ -192,7 +192,7 @@ export default function GratitudeJournal() {
         )}
       </div>
 
-      {/* Entry Form Modal */}
+      {/* Entry Form — bottom sheet */}
       <AnimatePresence>
         {showEntryForm && (
           <>
@@ -204,70 +204,79 @@ export default function GratitudeJournal() {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed inset-x-4 top-1/2 -translate-y-1/2 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 z-50 max-w-md mx-auto border-2 border-purple-500/30"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-t-3xl border-t-2 border-purple-500/30 flex flex-col"
+              style={{ maxHeight: '90dvh' }}
             >
-              <h2 className="text-2xl font-bold text-center mb-2 text-purple-300">
-                Add Gratitude
-              </h2>
-              <p className="text-center text-purple-200/60 text-sm mb-6">
-                {selectedDate ? `For ${format(new Date(selectedDate.date), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
-              </p>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 1</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={newEntry.gratitude_1}
-                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_1: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                    autoFocus
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 2 (optional)</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={newEntry.gratitude_2}
-                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_2: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-purple-300/70 mb-1 block">Entry 3 (optional)</label>
-                  <textarea
-                    placeholder="I am grateful for..."
-                    value={newEntry.gratitude_3}
-                    onChange={(e) => setNewEntry({ ...newEntry, gratitude_3: e.target.value })}
-                    className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                    rows={3}
-                  />
-                </div>
+              {/* Drag handle */}
+              <div className="flex-shrink-0 flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-white/30" />
               </div>
 
-              <div className="flex gap-4 mt-6">
-                <button
-                  onClick={() => {
-                    setShowEntryForm(false);
-                    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
-                    setSelectedDate(null);
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending}
-                  className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold transition-all shadow-lg shadow-purple-500/30 disabled:opacity-50"
-                >
-                  {createMutation.isPending ? 'Saving...' : 'Save'}
-                </button>
+              {/* Scrollable body */}
+              <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2">
+                <h2 className="text-2xl font-bold text-center mb-1 text-purple-300">
+                  Add Gratitude
+                </h2>
+                <p className="text-center text-purple-200/60 text-sm mb-5">
+                  {selectedDate ? `For ${format(new Date(selectedDate.date), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
+                </p>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs text-purple-300/70 mb-1 block">Entry 1</label>
+                    <textarea
+                      placeholder="I am grateful for..."
+                      value={newEntry.gratitude_1}
+                      onChange={(e) => setNewEntry({ ...newEntry, gratitude_1: e.target.value })}
+                      className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-purple-300/70 mb-1 block">Entry 2 (optional)</label>
+                    <textarea
+                      placeholder="I am grateful for..."
+                      value={newEntry.gratitude_2}
+                      onChange={(e) => setNewEntry({ ...newEntry, gratitude_2: e.target.value })}
+                      className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-purple-300/70 mb-1 block">Entry 3 (optional)</label>
+                    <textarea
+                      placeholder="I am grateful for..."
+                      value={newEntry.gratitude_3}
+                      onChange={(e) => setNewEntry({ ...newEntry, gratitude_3: e.target.value })}
+                      className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-6 pb-safe">
+                  <button
+                    onClick={() => {
+                      setShowEntryForm(false);
+                      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+                      setSelectedDate(null);
+                    }}
+                    className="flex-1 py-4 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending}
+                    className="flex-1 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30 disabled:opacity-50"
+                  >
+                    {createMutation.isPending ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
               </div>
             </motion.div>
           </>
