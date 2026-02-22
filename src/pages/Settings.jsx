@@ -6,13 +6,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown
+  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Bug
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
 import { isDevMode, setDevMode } from '@/components/subscription/subscriptionHelper';
+import { Link } from 'react-router-dom';
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
@@ -237,6 +238,18 @@ export default function Settings() {
                 checked={devModeOn}
                 onToggle={(val) => { setDevMode(val); setDevModeOn(val); }}
               />
+              {user?.role === 'admin' && (
+                <Link to={createPageUrl('Diagnostics')}>
+                  <SettingsRow
+                    icon={Bug}
+                    iconBg="bg-green-500/20"
+                    iconColor="text-green-400"
+                    title="Diagnostics"
+                    subtitle="System checks & event log"
+                    onClick={() => {}}
+                  />
+                </Link>
+              )}
             </div>
           </motion.div>
 
