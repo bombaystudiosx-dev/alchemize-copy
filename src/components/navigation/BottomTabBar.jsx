@@ -138,12 +138,14 @@ export default function BottomTabBar({ currentPageName }) {
           const active = t.key === currentTab;
           const Icon = t.icon;
           return (
-            <button
+            <motion.button
               key={t.key}
               onClick={() => onTabPress(t)}
               type="button"
               role="tab"
               aria-selected={active}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className="flex flex-col items-center justify-center flex-1 h-full relative"
               style={{
                 minHeight: 52,
@@ -155,21 +157,39 @@ export default function BottomTabBar({ currentPageName }) {
               }}
             >
               {active && (
-                <motion.div
-                  layoutId="activeTab"
-                  className="absolute -top-px left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
-                  style={{ background: 'var(--brand)' }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
+                <>
+                  {/* Top indicator line */}
+                  <motion.div
+                    layoutId="activeTab"
+                    className="absolute -top-px left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full"
+                    style={{ background: 'var(--brand)' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                  {/* Glow under icon */}
+                  <motion.div
+                    layoutId="activeGlow"
+                    className="absolute inset-0 rounded-xl"
+                    style={{
+                      background: 'radial-gradient(ellipse at center 60%, rgba(168,85,247,0.18) 0%, transparent 70%)',
+                    }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                </>
               )}
-              <Icon className="w-5 h-5 transition-colors duration-200" style={{ color: 'inherit' }} />
-              <span
-                className="font-medium transition-colors duration-200"
+              <motion.div
+                animate={{ scale: active ? 1.15 : 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              >
+                <Icon className="w-5 h-5" style={{ color: 'inherit' }} />
+              </motion.div>
+              <motion.span
+                animate={{ opacity: active ? 1 : 0.45 }}
+                className="font-medium"
                 style={{ fontSize: 12, lineHeight: '14px', color: 'inherit' }}
               >
                 {t.label}
-              </span>
-            </button>
+              </motion.span>
+            </motion.button>
           );
         })}
       </div>
