@@ -172,7 +172,7 @@ export default function Premium() {
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                {selectedPlan === 'monthly' ? 'Start 7-Day Free Trial' : 'Subscribe Now'}
+                Start 7-Day Free Trial
               </>
             )}
           </motion.button>
