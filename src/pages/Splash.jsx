@@ -36,6 +36,24 @@ export default function Splash() {
     base44.auth.loginWithProvider('apple', getNextUrl());
   };
 
+  const handleEmailLogin = async () => {
+    setEmailError('');
+    try {
+      await base44.auth.login(email, password, getNextUrl());
+    } catch (e) {
+      setEmailError(e.message || 'Invalid email or password');
+    }
+  };
+
+  const handleEmailSignup = async () => {
+    setEmailError('');
+    try {
+      await base44.auth.signup(email, password, getNextUrl());
+    } catch (e) {
+      setEmailError(e.message || 'Could not create account');
+    }
+  };
+
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
 
   return (
