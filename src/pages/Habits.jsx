@@ -122,15 +122,19 @@ export default function Habits() {
     }
   });
   
-  // Save to database whenever data changes (debounced)
+  // Save to database whenever data changes (debounced) — skip on first load
+  const isFirstLoad = React.useRef(true);
   useEffect(() => {
-    if (!isLoading && habitsData && habitRecord !== undefined) {
-      const timer = setTimeout(() => {
-        saveMutation.mutate(habitsData);
-      }, 500);
-      return () => clearTimeout(timer);
+    if (isLoading || habitRecord === undefined) return;
+    if (isFirstLoad.current) {
+      isFirstLoad.current = false;
+      return;
     }
-  }, [habitsData, isLoading, habitRecord]);
+    const timer = setTimeout(() => {
+      saveMutation.mutate(habitsData);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [habitsData]);
 
   // Timer effect with alarm
   useEffect(() => {
@@ -276,12 +280,9 @@ export default function Habits() {
   };
 
   const getStreakBadge = (streak) => {
-    const badges = gritData.layout.streak_indicator.badge_levels;
-    for (let i = badges.length - 1; i >= 0; i--) {
-      if (streak >= badges[i].threshold) {
-        return badges[i].badge;
-      }
-    }
+    if (streak >= 30) return '🏆';
+    if (streak >= 14) return '💎';
+    if (streak >= 7) return '🔥';
     return null;
   };
 

@@ -48,7 +48,7 @@ export default function Splash() {
   const handleEmailSignup = async () => {
     setEmailError('');
     try {
-      await base44.auth.signup(email, password, getNextUrl(), { requireCode: false });
+      await base44.auth.signup(email, password, getNextUrl());
     } catch (e) {
       setEmailError(e.message || 'Could not create account');
     }

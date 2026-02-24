@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import PlanCard from '@/components/subscription/PlanCard';
 import { 
   Crown, Sparkles, Star, Wand2, Eye, 
-  Infinity, Loader2 
+  Zap, Loader2 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
@@ -41,7 +41,7 @@ const FEATURES = [
   { icon: Wand2, text: 'Advanced Manifestation Tools' },
   { icon: Eye, text: 'AI Vision Board Generator' },
   { icon: Star, text: 'Unlimited Affirmations' },
-  { icon: Infinity, text: 'Priority AI Chat Support' },
+  { icon: Zap, text: 'Priority AI Chat Support' },
   { icon: Sparkles, text: 'Exclusive Cosmic Themes' },
 ];
 
