@@ -4,19 +4,19 @@ import Stripe from 'npm:stripe@17.7.0';
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
 
 const PRICES = {
-  monthly: 'price_1T31mwAqYthC9sOwUqQZL0wn',
-  semiannual: 'price_1T31mwAqYthC9sOw0XdCBvxx',
-  annual: 'price_1T31mwAqYthC9sOwi3fnOJXD',
+  monthly: Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
+  semiannual: Deno.env.get("STRIPE_SEMIANNUAL_PRICE_ID") || Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
+  annual: Deno.env.get("STRIPE_ANNUAL_PRICE_ID") || Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
 };
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { plan } = await req.json();
+    const { plan = 'monthly' } = await req.json();
 
-    const priceId = PRICES[plan];
+    const priceId = PRICES[plan] || PRICES['monthly'];
     if (!priceId) {
-      return Response.json({ error: 'Invalid plan' }, { status: 400 });
+      return Response.json({ error: 'Stripe price ID not configured. Please set STRIPE_MONTHLY_PRICE_ID.' }, { status: 500 });
     }
 
     // Try to get user email for pre-fill, but don't require auth
