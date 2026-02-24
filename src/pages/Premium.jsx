@@ -17,22 +17,6 @@ const PLANS = [
     price: '15.55',
     interval: 'month',
     trial: true,
-  },
-  {
-    id: 'semiannual',
-    name: '6-Month',
-    price: '83.97',
-    interval: '6 months',
-    perMonth: '13.99',
-    savings: '10%',
-  },
-  {
-    id: 'annual',
-    name: 'Annual',
-    price: '149.28',
-    interval: 'year',
-    perMonth: '12.44',
-    savings: '20%',
     popular: true,
   },
 ];
