@@ -125,6 +125,63 @@ export default function Splash() {
               Sign in with Apple
             </motion.button>
 
+            {/* Divider */}
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-px bg-white/15" />
+              <span className="text-white/30 text-xs">or</span>
+              <div className="flex-1 h-px bg-white/15" />
+            </div>
+
+            {/* Email/Password Form */}
+            {!showEmailForm ? (
+              <motion.button
+                onClick={() => setShowEmailForm(true)}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full py-3 px-5 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center gap-3 text-white font-semibold text-sm hover:bg-white/15 transition-colors"
+              >
+                Continue with Email
+              </motion.button>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-2"
+              >
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
+                />
+                {emailError && <p className="text-red-400 text-xs px-1">{emailError}</p>}
+                <div className="flex gap-2">
+                  <motion.button
+                    onClick={handleEmailLogin}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-semibold text-sm transition-colors"
+                  >
+                    Sign In
+                  </motion.button>
+                  <motion.button
+                    onClick={handleEmailSignup}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 py-2.5 bg-white/10 border border-white/20 hover:bg-white/15 rounded-xl text-white font-semibold text-sm transition-colors"
+                  >
+                    Sign Up
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
             {/* Terms */}
             <div className="flex items-center justify-center gap-3 text-xs text-white/40 pt-1">
               <Link to={createPageUrl('Terms')} className="hover:text-white/70 transition-colors">Terms</Link>
