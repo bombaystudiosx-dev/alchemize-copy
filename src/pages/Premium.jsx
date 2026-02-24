@@ -109,7 +109,8 @@ export default function Premium() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4 space-y-3 mb-6"
+          className="rounded-2xl border border-white/10 p-4 space-y-3 mb-6"
+          style={{ background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}
         >
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon;
