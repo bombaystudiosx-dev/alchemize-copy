@@ -155,11 +155,27 @@ export default function Premium() {
           transition={{ delay: 0.3 }}
           className="space-y-3"
         >
-          <button
+          <motion.button
             onClick={handleSubscribe}
             disabled={loading}
-            className="w-full py-4 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg shadow-lg shadow-purple-500/30 hover:from-purple-500 hover:to-indigo-500 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
+            whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.01 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            className="relative w-full py-4 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-bold text-lg shadow-xl shadow-purple-500/40 disabled:opacity-60 flex items-center justify-center gap-2"
+            style={{ backgroundSize: '200% 100%' }}
           >
+            {/* Shimmer overlay */}
+            {!loading && (
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.18) 50%, transparent 60%)',
+                  backgroundSize: '200% 100%',
+                }}
+                animate={{ backgroundPosition: ['200% 0', '-200% 0'] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: 'linear', repeatDelay: 0.8 }}
+              />
+            )}
             {loading ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
@@ -168,7 +184,7 @@ export default function Premium() {
                 {selectedPlan === 'monthly' ? 'Start 7-Day Free Trial' : 'Subscribe Now'}
               </>
             )}
-          </button>
+          </motion.button>
           {selectedPlan === 'monthly' && (
             <p className="text-center text-white/40 text-xs">
               Then $15.55/month after trial. Cancel anytime.
