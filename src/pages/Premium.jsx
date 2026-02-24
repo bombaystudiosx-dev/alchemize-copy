@@ -176,11 +176,9 @@ export default function Premium() {
               </>
             )}
           </motion.button>
-          {selectedPlan === 'monthly' && (
-            <p className="text-center text-white/40 text-xs">
-              Then $15.55/month after trial. Cancel anytime.
-            </p>
-          )}
+          <p className="text-center text-white/40 text-xs">
+            7-day free trial, then $15.55/month. Cancel anytime.
+          </p>
 
           {/* Skip / Free tier */}
           <button
