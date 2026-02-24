@@ -115,12 +115,18 @@ export default function Premium() {
           {FEATURES.map((feature, i) => {
             const Icon = feature.icon;
             return (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + i * 0.06, type: 'spring', stiffness: 300, damping: 24 }}
+                className="flex items-center gap-3"
+              >
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 shadow-md shadow-purple-500/10">
                   <Icon className="w-4 h-4 text-purple-400" />
                 </div>
                 <span className="text-white/90 text-sm">{feature.text}</span>
-              </div>
+              </motion.div>
             );
           })}
         </motion.div>
