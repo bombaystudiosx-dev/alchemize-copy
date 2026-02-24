@@ -6,12 +6,18 @@ export default function PlanCard({ plan, selected, onSelect, popular }) {
   return (
     <motion.button
       onClick={() => onSelect(plan.id)}
-      whileTap={{ scale: 0.97 }}
-      className={`relative w-full rounded-2xl p-4 text-left transition-all duration-200 ${
+      whileTap={{ scale: 0.96 }}
+      animate={selected ? { scale: 1.01 } : { scale: 1 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className={`relative w-full rounded-2xl p-4 text-left ${
         selected
-          ? 'bg-purple-600/30 border-2 border-purple-500'
-          : 'bg-white/5 border-2 border-white/10'
+          ? 'bg-purple-600/25 border-2 border-purple-400 shadow-lg shadow-purple-500/20'
+          : 'bg-white/5 border-2 border-white/10 hover:border-white/20'
       }`}
+      style={selected ? {
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      } : {}}
     >
       {popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold text-white flex items-center gap-1">
