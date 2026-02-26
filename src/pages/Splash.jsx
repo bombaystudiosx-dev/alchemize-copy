@@ -50,7 +50,7 @@ export default function Splash() {
     try {
       if (isSignUp) {
         const pwd = password || Math.random().toString(36).slice(-10) + 'A1!';
-        await base44.auth.register(email, pwd, getNextUrl());
+        await base44.auth.login(email, pwd, getNextUrl());
       } else {
         await base44.auth.login(email, password, getNextUrl());
       }
