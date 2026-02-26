@@ -28,9 +28,7 @@ export default function Settings() {
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
   const [devModeOn, setDevModeOn] = useState(() => isDevMode());
-  const [showCalendar, setShowCalendar] = useState(() => {
-    return localStorage.getItem('show_calendar') !== 'false';
-  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
