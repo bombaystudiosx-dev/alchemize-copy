@@ -270,6 +270,16 @@ export default function Settings() {
                   onClick={() => setShowResetData(true)}
                 />
               </div>
+              <div onClick={() => setShowDeleteAccount(true)}>
+                <SettingsRow
+                  icon={Trash2}
+                  iconBg="bg-red-600/20"
+                  iconColor="text-red-500"
+                  title="Delete Account"
+                  subtitle="Permanently delete your account and all data"
+                  onClick={() => setShowDeleteAccount(true)}
+                />
+              </div>
             </div>
           </motion.div>
 
