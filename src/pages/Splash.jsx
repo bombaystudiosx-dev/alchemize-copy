@@ -38,21 +38,33 @@ export default function Splash() {
     base44.auth.loginWithProvider('apple', getNextUrl());
   };
 
-  const handleEmailLogin = async () => {
-    setEmailError('');
-    try {
-      await base44.auth.login(email, password, getNextUrl());
-    } catch (e) {
-      setEmailError(e.message || 'Invalid email or password');
-    }
+  const handleRememberMeChange = (val) => {
+    setRememberMe(val);
+    localStorage.setItem('remember_me', val.toString());
   };
 
-  const handleEmailSignup = async () => {
+  const handleEmailSubmit = async () => {
     setEmailError('');
+    if (!email) { setEmailError('Please enter your email'); return; }
+    if (!isSignUp && !password) { setEmailError('Please enter your password'); return; }
     try {
-      await base44.auth.signup(email, password, getNextUrl());
+      if (isSignUp) {
+        // Sign up without requiring a password - use magic link / email only if no password provided
+        const pwd = password || Math.random().toString(36).slice(-10) + 'A1!';
+        await base44.auth.signup(email, pwd, getNextUrl());
+      } else {
+        await base44.auth.login(email, password, getNextUrl());
+      }
     } catch (e) {
-      setEmailError(e.message || 'Could not create account');
+      const msg = e.message || '';
+      if (msg.toLowerCase().includes('invalid') || msg.toLowerCase().includes('credentials')) {
+        setEmailError('Incorrect email or password. Try again or sign up.');
+      } else if (msg.toLowerCase().includes('exist') || msg.toLowerCase().includes('already')) {
+        setEmailError('An account with this email already exists. Please sign in.');
+        setIsSignUp(false);
+      } else {
+        setEmailError(msg || 'Something went wrong. Please try again.');
+      }
     }
   };
 
