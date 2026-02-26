@@ -56,11 +56,19 @@ Deno.serve(async (req) => {
           if (email) {
             const users = await base44.asServiceRole.entities.User.filter({ email });
             if (users.length > 0) {
+              const plan = subscription.items?.data?.[0]?.price?.nickname || 
+                           subscription.items?.data?.[0]?.price?.id || 'unknown';
+              const periodEnd = subscription.current_period_end
+                ? new Date(subscription.current_period_end * 1000).toISOString()
+                : null;
               await base44.asServiceRole.entities.User.update(users[0].id, {
                 subscription_status: status,
                 stripe_customer_id: customerId,
+                stripe_subscription_id: subscription.id,
+                subscription_plan: plan,
+                subscription_period_end: periodEnd,
               });
-              console.log('User subscription updated:', email, 'status:', status);
+              console.log('User subscription updated:', email, 'status:', status, 'plan:', plan);
             }
           }
         } catch (e) {
