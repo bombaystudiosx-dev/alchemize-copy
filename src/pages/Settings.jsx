@@ -39,11 +39,6 @@ export default function Settings() {
     fetchUser();
   }, []);
 
-  const handleCalendarToggle = (val) => {
-    setShowCalendar(val);
-    localStorage.setItem('show_calendar', val.toString());
-  };
-
   const handleLogout = () => {
     base44.auth.logout();
   };
