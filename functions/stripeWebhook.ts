@@ -89,6 +89,10 @@ Deno.serve(async (req) => {
             if (users.length > 0) {
               await base44.asServiceRole.entities.User.update(users[0].id, {
                 subscription_status: 'cancelled',
+                stripe_subscription_id: subscription.id,
+                subscription_period_end: subscription.current_period_end
+                  ? new Date(subscription.current_period_end * 1000).toISOString()
+                  : null,
               });
               console.log('User subscription cancelled:', email);
             }
@@ -100,7 +104,44 @@ Deno.serve(async (req) => {
       }
       case 'invoice.paid': {
         const invoice = event.data.object;
+        const customerId = invoice.customer;
         console.log('Invoice paid:', invoice.id, 'amount:', invoice.amount_paid);
+        try {
+          const customer = await stripe.customers.retrieve(customerId);
+          const email = customer.email;
+          if (email) {
+            const users = await base44.asServiceRole.entities.User.filter({ email });
+            if (users.length > 0) {
+              await base44.asServiceRole.entities.User.update(users[0].id, {
+                subscription_status: 'active',
+                stripe_customer_id: customerId,
+              });
+              console.log('Invoice paid, subscription kept active for:', email);
+            }
+          }
+        } catch (e) {
+          console.error('Error handling invoice.paid:', e.message);
+        }
+        break;
+      }
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object;
+        console.log('Invoice payment failed:', invoice.id);
+        try {
+          const customer = await stripe.customers.retrieve(invoice.customer);
+          const email = customer.email;
+          if (email) {
+            const users = await base44.asServiceRole.entities.User.filter({ email });
+            if (users.length > 0) {
+              await base44.asServiceRole.entities.User.update(users[0].id, {
+                subscription_status: 'past_due',
+              });
+              console.log('User marked past_due due to failed payment:', email);
+            }
+          }
+        } catch (e) {
+          console.error('Error handling invoice.payment_failed:', e.message);
+        }
         break;
       }
       default:
