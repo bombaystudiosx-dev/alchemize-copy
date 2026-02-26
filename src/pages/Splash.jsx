@@ -184,6 +184,18 @@ export default function Splash() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-2"
               >
+                {/* Sign In / Sign Up toggle */}
+                <div className="flex rounded-xl overflow-hidden border border-white/20">
+                  <button
+                    onClick={() => { setIsSignUp(false); setEmailError(''); }}
+                    className={`flex-1 py-2 text-sm font-semibold transition-colors ${!isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
+                  >Sign In</button>
+                  <button
+                    onClick={() => { setIsSignUp(true); setEmailError(''); }}
+                    className={`flex-1 py-2 text-sm font-semibold transition-colors ${isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
+                  >Sign Up</button>
+                </div>
+
                 <input
                   type="email"
                   placeholder="Email"
@@ -193,28 +205,32 @@ export default function Splash() {
                 />
                 <input
                   type="password"
-                  placeholder="Password"
+                  placeholder={isSignUp ? 'Password (optional)' : 'Password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
                 />
-                {emailError && <p className="text-red-400 text-xs px-1">{emailError}</p>}
-                <div className="flex gap-2">
-                  <motion.button
-                    onClick={handleEmailLogin}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-semibold text-sm transition-colors"
+
+                {/* Remember Me */}
+                <div className="flex items-center gap-2 px-1">
+                  <button
+                    onClick={() => handleRememberMeChange(!rememberMe)}
+                    className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${rememberMe ? 'bg-purple-600 border-purple-600' : 'border-white/30'}`}
                   >
-                    Sign In
-                  </motion.button>
-                  <motion.button
-                    onClick={handleEmailSignup}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex-1 py-2.5 bg-white/10 border border-white/20 hover:bg-white/15 rounded-xl text-white font-semibold text-sm transition-colors"
-                  >
-                    Sign Up
-                  </motion.button>
+                    {rememberMe && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>}
+                  </button>
+                  <span className="text-white/50 text-xs">Remember me</span>
                 </div>
+
+                {emailError && <p className="text-red-400 text-xs px-1">{emailError}</p>}
+
+                <motion.button
+                  onClick={handleEmailSubmit}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-semibold text-sm transition-colors"
+                >
+                  {isSignUp ? 'Create Account' : 'Sign In'}
+                </motion.button>
               </motion.div>
             )}
 
