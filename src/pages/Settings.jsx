@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Calendar, Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Bug
+  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Bug
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
