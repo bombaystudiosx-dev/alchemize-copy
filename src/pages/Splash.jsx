@@ -168,8 +168,20 @@ export default function Splash() {
               <div className="flex-1 h-px bg-white/15" />
             </div>
 
+            {/* Sign In / Sign Up toggle — always visible */}
+            <div className="flex rounded-xl overflow-hidden border border-white/20">
+              <button
+                onClick={() => { setIsSignUp(false); setEmailError(''); setShowEmailForm(false); }}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors ${!isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
+              >Sign In</button>
+              <button
+                onClick={() => { setIsSignUp(true); setEmailError(''); setShowEmailForm(true); }}
+                className={`flex-1 py-2 text-sm font-semibold transition-colors ${isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
+              >Sign Up</button>
+            </div>
+
             {/* Email/Password Form */}
-            {!showEmailForm ? (
+            {!showEmailForm && !isSignUp ? (
               <motion.button
                 onClick={() => setShowEmailForm(true)}
                 whileHover={{ scale: 1.02 }}
@@ -184,18 +196,6 @@ export default function Splash() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-2"
               >
-                {/* Sign In / Sign Up toggle */}
-                <div className="flex rounded-xl overflow-hidden border border-white/20">
-                  <button
-                    onClick={() => { setIsSignUp(false); setEmailError(''); }}
-                    className={`flex-1 py-2 text-sm font-semibold transition-colors ${!isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
-                  >Sign In</button>
-                  <button
-                    onClick={() => { setIsSignUp(true); setEmailError(''); }}
-                    className={`flex-1 py-2 text-sm font-semibold transition-colors ${isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
-                  >Sign Up</button>
-                </div>
-
                 <input
                   type="email"
                   placeholder="Email"
@@ -203,13 +203,15 @@ export default function Splash() {
                   onChange={e => setEmail(e.target.value)}
                   className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
                 />
-                <input
-                  type="password"
-                  placeholder={isSignUp ? 'Password (optional)' : 'Password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
-                />
+                {!isSignUp && (
+                  <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
+                  />
+                )}
 
                 {/* Remember Me */}
                 <div className="flex items-center gap-2 px-1">
