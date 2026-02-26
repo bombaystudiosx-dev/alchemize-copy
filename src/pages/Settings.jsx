@@ -210,16 +210,7 @@ export default function Settings() {
                 subtitle={themeLabel}
                 onClick={() => setShowTheme(true)}
               />
-              <SettingsRow
-                icon={Calendar}
-                iconBg="bg-purple-500/20"
-                iconColor="text-purple-400"
-                title="Show Calendar"
-                subtitle="Display unified calendar on home screen"
-                toggle
-                checked={showCalendar}
-                onToggle={handleCalendarToggle}
-              />
+
               <SettingsRow
                 icon={Shield}
                 iconBg="bg-amber-500/20"
