@@ -49,9 +49,8 @@ export default function Splash() {
     if (!isSignUp && !password) { setEmailError('Please enter your password'); return; }
     try {
       if (isSignUp) {
-        // Sign up without requiring a password - use magic link / email only if no password provided
         const pwd = password || Math.random().toString(36).slice(-10) + 'A1!';
-        await base44.auth.signup(email, pwd, getNextUrl());
+        await base44.auth.register(email, pwd, getNextUrl());
       } else {
         await base44.auth.login(email, password, getNextUrl());
       }
