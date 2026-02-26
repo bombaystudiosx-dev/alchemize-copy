@@ -11,7 +11,6 @@ export default function Splash() {
     return localStorage.getItem('app_language') || 'en';
   });
 
-
   useEffect(() => {
     localStorage.setItem('app_language', language);
     window.dispatchEvent(new Event('language-changed'));
@@ -31,17 +30,6 @@ export default function Splash() {
 
   const handleApple = () => {
     base44.auth.loginWithProvider('apple', getNextUrl());
-  };
-
-  const handleRememberMeChange = (val) => {
-    setRememberMe(val);
-    localStorage.setItem('remember_me', val.toString());
-  };
-
-  const handleEmailSubmit = () => {
-    setEmailError('');
-    if (!email) { setEmailError('Please enter your email'); return; }
-    base44.auth.redirectToLogin(getNextUrl());
   };
 
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
@@ -136,81 +124,6 @@ export default function Splash() {
               <Apple className="w-5 h-5 flex-shrink-0" />
               Sign in with Apple
             </motion.button>
-
-            {/* Divider */}
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-px bg-white/15" />
-              <span className="text-white/30 text-xs">or</span>
-              <div className="flex-1 h-px bg-white/15" />
-            </div>
-
-            {/* Sign In / Sign Up toggle — always visible */}
-            <div className="flex rounded-xl overflow-hidden border border-white/20">
-              <button
-                onClick={() => { setIsSignUp(false); setEmailError(''); setShowEmailForm(false); }}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${!isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
-              >Sign In</button>
-              <button
-                onClick={() => { setIsSignUp(true); setEmailError(''); setShowEmailForm(true); }}
-                className={`flex-1 py-2 text-sm font-semibold transition-colors ${isSignUp ? 'bg-purple-600 text-white' : 'text-white/50 hover:text-white/80'}`}
-              >Sign Up</button>
-            </div>
-
-            {/* Email/Password Form */}
-            {!showEmailForm && !isSignUp ? (
-              <motion.button
-                onClick={() => setShowEmailForm(true)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full py-3 px-5 bg-white/10 border border-white/20 rounded-xl flex items-center justify-center gap-3 text-white font-semibold text-sm hover:bg-white/15 transition-colors"
-              >
-                Continue with Email
-              </motion.button>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-2"
-              >
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
-                />
-                {!isSignUp && (
-                  <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="w-full py-2.5 px-4 bg-white/10 border border-white/20 rounded-xl text-white text-sm placeholder-white/40 outline-none focus:border-purple-500"
-                  />
-                )}
-
-                {/* Remember Me */}
-                <div className="flex items-center gap-2 px-1">
-                  <button
-                    onClick={() => handleRememberMeChange(!rememberMe)}
-                    className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${rememberMe ? 'bg-purple-600 border-purple-600' : 'border-white/30'}`}
-                  >
-                    {rememberMe && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>}
-                  </button>
-                  <span className="text-white/50 text-xs">Remember me</span>
-                </div>
-
-                {emailError && <p className="text-red-400 text-xs px-1">{emailError}</p>}
-
-                <motion.button
-                  onClick={handleEmailSubmit}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 rounded-xl text-white font-semibold text-sm transition-colors"
-                >
-                  {isSignUp ? 'Create Account' : 'Sign In'}
-                </motion.button>
-              </motion.div>
-            )}
 
             {/* Terms */}
             <div className="flex items-center justify-center gap-3 text-xs text-white/40 pt-1">
