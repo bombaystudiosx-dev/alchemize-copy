@@ -4,9 +4,6 @@ import { Palette, Check } from 'lucide-react';
 
 const THEMES = [
   { id: 'cosmic-dark', name: 'Cosmic Dark', desc: 'Deep purple cosmic theme', colors: ['#0a0118', '#1a0a2e', '#a855f7'] },
-  { id: 'midnight-blue', name: 'Midnight Blue', desc: 'Deep ocean blue', colors: ['#020617', '#0f172a', '#3b82f6'] },
-  { id: 'aurora', name: 'Aurora', desc: 'Northern lights green', colors: ['#022c22', '#064e3b', '#10b981'] },
-  { id: 'rose-gold', name: 'Rose Gold', desc: 'Warm rose tones', colors: ['#1c0a14', '#2e0a1e', '#f43f5e'] },
 ];
 
 export default function ThemeDialog({ open, onOpenChange }) {
