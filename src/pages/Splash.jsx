@@ -10,12 +10,7 @@ export default function Splash() {
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('app_language') || 'en';
   });
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [emailError, setEmailError] = useState('');
-  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('remember_me') === 'true');
-  const [isSignUp, setIsSignUp] = useState(false);
+
 
   useEffect(() => {
     localStorage.setItem('app_language', language);
