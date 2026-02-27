@@ -14,6 +14,8 @@ import { toast } from '@/components/common/AppToast';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import IncomeCalendar from '@/components/finance/IncomeCalendar';
 import ExpenseCalendar from '@/components/finance/ExpenseCalendar';
+import YearCalendar from '@/components/finance/YearCalendar';
+import FinanceNotepad from '@/components/finance/FinanceNotepad';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
@@ -60,6 +62,14 @@ export default function Finance() {
     queryFn: async () => {
       const user = await base44.auth.me();
       return base44.entities.FinancialNote.filter({ created_by: user.email });
+    }
+  });
+
+  const { data: financeNotes = [] } = useQuery({
+    queryKey: ['financeNotes'],
+    queryFn: async () => {
+      const user = await base44.auth.me();
+      return base44.entities.FinanceNote.filter({ created_by: user.email });
     }
   });
 
@@ -248,6 +258,7 @@ export default function Finance() {
       queryClient.invalidateQueries(['financialIncomes']),
       queryClient.invalidateQueries(['financialExpenses']),
       queryClient.invalidateQueries(['financialNotes']),
+      queryClient.invalidateQueries(['financeNotes']),
     ]);
   };
 
@@ -338,6 +349,9 @@ export default function Finance() {
             </div>
           </CosmicCard>
 
+          {/* 12-Month Year Calendar */}
+          <YearCalendar incomes={incomes} expenses={expenses} />
+
           {/* Calendars */}
           <div className="space-y-4">
             <IncomeCalendar 
@@ -421,6 +435,9 @@ export default function Finance() {
               </div>
             )}
           </CosmicCard>
+
+          {/* Notepad */}
+          <FinanceNotepad notes={financeNotes} />
 
           {/* Notes Section */}
           <CosmicCard>
