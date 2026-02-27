@@ -11,6 +11,27 @@
   --muted: var(--color-muted, rgba(255,255,255,0.35));
   --brand: var(--color-brand, #a855f7);
   --danger: var(--color-danger, #ff3b30);
+
+  /* Force dark mode for shadcn/ui — override light :root from index.css */
+  --background: 270 100% 4%;
+  --foreground: 0 0% 96%;
+  --card: 270 60% 7%;
+  --card-foreground: 0 0% 96%;
+  --popover: 270 60% 7%;
+  --popover-foreground: 0 0% 96%;
+  --primary: 270 70% 60%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 270 30% 12%;
+  --secondary-foreground: 0 0% 96%;
+  --muted: 270 30% 12%;
+  --muted-foreground: 0 0% 55%;
+  --accent: 270 30% 14%;
+  --accent-foreground: 0 0% 96%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 270 20% 15%;
+  --input: 270 20% 15%;
+  --ring: 270 70% 60%;
 }
 
 /* ===== PERFORMANCE & MOTION ===== */
