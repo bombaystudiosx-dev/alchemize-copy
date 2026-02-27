@@ -47,7 +47,7 @@ export default function Layout({ children, currentPageName }) {
 
   if (authError) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620] flex items-center justify-center">
+      <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
         <div className="text-center px-6">
           <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
             <span className="text-2xl">⚠️</span>
@@ -67,7 +67,7 @@ export default function Layout({ children, currentPageName }) {
 
   if (isAuthenticated === null) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620] flex items-center justify-center">
+      <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-10 h-10 text-purple-500 animate-spin mx-auto mb-4" />
           <p className="text-purple-200/70">Loading your journey...</p>
@@ -84,7 +84,8 @@ export default function Layout({ children, currentPageName }) {
         <InstallPrompt />
         <div className="min-h-screen" style={{
           paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`
+          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
+          background: '#0a0118',
         }}>
           <PageTransition pageKey={currentPageName}>
             {children}

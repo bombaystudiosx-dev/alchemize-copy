@@ -28,6 +28,8 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  height: 100%;
+  overflow-x: hidden;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -42,13 +44,30 @@ html {
 
 /* ===== COSMIC THEME ===== */
 
-body {
-  background: linear-gradient(135deg, #0a0118 0%, #1a0a2e 50%, #0d0620 100%);
+html, body {
+  background: #0a0118;
   min-height: 100vh;
   min-height: 100dvh;
+  margin: 0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0118 0%, #1a0a2e 50%, #0d0620 100%);
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #0a0118;
+  overflow-x: hidden;
 }
 
 /* ===== NATIVE INPUT STYLING ===== */
@@ -172,4 +191,48 @@ input[type="range"]::-webkit-slider-thumb {
 }
 .animate-float-slow {
   animation: float-slow 4s ease-in-out infinite;
+}
+
+/* ===== NATIVE APP FEEL ===== */
+
+/* Prevent rubber-banding / overscroll white flash */
+html, body, #root {
+  overscroll-behavior-y: none;
+}
+
+/* Prevent text selection on UI elements (native feel) */
+button, a, nav, header, [role="tablist"], [role="tab"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent pull-to-refresh in standalone mode */
+@media all and (display-mode: standalone) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Remove any default margins/gaps from common elements */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure images don't cause layout overflow */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fix 100vh on mobile browsers */
+.min-h-screen {
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+}
+
+/* Prevent white flash on page transitions */
+.page-transition-wrapper {
+  background: #0a0118;
 }
