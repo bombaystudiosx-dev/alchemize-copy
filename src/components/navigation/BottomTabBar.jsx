@@ -153,7 +153,7 @@ export default function BottomTabBar({ currentPageName }) {
                 gap: 3,
                 background: 'transparent',
                 border: 0,
-                color: active ? '#ffd700' : 'var(--muted)',
+                color: active ? '#ffd700' : 'rgba(255, 215, 0, 0.4)',
               }}
             >
               {active && (
