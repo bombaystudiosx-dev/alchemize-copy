@@ -21,7 +21,7 @@ export default function PremiumGate({ featureId, children }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#0a0118] flex items-center justify-center px-6">
       <div className="text-center space-y-6 max-w-sm">
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-400/20 to-purple-600/20 flex items-center justify-center mx-auto">
           <Lock className="w-10 h-10 text-purple-400" />
