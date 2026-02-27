@@ -159,7 +159,7 @@ export default function GratitudeJournal() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="px-6 pb-32">
+      <div className="px-6" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
         {entries.length === 0 ? (
           <div className="text-center py-12">
             <Heart className="w-12 h-12 text-purple-400 mx-auto mb-3 opacity-50" />
