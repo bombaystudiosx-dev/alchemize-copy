@@ -64,6 +64,11 @@ export default function Splash() {
       if (signInError) {
         setError(signInError.message);
       } else {
+        if (!rememberMe) {
+          localStorage.setItem('supabase_no_persist', 'true');
+        } else {
+          localStorage.removeItem('supabase_no_persist');
+        }
         navigate(getNextUrl());
       }
     }
