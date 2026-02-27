@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Apple } from 'lucide-react';
+import { Apple, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { isDevMode } from '@/components/subscription/subscriptionHelper';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/components/supabaseClient';
 
 export default function Splash() {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem('app_language') || 'en';
-  });
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState(() => localStorage.getItem('app_language') || 'en');
+  const [showEmailForm, setShowEmailForm] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
     localStorage.setItem('app_language', language);
@@ -32,19 +40,44 @@ export default function Splash() {
     base44.auth.loginWithProvider('apple', getNextUrl());
   };
 
+  const handleEmailAuth = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMsg('');
+    setLoading(true);
+
+    if (isSignUp) {
+      const { error: signUpError } = await supabase.auth.signUp({ email, password });
+      if (signUpError) {
+        setError(signUpError.message);
+      } else {
+        setSuccessMsg('Check your email to confirm your account!');
+      }
+    } else {
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setError(signInError.message);
+      } else {
+        navigate(getNextUrl());
+      }
+    }
+
+    setLoading(false);
+  };
+
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
 
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/93e342e0e_ChatGPTImageFeb21202605_00_36PM1.png)'
         }}
       />
-      
-      {/* Language Toggle - Top */}
+
+      {/* Language Toggle */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,19 +87,15 @@ export default function Splash() {
         <button
           onClick={() => setLanguage('en')}
           className={`text-xs font-medium px-2 py-1 rounded ${language === 'en' ? 'text-white bg-purple-600' : 'text-white/50'}`}
-        >
-          EN
-        </button>
+        >EN</button>
         <button
           onClick={() => setLanguage('es')}
           className={`text-xs font-medium px-2 py-1 rounded ${language === 'es' ? 'text-white bg-purple-600' : 'text-white/50'}`}
-        >
-          ES
-        </button>
+        >ES</button>
       </motion.div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-end px-6 pt-16 pb-12">
-        
+
         {/* Tagline */}
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -92,10 +121,8 @@ export default function Splash() {
           transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
           className="relative w-full max-w-xs mt-4"
         >
-          {/* Glow Effect */}
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-amber-500 to-purple-600 rounded-2xl blur-lg opacity-50 animate-pulse" />
 
-          {/* Box Content */}
           <div className="relative bg-black/60 backdrop-blur-md rounded-xl p-6 border border-white/10 space-y-3">
 
             {/* Google Button */}
@@ -125,6 +152,96 @@ export default function Splash() {
               Sign in with Apple
             </motion.button>
 
+            {/* Divider */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-white/30 text-xs">or</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+
+            {/* Email toggle / form */}
+            <AnimatePresence mode="wait">
+              {!showEmailForm ? (
+                <motion.button
+                  key="email-btn"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setShowEmailForm(true)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full py-3 px-5 bg-purple-600/30 border border-purple-500/40 rounded-xl flex items-center justify-center gap-3 text-white font-semibold text-sm hover:bg-purple-600/50 transition-colors"
+                >
+                  <Mail className="w-4 h-4" />
+                  Continue with Email
+                </motion.button>
+              ) : (
+                <motion.form
+                  key="email-form"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  onSubmit={handleEmailAuth}
+                  className="space-y-3"
+                >
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-white/40 text-sm focus:outline-none focus:border-purple-500"
+                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      required
+                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2.5 text-white placeholder-white/40 text-sm focus:outline-none focus:border-purple-500 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+
+                  {error && <p className="text-red-400 text-xs text-center">{error}</p>}
+                  {successMsg && <p className="text-green-400 text-xs text-center">{successMsg}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 rounded-lg text-white font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-60 transition-colors"
+                  >
+                    {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {isSignUp ? 'Create Account' : 'Sign In'}
+                  </button>
+
+                  <div className="flex items-center justify-between text-xs">
+                    <button
+                      type="button"
+                      onClick={() => { setIsSignUp(!isSignUp); setError(''); setSuccessMsg(''); }}
+                      className="text-purple-400 hover:text-purple-300"
+                    >
+                      {isSignUp ? 'Already have an account?' : 'Create an account'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowEmailForm(false); setError(''); setSuccessMsg(''); }}
+                      className="text-white/30 hover:text-white/60"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </motion.form>
+              )}
+            </AnimatePresence>
+
             {/* Terms */}
             <div className="flex items-center justify-center gap-3 text-xs text-white/40 pt-1">
               <Link to={createPageUrl('Terms')} className="hover:text-white/70 transition-colors">Terms</Link>
@@ -135,7 +252,6 @@ export default function Splash() {
         </motion.div>
       </div>
 
-      {/* Bottom decorative line */}
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
