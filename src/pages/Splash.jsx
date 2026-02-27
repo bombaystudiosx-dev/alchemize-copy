@@ -189,6 +189,24 @@ export default function Splash() {
                   onSubmit={handleEmailAuth}
                   className="space-y-3"
                 >
+                  {/* Sign In / Sign Up Toggle Tabs */}
+                  <div className="flex bg-white/10 rounded-lg p-1 gap-1">
+                    <button
+                      type="button"
+                      onClick={() => { setIsSignUp(false); setError(''); setSuccessMsg(''); }}
+                      className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-all ${!isSignUp ? 'bg-purple-600 text-white shadow' : 'text-white/50 hover:text-white/80'}`}
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setIsSignUp(true); setError(''); setSuccessMsg(''); }}
+                      className={`flex-1 py-1.5 rounded-md text-xs font-semibold transition-all ${isSignUp ? 'bg-purple-600 text-white shadow' : 'text-white/50 hover:text-white/80'}`}
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+
                   <input
                     type="email"
                     placeholder="Email"
