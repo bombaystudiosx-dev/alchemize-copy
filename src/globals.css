@@ -24,12 +24,13 @@
   }
 }
 
-/* GPU-accelerated smooth scrolling */
+/* GPU-accelerated smooth scrolling + HiDPI crisp rendering */
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
   height: 100%;
   overflow-x: hidden;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 /* ===== SCROLLBAR ===== */
@@ -50,9 +51,10 @@ html, body {
   min-height: 100dvh;
   margin: 0;
   padding: 0;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: subpixel-antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  text-rendering: geometricPrecision;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   overflow-x: hidden;
@@ -136,6 +138,13 @@ input[type="range"]::-webkit-slider-thumb {
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 40px rgba(168, 85, 247, 0.1);
 }
 
+/* Crisp borders on HiDPI */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .glass, .glass-light {
+    border-width: 0.5px;
+  }
+}
+
 /* ===== NATIVE-FEEL SPRING ANIMATION ===== */
 
 @keyframes spring-in {
@@ -171,16 +180,16 @@ input[type="range"]::-webkit-slider-thumb {
 /* ===== GLASS MORPHISM ===== */
 
 .glass {
-  background: rgba(10, 1, 24, 0.75);
-  backdrop-filter: blur(20px) saturate(1.8);
-  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  background: rgba(10, 1, 24, 0.78);
+  backdrop-filter: blur(24px) saturate(2);
+  -webkit-backdrop-filter: blur(24px) saturate(2);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-light {
   background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(20px) saturate(1.5);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -220,10 +229,31 @@ button, a, nav, header, [role="tablist"], [role="tab"] {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Ensure images don't cause layout overflow */
+/* Ensure images don't cause layout overflow + crisp on HiDPI */
 img, video {
   max-width: 100%;
   height: auto;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* HiDPI / Retina sharpness */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  img {
+    image-rendering: auto;
+  }
+}
+
+/* Ultra-crisp text on high-res displays */
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 350dpi) {
+  body {
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
 }
 
 /* Fix 100vh on mobile browsers */
