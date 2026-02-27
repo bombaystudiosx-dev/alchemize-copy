@@ -51,7 +51,12 @@ export default function Splash() {
       if (signUpError) {
         setError(signUpError.message);
       } else {
-        setSuccessMsg('Check your email to confirm your account!');
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          setSuccessMsg('Account created! Welcome to Alchemize!');
+        } else {
+          navigate(getNextUrl());
+        }
       }
     } else {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
