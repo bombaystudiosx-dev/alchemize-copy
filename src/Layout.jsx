@@ -25,11 +25,17 @@ export default function Layout({ children, currentPageName }) {
     }
     try {
       const authenticated = await base44.auth.isAuthenticated();
-      if (!authenticated) {
-        base44.auth.redirectToLogin();
-      } else {
+      if (authenticated) {
         setIsAuthenticated(true);
+        return;
       }
+      // Also check Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAuthenticated(true);
+        return;
+      }
+      base44.auth.redirectToLogin();
     } catch (e) {
       setAuthError(true);
     }
