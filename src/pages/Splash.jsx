@@ -47,12 +47,6 @@ export default function Splash() {
     setSuccessMsg('');
     setLoading(true);
 
-    await supabase.auth.setSession && null; // no-op
-    // Set persistence based on rememberMe
-    if (!rememberMe) {
-      await supabase.auth.signOut(); // clear any existing session to reset storage
-    }
-
     if (isSignUp) {
       const { error: signUpError } = await supabase.auth.signUp({ email, password });
       if (signUpError) {
