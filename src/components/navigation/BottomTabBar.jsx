@@ -153,7 +153,7 @@ export default function BottomTabBar({ currentPageName }) {
                 gap: 3,
                 background: 'transparent',
                 border: 0,
-                color: active ? 'var(--brand)' : 'var(--muted)',
+                color: active ? '#ffd700' : 'var(--muted)',
               }}
             >
               {active && (
@@ -162,7 +162,7 @@ export default function BottomTabBar({ currentPageName }) {
                   <motion.div
                     layoutId="activeTab"
                     className="absolute -top-px left-1/2 -translate-x-1/2 w-10 h-0.5 rounded-full"
-                    style={{ background: 'var(--brand)' }}
+                    style={{ background: 'linear-gradient(90deg, #ffd700, #f5c542)' }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
                   {/* Glow under icon */}
@@ -170,7 +170,7 @@ export default function BottomTabBar({ currentPageName }) {
                     layoutId="activeGlow"
                     className="absolute inset-0 rounded-xl"
                     style={{
-                      background: 'radial-gradient(ellipse at center 60%, rgba(168,85,247,0.18) 0%, transparent 70%)',
+                      background: 'radial-gradient(ellipse at center 60%, rgba(255,215,0,0.15) 0%, transparent 70%)',
                     }}
                     transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                   />
