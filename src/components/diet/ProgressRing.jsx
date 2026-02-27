@@ -10,7 +10,8 @@ export default function ProgressRing({
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
-  const offset = circumference - (Math.min(progress, 100) / 100) * circumference;
+  const clampedProgress = Math.min(Math.max(progress, 0), 100);
+  const offset = circumference - (clampedProgress / 100) * circumference;
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -33,7 +34,7 @@ export default function ProgressRing({
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="transition-all duration-500 ease-out"
+          className="transition-all duration-700 ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">

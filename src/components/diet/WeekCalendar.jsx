@@ -1,6 +1,6 @@
 import React from 'react';
 import { format, addDays, subDays, isSameDay } from 'date-fns';
-import ProgressRing from './ProgressRing';
+import { motion } from 'framer-motion';
 
 export default function WeekCalendar({ selectedDate, onSelectDate, dailyData, calorieGoal }) {
   const today = new Date();
@@ -17,33 +17,45 @@ export default function WeekCalendar({ selectedDate, onSelectDate, dailyData, ca
   });
 
   return (
-    <div className="flex justify-between px-2 py-4 bg-white rounded-2xl shadow-sm">
+    <div className="flex justify-between gap-1 py-3 px-1 bg-gradient-to-br from-purple-900/30 to-indigo-900/20 backdrop-blur-xl rounded-2xl border border-white/10">
       {days.map((day) => {
         const dayCalories = dailyData[day.dateStr] || 0;
-        const percent = calorieGoal ? (dayCalories / calorieGoal) * 100 : 0;
+        const pct = calorieGoal ? Math.min((dayCalories / calorieGoal) * 100, 100) : 0;
         
         return (
           <button
             key={day.dateStr}
             onClick={() => onSelectDate(day.dateStr)}
-            className={`flex flex-col items-center p-1 rounded-xl transition-all ${
-              day.isSelected ? 'bg-green-50' : ''
+            className={`flex flex-col items-center flex-1 py-2 rounded-xl transition-all ${
+              day.isSelected 
+                ? 'bg-purple-600/40 border border-purple-400/30' 
+                : 'hover:bg-white/5'
             }`}
           >
-            <span className={`text-xs mb-1 ${day.isToday ? 'font-bold text-green-600' : 'text-gray-400'}`}>
+            <span className={`text-[10px] mb-1 ${day.isToday ? 'font-bold text-purple-300' : 'text-white/40'}`}>
               {day.dayName}
             </span>
-            <ProgressRing
-              progress={percent}
-              size={36}
-              strokeWidth={3}
-              color={percent > 100 ? '#ef4444' : '#22c55e'}
-              bgColor={day.isSelected ? 'rgba(34,197,94,0.2)' : 'rgba(0,0,0,0.05)'}
-            >
-              <span className={`text-xs font-semibold ${day.isSelected ? 'text-green-600' : 'text-gray-600'}`}>
+            <div className="relative w-9 h-9 flex items-center justify-center">
+              {/* Background ring */}
+              <svg className="absolute inset-0" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
+                <circle 
+                  cx="18" cy="18" r="15" fill="none" 
+                  stroke={pct > 100 ? '#ef4444' : day.isSelected ? '#a855f7' : '#22c55e'} 
+                  strokeWidth="3"
+                  strokeDasharray={`${pct * 0.94} 100`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 18 18)"
+                  className="transition-all duration-500"
+                />
+              </svg>
+              <span className={`text-xs font-bold relative z-10 ${day.isSelected ? 'text-purple-200' : 'text-white/70'}`}>
                 {day.dayNum}
               </span>
-            </ProgressRing>
+            </div>
+            {dayCalories > 0 && (
+              <span className="text-[9px] text-white/30 mt-0.5">{dayCalories}</span>
+            )}
           </button>
         );
       })}
