@@ -53,7 +53,7 @@ export default function Settings() {
 
   return (
     <CosmicBackground>
-      <div className="min-h-screen pb-8">
+      <div className="min-h-screen pb-0">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
