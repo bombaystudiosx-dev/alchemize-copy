@@ -18,6 +18,7 @@ export default function Splash() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
 
   useEffect(() => {
     localStorage.setItem('app_language', language);
