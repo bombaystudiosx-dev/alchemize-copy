@@ -200,6 +200,19 @@ export default function Splash() {
                     </button>
                   </div>
 
+                  {/* Remember Me */}
+                  {!isSignUp && (
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={e => setRememberMe(e.target.checked)}
+                        className="w-4 h-4 accent-purple-500 rounded"
+                      />
+                      <span className="text-white/60 text-xs">Remember me</span>
+                    </label>
+                  )}
+
                   {error && <p className="text-red-400 text-xs text-center">{error}</p>}
                   {successMsg && <p className="text-green-400 text-xs text-center">{successMsg}</p>}
 
