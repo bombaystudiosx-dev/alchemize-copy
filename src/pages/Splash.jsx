@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { Apple, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { isDevMode } from '@/components/subscription/subscriptionHelper';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/components/supabaseClient';
