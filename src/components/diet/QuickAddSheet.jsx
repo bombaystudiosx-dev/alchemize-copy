@@ -71,14 +71,14 @@ export default function QuickAddSheet({ open, onClose, onAdd, savedFoods = [] })
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
       />
       <motion.div
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
         transition={{ type: 'spring', damping: 32, stiffness: 300 }}
-        className="fixed inset-x-0 bottom-0 z-[60] bg-[#0c0c0c] rounded-t-2xl flex flex-col"
+        className="fixed inset-x-0 bottom-0 z-[60] bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] rounded-t-2xl border-t border-purple-500/20 flex flex-col"
         style={{ maxHeight: '88dvh' }}
       >
         {/* Handle */}

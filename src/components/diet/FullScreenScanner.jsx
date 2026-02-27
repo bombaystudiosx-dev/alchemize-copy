@@ -33,7 +33,7 @@ function AnalyzingOverlay() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="absolute inset-0 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center z-20"
+      className="absolute inset-0 bg-[#0a0118]/90 backdrop-blur-md flex flex-col items-center justify-center z-20"
     >
       <motion.div
         animate={{ scale: [1, 1.2, 1] }}
@@ -63,9 +63,9 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="absolute inset-0 z-30 bg-[#0c0c0c] overflow-y-auto"
+        className="absolute inset-0 z-30 bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620] overflow-y-auto"
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-[#0c0c0c]/90 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-[#0a0118]/90 backdrop-blur-sm">
           <button onClick={() => setEditMode(false)} className="text-white/60 text-sm">Cancel</button>
           <span className="text-white font-semibold">Edit Values</span>
           <button onClick={() => onConfirm(editData)} className="text-emerald-400 font-semibold text-sm">Save</button>
@@ -127,7 +127,7 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
       {/* Image header */}
       <div className="relative h-32 flex-shrink-0 overflow-hidden rounded-t-3xl">
         <img src={image} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0c0c0c] via-[#0c0c0c]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0118] via-[#0a0118]/40 to-transparent" />
         <button onClick={onClose} className="absolute top-3 right-4 w-8 h-8 rounded-full bg-black/50 backdrop-blur flex items-center justify-center">
           <X className="w-4 h-4 text-white" />
         </button>
@@ -138,7 +138,7 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto bg-[#0c0c0c]">
+      <div className="flex-1 overflow-y-auto bg-[#0a0118]">
         <div className="px-5 pt-4 pb-4">
           {/* Calorie hero */}
           <div className="flex items-baseline gap-1 mb-5">
@@ -217,7 +217,7 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
       </div>
 
       {/* Action bar */}
-      <div className="flex-shrink-0 px-5 pb-6 pt-2 bg-[#0c0c0c] border-t border-white/5">
+      <div className="flex-shrink-0 px-5 pb-6 pt-2 bg-[#0a0118] border-t border-purple-500/10">
         <div className="flex gap-3">
           <button
             onClick={onRetry}
@@ -357,7 +357,7 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-black"
+      className="fixed inset-0 z-[100] bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]"
     >
       {/* Hidden inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />

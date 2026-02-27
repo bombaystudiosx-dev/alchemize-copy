@@ -171,9 +171,9 @@ export default function CalorieTracker() {
 
   return (
     <PremiumGate featureId="calories">
-    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-[#0a0a0a]">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-lg px-5 pt-4 pb-3">
+      <div className="sticky top-0 z-30 bg-[#0a0118]/90 backdrop-blur-lg px-5 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <Link to={createPageUrl('Home')} className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center">
             <ArrowLeft className="w-4 h-4 text-white/60" />
@@ -269,7 +269,7 @@ export default function CalorieTracker() {
 
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={(o) => { setShowGoalsDialog(o); if (!o) setGoalDraft(null); }}>
-        <DialogContent className="bg-[#1a1a1a] border-white/10 max-w-sm">
+        <DialogContent className="bg-[#1a0a2e] border-purple-500/20 max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white">Daily Goals</DialogTitle>
           </DialogHeader>
@@ -287,7 +287,7 @@ export default function CalorieTracker() {
                     type="number"
                     value={goalDraft[key] || ''}
                     onChange={(e) => setGoalDraft({ ...goalDraft, [key]: parseInt(e.target.value) || 0 })}
-                    className="bg-white/[0.06] border-white/10 text-white"
+                    className="bg-white/[0.08] border-purple-500/20 text-white"
                   />
                 </div>
               ))}
