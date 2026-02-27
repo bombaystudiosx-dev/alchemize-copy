@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
-import { ArrowLeft, Camera, Settings, Plus, CalendarDays, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, Camera, Sparkles, Plus, SlidersHorizontal } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import MacroDashboard from '@/components/diet/MacroDashboard';
 import WeekCalendar from '@/components/diet/WeekCalendar';
 import MealSection from '@/components/diet/MealSection';
-import FoodPhotoAnalyzer from '@/components/diet/FoodPhotoAnalyzer';
+import FullScreenScanner from '@/components/diet/FullScreenScanner';
 import QuickAddSheet from '@/components/diet/QuickAddSheet';
 import MealPlanDialog from '@/components/diet/MealPlanDialog';
 import PullToRefresh from '@/components/common/PullToRefresh';
@@ -29,13 +29,12 @@ const DEFAULT_GOALS = {
 
 export default function CalorieTracker() {
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
-  const [showPhotoAnalyzer, setShowPhotoAnalyzer] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [activeMealType, setActiveMealType] = useState('breakfast');
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [showMealPlanner, setShowMealPlanner] = useState(false);
   const [goalDraft, setGoalDraft] = useState(null);
-
   const queryClient = useQueryClient();
 
   const { data: foodLogs = [] } = useQuery({
@@ -68,7 +67,6 @@ export default function CalorieTracker() {
     mutationFn: (data) => base44.entities.FoodLog.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries(['foodLogs']);
-      setShowPhotoAnalyzer(false);
       setShowQuickAdd(false);
     }
   });
@@ -148,61 +146,49 @@ export default function CalorieTracker() {
     setShowQuickAdd(true);
   };
 
-  const handlePhotoAnalyzed = (foodData) => {
-    createFoodMutation.mutate({
-      ...foodData,
-      meal_type: activeMealType,
-      logged_at: new Date().toISOString(),
-      source_type: 'camera'
-    });
+  const handleFoodScanned = (foodData) => {
+    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
   };
 
   const handleQuickFoodAdd = (foodData) => {
-    createFoodMutation.mutate({
-      ...foodData,
-      meal_type: activeMealType,
-    });
+    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
   };
 
   const handleSaveFood = (food) => {
     saveFoodMutation.mutate({
-      food_name: food.food_name,
-      serving_description: food.serving_description,
-      calories: food.calories,
-      protein_grams: food.protein_grams,
-      carb_grams: food.carb_grams,
-      fat_grams: food.fat_grams,
-      sugar_grams: food.sugar_grams,
-      fiber_grams: food.fiber_grams,
-      tags: []
+      food_name: food.food_name, serving_description: food.serving_description,
+      calories: food.calories, protein_grams: food.protein_grams,
+      carb_grams: food.carb_grams, fat_grams: food.fat_grams,
+      sugar_grams: food.sugar_grams, fiber_grams: food.fiber_grams, tags: []
     });
   };
 
-  const handleRefresh = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries(['foodLogs']),
-      queryClient.invalidateQueries(['savedFoods']),
-      queryClient.invalidateQueries(['nutritionGoals']),
-    ]);
-  };
+  const handleRefresh = () => Promise.all([
+    queryClient.invalidateQueries(['foodLogs']),
+    queryClient.invalidateQueries(['savedFoods']),
+    queryClient.invalidateQueries(['nutritionGoals']),
+  ]);
 
   return (
     <PremiumGate featureId="calories">
-    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen bg-[#0a0a0a]">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-gradient-to-b from-[#0a0118] to-transparent backdrop-blur-sm px-5 pt-4 pb-3">
+      <div className="sticky top-0 z-30 bg-[#0a0a0a]/90 backdrop-blur-lg px-5 pt-4 pb-3">
         <div className="flex items-center justify-between">
-          <Link to={createPageUrl('Home')} className="p-2 -ml-2 rounded-full bg-white/10">
-            <ArrowLeft className="w-5 h-5 text-white" />
+          <Link to={createPageUrl('Home')} className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center">
+            <ArrowLeft className="w-4 h-4 text-white/60" />
           </Link>
-          <h1 className="text-lg font-bold text-white">Nutrition</h1>
-          <button onClick={() => { setGoalDraft({ ...goals }); setShowGoalsDialog(true); }} className="p-2 -mr-2 rounded-full bg-white/10">
-            <Settings className="w-5 h-5 text-white/70" />
+          <span className="text-white font-semibold text-sm">Nutrition</span>
+          <button
+            onClick={() => { setGoalDraft({ ...goals }); setShowGoalsDialog(true); }}
+            className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-white/60" />
           </button>
         </div>
       </div>
 
-      <div className="px-5 space-y-4" style={{ paddingBottom: 'calc(120px + env(safe-area-inset-bottom))' }}>
+      <div className="px-5 space-y-5" style={{ paddingBottom: 'calc(140px + env(safe-area-inset-bottom))' }}>
         <WeekCalendar
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
@@ -212,42 +198,31 @@ export default function CalorieTracker() {
 
         <MacroDashboard totals={totals} goals={goals} />
 
-        {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-3">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setActiveMealType('snack');
-              setShowPhotoAnalyzer(true);
-            }}
-            className="flex flex-col items-center gap-1.5 py-4 rounded-2xl bg-gradient-to-br from-emerald-500/30 to-green-600/20 border border-emerald-500/20 text-white"
+        {/* Quick actions */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => { setActiveMealType('snack'); setShowScanner(true); }}
+            className="flex-1 h-12 rounded-xl bg-white flex items-center justify-center gap-2"
           >
-            <Camera className="w-5 h-5 text-emerald-400" />
-            <span className="text-xs font-medium">Scan</span>
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
+            <Camera className="w-4 h-4 text-black" />
+            <span className="text-black text-sm font-semibold">Scan</span>
+          </button>
+          <button
             onClick={() => setShowMealPlanner(true)}
-            className="flex flex-col items-center gap-1.5 py-4 rounded-2xl bg-gradient-to-br from-purple-500/30 to-indigo-600/20 border border-purple-500/20 text-white"
+            className="h-12 w-12 rounded-xl bg-white/[0.06] flex items-center justify-center"
           >
-            <Sparkles className="w-5 h-5 text-purple-400" />
-            <span className="text-xs font-medium">AI Plan</span>
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setActiveMealType('snack');
-              setShowQuickAdd(true);
-            }}
-            className="flex flex-col items-center gap-1.5 py-4 rounded-2xl bg-gradient-to-br from-amber-500/30 to-orange-600/20 border border-amber-500/20 text-white"
+            <Sparkles className="w-4 h-4 text-white/50" />
+          </button>
+          <button
+            onClick={() => { setActiveMealType('snack'); setShowQuickAdd(true); }}
+            className="h-12 w-12 rounded-xl bg-white/[0.06] flex items-center justify-center"
           >
-            <Plus className="w-5 h-5 text-amber-400" />
-            <span className="text-xs font-medium">Add</span>
-          </motion.button>
+            <Plus className="w-4 h-4 text-white/50" />
+          </button>
         </div>
 
         {/* Meals */}
-        <div className="space-y-3">
+        <div className="space-y-5">
           {(['breakfast', 'lunch', 'dinner', 'snack']).map((mealType) => (
             <MealSection
               key={mealType}
@@ -261,21 +236,16 @@ export default function CalorieTracker() {
         </div>
       </div>
 
-      {/* Photo Analyzer Dialog */}
-      <Dialog open={showPhotoAnalyzer} onOpenChange={setShowPhotoAnalyzer}>
-        <DialogContent className="bg-white max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-emerald-600" />
-              Scan Food
-            </DialogTitle>
-          </DialogHeader>
-          <FoodPhotoAnalyzer
-            onAnalyzed={handlePhotoAnalyzed}
-            onClose={() => setShowPhotoAnalyzer(false)}
+      {/* Full screen scanner */}
+      <AnimatePresence>
+        {showScanner && (
+          <FullScreenScanner
+            open={showScanner}
+            onClose={() => setShowScanner(false)}
+            onFoodLogged={handleFoodScanned}
           />
-        </DialogContent>
-      </Dialog>
+        )}
+      </AnimatePresence>
 
       {/* Quick Add Sheet */}
       <AnimatePresence>
@@ -299,12 +269,12 @@ export default function CalorieTracker() {
 
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={(o) => { setShowGoalsDialog(o); if (!o) setGoalDraft(null); }}>
-        <DialogContent className="bg-white max-w-md">
+        <DialogContent className="bg-[#1a1a1a] border-white/10 max-w-sm">
           <DialogHeader>
-            <DialogTitle>Daily Goals</DialogTitle>
+            <DialogTitle className="text-white">Daily Goals</DialogTitle>
           </DialogHeader>
           {goalDraft && (
-            <div className="space-y-3 mt-3">
+            <div className="space-y-3 mt-2">
               {[
                 { label: 'Calories', key: 'daily_calories', unit: 'kcal' },
                 { label: 'Protein', key: 'daily_protein', unit: 'g' },
@@ -312,19 +282,20 @@ export default function CalorieTracker() {
                 { label: 'Fat', key: 'daily_fat', unit: 'g' },
               ].map(({ label, key, unit }) => (
                 <div key={key}>
-                  <label className="text-xs text-gray-500 mb-1 block">{label} ({unit})</label>
+                  <label className="text-white/40 text-xs mb-1 block">{label} ({unit})</label>
                   <Input
                     type="number"
                     value={goalDraft[key] || ''}
                     onChange={(e) => setGoalDraft({ ...goalDraft, [key]: parseInt(e.target.value) || 0 })}
+                    className="bg-white/[0.06] border-white/10 text-white"
                   />
                 </div>
               ))}
               <button
                 onClick={() => updateGoalsMutation.mutate(goalDraft)}
-                className="w-full py-3 rounded-xl bg-purple-600 text-white font-semibold mt-2"
+                className="w-full py-3 rounded-xl bg-white text-black font-semibold text-sm mt-2"
               >
-                Save Goals
+                Save
               </button>
             </div>
           )}

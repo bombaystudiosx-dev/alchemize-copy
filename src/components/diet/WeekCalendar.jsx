@@ -17,45 +17,34 @@ export default function WeekCalendar({ selectedDate, onSelectDate, dailyData, ca
   });
 
   return (
-    <div className="flex justify-between gap-1 py-3 px-1 bg-gradient-to-br from-purple-900/30 to-indigo-900/20 backdrop-blur-xl rounded-2xl border border-white/10">
+    <div className="flex gap-1.5">
       {days.map((day) => {
         const dayCalories = dailyData[day.dateStr] || 0;
         const pct = calorieGoal ? Math.min((dayCalories / calorieGoal) * 100, 100) : 0;
+        const hasData = dayCalories > 0;
         
         return (
           <button
             key={day.dateStr}
             onClick={() => onSelectDate(day.dateStr)}
-            className={`flex flex-col items-center flex-1 py-2 rounded-xl transition-all ${
+            className={`flex flex-col items-center flex-1 py-2.5 rounded-xl transition-all ${
               day.isSelected 
-                ? 'bg-purple-600/40 border border-purple-400/30' 
-                : 'hover:bg-white/5'
+                ? 'bg-white/[0.08]' 
+                : ''
             }`}
           >
-            <span className={`text-[10px] mb-1 ${day.isToday ? 'font-bold text-purple-300' : 'text-white/40'}`}>
-              {day.dayName}
+            <span className={`text-[10px] mb-1.5 ${day.isToday ? 'text-white/60 font-semibold' : 'text-white/25'}`}>
+              {day.isToday ? 'Today' : day.dayName.charAt(0)}
             </span>
-            <div className="relative w-9 h-9 flex items-center justify-center">
-              {/* Background ring */}
-              <svg className="absolute inset-0" viewBox="0 0 36 36">
-                <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="3" />
-                <circle 
-                  cx="18" cy="18" r="15" fill="none" 
-                  stroke={pct > 100 ? '#ef4444' : day.isSelected ? '#a855f7' : '#22c55e'} 
-                  strokeWidth="3"
-                  strokeDasharray={`${pct * 0.94} 100`}
-                  strokeLinecap="round"
-                  transform="rotate(-90 18 18)"
-                  className="transition-all duration-500"
-                />
-              </svg>
-              <span className={`text-xs font-bold relative z-10 ${day.isSelected ? 'text-purple-200' : 'text-white/70'}`}>
-                {day.dayNum}
-              </span>
-            </div>
-            {dayCalories > 0 && (
-              <span className="text-[9px] text-white/30 mt-0.5">{dayCalories}</span>
-            )}
+            <span className={`text-sm font-semibold ${day.isSelected ? 'text-white' : 'text-white/50'}`}>
+              {day.dayNum}
+            </span>
+            {/* Dot indicator */}
+            <div className={`w-1 h-1 rounded-full mt-1.5 transition-all ${
+              hasData 
+                ? pct >= 80 ? 'bg-emerald-400' : 'bg-white/30'
+                : 'bg-transparent'
+            }`} />
           </button>
         );
       })}

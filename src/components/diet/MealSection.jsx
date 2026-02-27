@@ -1,103 +1,85 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Save, ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Plus, Trash2, Bookmark } from 'lucide-react';
 
 const mealConfig = {
-  breakfast: { emoji: '🌅', label: 'Breakfast', gradient: 'from-orange-500/30 to-amber-500/10' },
-  lunch: { emoji: '☀️', label: 'Lunch', gradient: 'from-yellow-500/30 to-amber-500/10' },
-  dinner: { emoji: '🌙', label: 'Dinner', gradient: 'from-indigo-500/30 to-purple-500/10' },
-  snack: { emoji: '🍎', label: 'Snacks', gradient: 'from-emerald-500/30 to-green-500/10' }
+  breakfast: { label: 'Breakfast', time: 'Morning' },
+  lunch: { label: 'Lunch', time: 'Afternoon' },
+  dinner: { label: 'Dinner', time: 'Evening' },
+  snack: { label: 'Snacks', time: 'Anytime' }
 };
 
 export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, onSaveFood }) {
   const config = mealConfig[mealType];
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
-  const [expanded, setExpanded] = useState(foods.length > 0);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`bg-gradient-to-br ${config.gradient} backdrop-blur-xl rounded-2xl border border-white/10 overflow-hidden`}
-    >
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between p-4"
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{config.emoji}</span>
-          <div className="text-left">
-            <span className="font-semibold text-white">{config.label}</span>
-            <span className="text-xs text-white/40 ml-2">{foods.length} items</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-white/70">{totalCalories} cal</span>
-          {expanded ? (
-            <ChevronUp className="w-4 h-4 text-white/40" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-white/40" />
+    <div className="space-y-2">
+      {/* Header */}
+      <div className="flex items-center justify-between px-1">
+        <div>
+          <span className="text-white/90 text-sm font-semibold">{config.label}</span>
+          {totalCalories > 0 && (
+            <span className="text-white/25 text-xs ml-2 tabular-nums">{totalCalories} cal</span>
           )}
         </div>
-      </button>
+        <button
+          onClick={() => onAddFood(mealType)}
+          className="w-7 h-7 rounded-full bg-white/[0.06] flex items-center justify-center hover:bg-white/10 transition-colors"
+        >
+          <Plus className="w-3.5 h-3.5 text-white/40" />
+        </button>
+      </div>
 
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 space-y-2">
-              {foods.length > 0 ? (
-                foods.map((food) => (
-                  <div key={food.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
-                    {food.image_url && (
-                      <img src={food.image_url} alt={food.food_name} className="w-11 h-11 rounded-lg object-cover" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-white text-sm truncate">{food.food_name}</p>
-                      <p className="text-xs text-white/40">{food.serving_description}</p>
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-white text-sm">{Math.round(food.calories)}</p>
-                      <p className="text-[10px] text-white/40">cal</p>
-                    </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      {!food.saved_food_id && onSaveFood && (
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onSaveFood(food); }}
-                          className="p-1.5 text-white/30 hover:text-amber-400 transition-colors"
-                        >
-                          <Save className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDeleteFood(food.id); }}
-                        className="p-1.5 text-white/30 hover:text-red-400 transition-colors"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-white/30 text-center py-2">No foods logged</p>
+      {/* Items */}
+      {foods.length > 0 ? (
+        <div className="space-y-1">
+          {foods.map((food) => (
+            <motion.div
+              key={food.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-3 bg-white/[0.03] rounded-xl px-3.5 py-3 group"
+            >
+              {food.image_url && (
+                <img src={food.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
               )}
-
-              <button
-                onClick={() => onAddFood(mealType)}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-white/15 text-white/50 hover:text-white/80 hover:border-white/30 transition-all text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Food
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white/80 text-sm font-medium truncate">{food.food_name}</p>
+                <div className="flex gap-3 mt-0.5">
+                  <span className="text-white/20 text-[10px] tabular-nums">P {Math.round(food.protein_grams || 0)}g</span>
+                  <span className="text-white/20 text-[10px] tabular-nums">C {Math.round(food.carb_grams || 0)}g</span>
+                  <span className="text-white/20 text-[10px] tabular-nums">F {Math.round(food.fat_grams || 0)}g</span>
+                </div>
+              </div>
+              <span className="text-white/50 text-sm font-semibold tabular-nums flex-shrink-0">{Math.round(food.calories)}</span>
+              <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                {!food.saved_food_id && onSaveFood && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onSaveFood(food); }}
+                    className="p-1.5 text-white/20 hover:text-amber-400 transition-colors"
+                  >
+                    <Bookmark className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDeleteFood(food.id); }}
+                  className="p-1.5 text-white/20 hover:text-red-400 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      ) : (
+        <button
+          onClick={() => onAddFood(mealType)}
+          className="w-full py-3 rounded-xl border border-dashed border-white/[0.06] text-white/20 text-xs hover:border-white/15 hover:text-white/40 transition-all"
+        >
+          + Add food
+        </button>
+      )}
+    </div>
   );
 }
