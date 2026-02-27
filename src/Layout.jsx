@@ -84,7 +84,7 @@ export default function Layout({ children, currentPageName }) {
         <InstallPrompt />
         <div className="min-h-screen" style={{
           paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom))`
+          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`
         }}>
           <PageTransition pageKey={currentPageName}>
             {children}
