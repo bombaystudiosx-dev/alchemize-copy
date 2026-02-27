@@ -61,7 +61,7 @@ export default function TodoList() {
   return (
     <PremiumGate featureId="todo">
     <div 
-      className="min-h-screen flex flex-col items-center relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center relative overflow-hidden bg-[#0a0118]"
       style={{
         backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/b794538fb_DB31821F-BEE3-4395-8386-4993A465E77E.png)',
         backgroundSize: 'cover',
