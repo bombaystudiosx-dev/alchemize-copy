@@ -12,9 +12,10 @@ export default function NativeFeelProvider() {
         user-select: none;
         -webkit-touch-callout: none;
         overscroll-behavior: none;
-        -webkit-font-smoothing: antialiased;
+        -webkit-font-smoothing: subpixel-antialiased;
         -moz-osx-font-smoothing: grayscale;
-        text-rendering: optimizeLegibility;
+        text-rendering: geometricPrecision;
+        font-feature-settings: "kern" 1, "liga" 1;
         position: fixed;
         width: 100%;
         height: 100%;
@@ -65,6 +66,7 @@ export default function NativeFeelProvider() {
         -webkit-user-drag: none;
         user-select: none;
         pointer-events: none;
+        image-rendering: -webkit-optimize-contrast;
       }
       a img, button img, [role="button"] img {
         pointer-events: auto;
@@ -82,6 +84,18 @@ export default function NativeFeelProvider() {
       /* Smooth scrolling containers */
       .overflow-y-auto, .overflow-auto, .overflow-x-auto {
         -webkit-overflow-scrolling: touch;
+      }
+
+      /* GPU-accelerated transforms for buttery animations */
+      .will-change-transform {
+        will-change: transform;
+        transform: translateZ(0);
+        backface-visibility: hidden;
+      }
+
+      /* Crisp SVG icons */
+      svg {
+        shape-rendering: geometricPrecision;
       }
     `;
     document.head.appendChild(style);
