@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 // Memoized to prevent unnecessary re-renders
 const CosmicBackground = memo(function CosmicBackground({ children, dimmed = false }) {
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
       {/* Background Image - reduced animation for performance */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat will-change-transform"
