@@ -245,14 +245,7 @@ export default function Splash() {
                     {isSignUp ? 'Create Account' : 'Sign In'}
                   </button>
 
-                  <div className="flex items-center justify-between text-xs">
-                    <button
-                      type="button"
-                      onClick={() => { setIsSignUp(!isSignUp); setError(''); setSuccessMsg(''); }}
-                      className="text-purple-400 hover:text-purple-300"
-                    >
-                      {isSignUp ? 'Already have an account?' : 'Create an account'}
-                    </button>
+                  <div className="flex items-center justify-center text-xs">
                     <button
                       type="button"
                       onClick={() => { setShowEmailForm(false); setError(''); setSuccessMsg(''); }}
