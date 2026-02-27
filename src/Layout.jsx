@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { supabase } from '@/components/supabaseClient';
 import { Loader2 } from 'lucide-react';
 import PWASetup from '@/components/pwa/PWASetup';
 import InstallPrompt from '@/components/pwa/InstallPrompt';
