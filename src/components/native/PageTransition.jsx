@@ -17,6 +17,7 @@ export default function PageTransition({ children, pageKey }) {
         animate="animate"
         exit="exit"
         transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+        style={{ background: '#0a0118', minHeight: '100dvh' }}
       >
         {children}
       </motion.div>
