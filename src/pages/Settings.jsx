@@ -244,26 +244,22 @@ export default function Settings() {
           >
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Data</h3>
             <div className="space-y-2">
-              <div onClick={() => setShowResetData(true)}>
-                <SettingsRow
-                  icon={Trash2}
-                  iconBg="bg-red-500/20"
-                  iconColor="text-red-400"
-                  title="Reset All Data"
-                  subtitle="Permanently delete all app data"
-                  onClick={() => setShowResetData(true)}
-                />
-              </div>
-              <div onClick={() => setShowDeleteAccount(true)}>
-                <SettingsRow
-                  icon={Trash2}
-                  iconBg="bg-red-600/20"
-                  iconColor="text-red-500"
-                  title="Delete Account"
-                  subtitle="Permanently delete your account and all data"
-                  onClick={() => setShowDeleteAccount(true)}
-                />
-              </div>
+              <SettingsRow
+                icon={Trash2}
+                iconBg="bg-red-500/20"
+                iconColor="text-red-400"
+                title="Reset All Data"
+                subtitle="Permanently delete all app data"
+                onClick={() => setShowResetData(true)}
+              />
+              <SettingsRow
+                icon={Trash2}
+                iconBg="bg-red-600/20"
+                iconColor="text-red-500"
+                title="Delete Account"
+                subtitle="Permanently delete your account and all data"
+                onClick={() => setShowDeleteAccount(true)}
+              />
             </div>
           </motion.div>
 
