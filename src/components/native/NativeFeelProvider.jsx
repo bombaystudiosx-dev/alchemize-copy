@@ -19,6 +19,9 @@ export default function NativeFeelProvider() {
         width: 100%;
         height: 100%;
         overflow: hidden;
+        background: #0a0118 !important;
+        margin: 0 !important;
+        padding: 0 !important;
       }
 
       input, textarea, [contenteditable="true"] {
@@ -43,6 +46,7 @@ export default function NativeFeelProvider() {
         -webkit-overflow-scrolling: touch;
         position: relative;
         min-height: 100dvh;
+        background: #0a0118;
       }
 
       .min-h-screen {
