@@ -5,26 +5,45 @@ import { Bluetooth, Loader2, AlertCircle } from 'lucide-react';
 export default function BluetoothDialog({ open, onOpenChange }) {
   const [scanning, setScanning] = useState(false);
   const [error, setError] = useState(null);
+  const [btState, setBtState] = useState('idle'); // idle, scanning, found, connecting, connected, error
 
   const handleScan = async () => {
     setScanning(true);
     setError(null);
+    setBtState('scanning');
     
     // Check if Web Bluetooth API is available
     if (!navigator.bluetooth) {
       setError('Bluetooth is not available on this device or browser. Try using Chrome on Android or a desktop device.');
+      setBtState('error');
       setScanning(false);
       return;
     }
 
     try {
-      await navigator.bluetooth.requestDevice({
+      const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
         optionalServices: ['heart_rate', 'battery_service']
       });
+      setBtState('found');
+      // Try to connect
+      try {
+        setBtState('connecting');
+        await device.gatt?.connect();
+        setBtState('connected');
+      } catch {
+        setBtState('error');
+        setError('Could not connect to device. Make sure it is in pairing mode and nearby.');
+      }
     } catch (err) {
-      if (err.name !== 'NotFoundError') {
+      if (err.name === 'NotFoundError') {
+        setBtState('idle');
+      } else if (err.name === 'SecurityError') {
+        setError('Bluetooth permission denied. Please allow Bluetooth access in your browser settings.');
+        setBtState('error');
+      } else {
         setError('Bluetooth scan was cancelled or failed. Please try again.');
+        setBtState('error');
       }
     } finally {
       setScanning(false);
@@ -45,6 +64,18 @@ export default function BluetoothDialog({ open, onOpenChange }) {
           <p className="text-sm text-white/60">
             Scan for nearby Bluetooth devices to connect fitness trackers, heart rate monitors, and other accessories.
           </p>
+
+          {/* State indicator */}
+          {btState !== 'idle' && btState !== 'error' && (
+            <div className="p-2 rounded-lg bg-white/5 text-center">
+              <p className="text-xs text-white/40">
+                {btState === 'scanning' && '🔍 Scanning for devices...'}
+                {btState === 'found' && '📡 Device found'}
+                {btState === 'connecting' && '🔗 Connecting...'}
+                {btState === 'connected' && '✅ Connected'}
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 flex items-start gap-2">

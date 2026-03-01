@@ -37,28 +37,35 @@ export default function QuickAddSheet({ open, onClose, onAdd, savedFoods = [] })
     onAdd({ ...data, logged_at: new Date().toISOString() });
   };
 
+  const [aiError, setAiError] = useState(null);
+
   const handleAiSearch = async () => {
     if (!search.trim()) return;
     setAiSearching(true);
     setAiResult(null);
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `Provide accurate USDA-based nutrition for: "${search}". Standard serving. Be precise with all macros.`,
-      add_context_from_internet: true,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          food_name: { type: "string" },
-          serving_description: { type: "string" },
-          calories: { type: "number" },
-          protein_grams: { type: "number" },
-          carb_grams: { type: "number" },
-          fat_grams: { type: "number" },
-          sugar_grams: { type: "number" },
-          fiber_grams: { type: "number" }
+    setAiError(null);
+    try {
+      const response = await base44.integrations.Core.InvokeLLM({
+        prompt: `Provide accurate USDA-based nutrition for: "${search}". Standard serving. Be precise with all macros.`,
+        add_context_from_internet: true,
+        response_json_schema: {
+          type: "object",
+          properties: {
+            food_name: { type: "string" },
+            serving_description: { type: "string" },
+            calories: { type: "number" },
+            protein_grams: { type: "number" },
+            carb_grams: { type: "number" },
+            fat_grams: { type: "number" },
+            sugar_grams: { type: "number" },
+            fiber_grams: { type: "number" }
+          }
         }
-      }
-    });
-    setAiResult(response);
+      });
+      setAiResult(response);
+    } catch (err) {
+      setAiError('Could not look up nutrition data. Try again.');
+    }
     setAiSearching(false);
   };
 
@@ -209,6 +216,13 @@ export default function QuickAddSheet({ open, onClose, onAdd, savedFoods = [] })
               ))}
             </div>
           </div>
+
+          {/* AI error */}
+          {aiError && (
+            <div className="mb-3 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-xl">
+              <p className="text-red-300 text-xs text-center">{aiError}</p>
+            </div>
+          )}
 
           {/* AI search fallback */}
           {search && filtered.length === 0 && filteredSaved.length === 0 && !aiResult && !aiSearching && (
