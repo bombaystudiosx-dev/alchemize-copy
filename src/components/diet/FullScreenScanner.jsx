@@ -262,12 +262,16 @@ export default function FullScreenScanner({ open, onClose, onFoodLogged }) {
     if (!open) reset();
   }, [open, reset]);
 
+  const [error, setError] = useState(null);
+
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setError(null);
     setImagePreview(URL.createObjectURL(file));
     setStep('analyzing');
 
+    try {
     const { file_url } = await base44.integrations.Core.UploadFile({ file });
     setImageUrl(file_url);
 
@@ -330,6 +334,10 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
 
     setResult({ ...response, image_url: file_url });
     setStep('results');
+    } catch (err) {
+      setError(err?.message || 'Failed to analyze food. Please try again.');
+      setStep('capture');
+    }
   };
 
   const handleConfirm = (data) => {
@@ -394,6 +402,12 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
             <p className="text-white/40 text-sm text-center leading-relaxed max-w-[260px]">
               Take a photo or upload an image for instant nutrition analysis
             </p>
+
+            {error && (
+              <div className="mt-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl max-w-[280px]">
+                <p className="text-red-300 text-sm text-center">{error}</p>
+              </div>
+            )}
           </div>
 
           {/* Bottom actions */}

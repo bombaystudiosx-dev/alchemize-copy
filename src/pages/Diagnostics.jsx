@@ -1,42 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ClipboardCopy, Trash2, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, ClipboardCopy, Trash2, Download } from 'lucide-react';
 import { getEvents, clearEvents, copyReport } from '@/components/common/appLogger';
 import useBackNav from '@/components/common/useBackNav';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
+import { isProductionBuild } from '@/components/subscription/subscriptionHelper';
 
-function StatusBadge({ status }) {
-  if (status === 'pending') return <Loader2 className="w-4 h-4 text-white/40 animate-spin" />;
-  if (status === 'pass') return <CheckCircle2 className="w-4 h-4 text-green-400" />;
-  if (status === 'fail') return <XCircle className="w-4 h-4 text-red-400" />;
-  return null;
-}
-
-function DiagRow({ label, status, detail }) {
-  return (
-    <div className="flex items-center gap-3 py-2 border-b border-white/10">
-      <StatusBadge status={status} />
-      <div className="flex-1">
-        <p className="text-white text-sm font-medium">{label}</p>
-        {detail && <p className={`text-xs mt-0.5 ${status === 'fail' ? 'text-red-400' : 'text-white/40'}`}>{detail}</p>}
-      </div>
-    </div>
-  );
-}
+import ShipScore from '@/components/diagnostics/ShipScore';
+import RouteInventory from '@/components/diagnostics/RouteInventory';
+import AutomatedChecks from '@/components/diagnostics/AutomatedChecks';
+import SmokeChecklist from '@/components/diagnostics/SmokeChecklist';
 
 export default function Diagnostics() {
   const goBack = useBackNav('Settings', 'Diagnostics');
   const [user, setUser] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [checks, setChecks] = useState({
-    auth: { status: 'pending', detail: '' },
-    dbWrite: { status: 'pending', detail: '' },
-    subscription: { status: 'pending', detail: '' },
-  });
   const [logs, setLogs] = useState([]);
   const [copied, setCopied] = useState(false);
-  const [running, setRunning] = useState(false);
+  const [autoChecks, setAutoChecks] = useState({});
+  const [smokeResults, setSmokeResults] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('qa_smoke_results') || '{}'); } catch { return {}; }
+  });
 
   useEffect(() => {
     setLogs(getEvents());
@@ -46,48 +31,48 @@ export default function Diagnostics() {
     }).catch(() => {});
   }, []);
 
-  const runDiagnostics = async () => {
-    setRunning(true);
-    const update = (key, status, detail) =>
-      setChecks(prev => ({ ...prev, [key]: { status, detail } }));
+  // Block non-admin and production access
+  if (isProductionBuild()) {
+    return (
+      <CosmicBackground>
+        <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="text-center">
+            <p className="text-white/60 text-sm">QA Dashboard not available in production builds.</p>
+          </div>
+        </div>
+      </CosmicBackground>
+    );
+  }
 
-    // Auth check
-    try {
-      const u = await base44.auth.me();
-      update('auth', 'pass', `${u.email} (${u.role})`);
-    } catch (e) {
-      update('auth', 'fail', e.message);
-    }
-
-    // DB write test — create + delete a GratitudeEntry
-    try {
-      const rec = await base44.entities.GratitudeEntry.create({
-        gratitude_1: '__diag_test__',
-        date: new Date().toISOString().split('T')[0]
-      });
-      await base44.entities.GratitudeEntry.delete(rec.id);
-      update('dbWrite', 'pass', 'Create + delete successful');
-    } catch (e) {
-      update('dbWrite', 'fail', e.message);
-    }
-
-    // Subscription check
-    try {
-      const u = await base44.auth.me();
-      const status = u.subscription_status || 'none';
-      update('subscription', status === 'active' || status === 'trialing' ? 'pass' : 'pass', `Status: ${status}`);
-    } catch (e) {
-      update('subscription', 'fail', e.message);
-    }
-
-    setLogs(getEvents());
-    setRunning(false);
+  const handleSmokeToggle = (key, val) => {
+    const next = { ...smokeResults, [key]: smokeResults[key] === val ? null : val };
+    setSmokeResults(next);
+    localStorage.setItem('qa_smoke_results', JSON.stringify(next));
   };
 
   const handleCopy = () => {
     copyReport();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleExport = () => {
+    const report = {
+      timestamp: new Date().toISOString(),
+      user: user?.email,
+      automated_checks: autoChecks,
+      smoke_results: smokeResults,
+      event_log: getEvents().slice(0, 50),
+    };
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `qa-report-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(url);
+    a.remove();
   };
 
   return (
@@ -99,55 +84,35 @@ export default function Diagnostics() {
             <ChevronLeft className="w-6 h-6" />
             <span className="font-medium">Back</span>
           </button>
-          <h1 className="text-lg font-bold text-white flex-1 text-center mr-16">Diagnostics</h1>
+          <h1 className="text-lg font-bold text-white flex-1 text-center mr-6">QA Dashboard</h1>
+          <button onClick={handleExport} className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+            <Download className="w-4 h-4 text-white/60" />
+          </button>
         </div>
 
-        <div className="px-4 space-y-6">
+        <div className="px-4 space-y-5">
           {!isAdmin && user && (
             <div className="bg-red-900/30 border border-red-500/40 rounded-xl p-4">
               <p className="text-red-300 text-sm text-center">Admin access required.</p>
             </div>
           )}
 
-          {/* Checks */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold">System Checks</h2>
-              <button
-                onClick={runDiagnostics}
-                disabled={running}
-                className="px-3 py-1.5 rounded-lg bg-purple-600 text-white text-sm disabled:opacity-50 flex items-center gap-1"
-              >
-                {running && <Loader2 className="w-3 h-3 animate-spin" />}
-                Run All
-              </button>
-            </div>
-            <DiagRow label="Auth / Current User" status={checks.auth.status} detail={checks.auth.detail} />
-            <DiagRow label="DB Write Test (create+delete)" status={checks.dbWrite.status} detail={checks.dbWrite.detail} />
-            <DiagRow label="Subscription Status" status={checks.subscription.status} detail={checks.subscription.detail} />
-          </div>
+          {/* Ship Score */}
+          <ShipScore checks={autoChecks} smokeResults={smokeResults} />
 
-          {/* Smoke Test Checklist */}
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
-            <h2 className="text-white font-semibold mb-3">Smoke Test Checklist</h2>
-            {[
-              { label: 'Gratitude Journal — add entry', screen: 'Journal' },
-              { label: 'Affirmations — add new', screen: 'Affirmations' },
-              { label: 'Goals — create goal', screen: 'Goals' },
-              { label: 'Finance — add expense', screen: 'Finance' },
-              { label: 'Habits — mark complete', screen: 'Habits' },
-              { label: 'Fitness — log workout', screen: 'Fitness' },
-              { label: 'Premium paywall + Restore', screen: 'Premium' },
-              { label: 'Settings — sign out', screen: 'Settings' },
-            ].map(({ label, screen }) => (
-              <SmokeRow key={screen} label={label} screen={screen} />
-            ))}
-          </div>
+          {/* Automated Checks */}
+          <AutomatedChecks onResults={setAutoChecks} />
+
+          {/* Smoke Tests */}
+          <SmokeChecklist results={smokeResults} onToggle={handleSmokeToggle} />
+
+          {/* Route Inventory */}
+          <RouteInventory />
 
           {/* Event Log */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-white font-semibold">Recent Events ({logs.length})</h2>
+              <h2 className="text-white font-semibold">Event Log ({logs.length})</h2>
               <div className="flex gap-2">
                 <button onClick={handleCopy} className="px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs flex items-center gap-1">
                   <ClipboardCopy className="w-3 h-3" />
@@ -169,6 +134,7 @@ export default function Diagnostics() {
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-white/70 truncate">{e.screen} › {e.action}</p>
                     {e.error && <p className="text-xs text-red-400 truncate">{e.error}</p>}
+                    {e.latency && <span className="text-[10px] text-white/20">{e.latency}ms</span>}
                   </div>
                   <span className="text-xs text-white/20 flex-shrink-0">{e.ts?.slice(11, 19)}</span>
                 </div>
@@ -178,24 +144,5 @@ export default function Diagnostics() {
         </div>
       </div>
     </CosmicBackground>
-  );
-}
-
-function SmokeRow({ label, screen }) {
-  const [result, setResult] = useState(null); // null | 'pass' | 'fail'
-  return (
-    <div className="flex items-center gap-3 py-2 border-b border-white/10">
-      <div className="flex gap-1">
-        <button
-          onClick={() => setResult('pass')}
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs transition-all ${result === 'pass' ? 'bg-green-500 border-green-500 text-white' : 'border-white/20 text-white/20 hover:border-green-400'}`}
-        >✓</button>
-        <button
-          onClick={() => setResult('fail')}
-          className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs transition-all ${result === 'fail' ? 'bg-red-500 border-red-500 text-white' : 'border-white/20 text-white/20 hover:border-red-400'}`}
-        >✗</button>
-      </div>
-      <p className="text-white/80 text-sm flex-1">{label}</p>
-    </div>
   );
 }
