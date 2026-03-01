@@ -17,6 +17,7 @@ const PLANS = [
     price: '15.55',
     interval: '30 days',
     trial: true,
+    trialLabel: '72-hour free trial',
     popular: true,
   },
 ];
@@ -172,12 +173,12 @@ export default function Premium() {
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                Start 7-Day Free Trial
+                Start 72-Hour Free Trial
               </>
             )}
           </motion.button>
           <p className="text-center text-white/40 text-xs">
-            7-day free trial, then $15.55 every 30 days. Cancel anytime.
+            72-hour free trial, then $15.55 every 30 days. Cancel anytime.
           </p>
 
           {/* Skip / Free tier */}
