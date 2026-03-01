@@ -30,12 +30,17 @@ Deno.serve(async (req) => {
 
     const origin = req.headers.get('origin') || req.headers.get('referer') || '';
 
+    // Build proper success/cancel URLs
+    const baseUrl = origin.replace(/\/$/, '');
+    const successUrl = `${baseUrl}/Home?checkout=success`;
+    const cancelUrl = `${baseUrl}/Premium?checkout=cancel`;
+
     const sessionConfig = {
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${origin}?checkout=success`,
-      cancel_url: `${origin}?checkout=cancel`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata: {
         base44_app_id: Deno.env.get("BASE44_APP_ID"),
         plan,
