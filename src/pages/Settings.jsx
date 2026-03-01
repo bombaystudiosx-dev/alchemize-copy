@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import { Link, useNavigate } from 'react-router-dom';
@@ -55,11 +54,7 @@ export default function Settings() {
     <CosmicBackground>
       <div className="min-h-screen pb-0">
         {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center px-4 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118]/95 to-transparent backdrop-blur-sm"
-        >
+        <header className="flex items-center px-4 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118]/95 to-transparent backdrop-blur-sm">
           <button 
             onClick={() => navigate(-1)}
             className="flex items-center gap-1 text-white"
@@ -68,7 +63,7 @@ export default function Settings() {
             <span className="text-base font-medium">Back</span>
           </button>
           <h1 className="text-xl font-bold text-white flex-1 text-center mr-16">Settings</h1>
-        </motion.header>
+        </header>
 
         <div className="px-4 space-y-6">
           {/* ACCOUNT Section */}
