@@ -19,11 +19,26 @@ export default function Splash() {
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const [checkingSession, setCheckingSession] = useState(true);
 
   useEffect(() => {
     localStorage.setItem('app_language', language);
     window.dispatchEvent(new Event('language-changed'));
   }, [language]);
+
+  // Auto-redirect if already authenticated
+  useEffect(() => {
+    (async () => {
+      try {
+        const authed = await base44.auth.isAuthenticated();
+        if (authed) {
+          navigate(getNextUrl());
+          return;
+        }
+      } catch {}
+      setCheckingSession(false);
+    })();
+  }, []);
 
   const getNextUrl = () => {
     const onboarded = localStorage.getItem('onboarding_complete');
@@ -77,6 +92,14 @@ export default function Splash() {
   };
 
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
+
+  if (checkingSession) {
+    return (
+      <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
