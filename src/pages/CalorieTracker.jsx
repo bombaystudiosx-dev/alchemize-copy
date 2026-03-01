@@ -63,6 +63,15 @@ export default function CalorieTracker() {
 
   const goals = goalsData[0] || DEFAULT_GOALS;
 
+  const [actionLock, setActionLock] = useState(false);
+
+  const withLock = (fn) => async (...args) => {
+    if (actionLock) return;
+    setActionLock(true);
+    try { return await fn(...args); }
+    finally { setTimeout(() => setActionLock(false), 300); }
+  };
+
   const createFoodMutation = useMutation({
     mutationFn: (data) => base44.entities.FoodLog.create(data),
     onSuccess: () => {
@@ -146,13 +155,13 @@ export default function CalorieTracker() {
     setShowQuickAdd(true);
   };
 
-  const handleFoodScanned = (foodData) => {
+  const handleFoodScanned = withLock((foodData) => {
     createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
-  };
+  });
 
-  const handleQuickFoodAdd = (foodData) => {
+  const handleQuickFoodAdd = withLock((foodData) => {
     createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
-  };
+  });
 
   const handleSaveFood = (food) => {
     saveFoodMutation.mutate({
