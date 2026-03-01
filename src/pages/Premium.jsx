@@ -15,7 +15,7 @@ const PLANS = [
     id: 'monthly',
     name: 'Monthly',
     price: '15.55',
-    interval: 'month',
+    interval: '30 days',
     trial: true,
     popular: true,
   },
@@ -30,7 +30,7 @@ const FEATURES = [
 ];
 
 export default function Premium() {
-  const [selectedPlan, setSelectedPlan] = useState('annual');
+  const [selectedPlan, setSelectedPlan] = useState('monthly');
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
@@ -177,7 +177,7 @@ export default function Premium() {
             )}
           </motion.button>
           <p className="text-center text-white/40 text-xs">
-            7-day free trial, then $15.55/month. Cancel anytime.
+            7-day free trial, then $15.55 every 30 days. Cancel anytime.
           </p>
 
           {/* Skip / Free tier */}

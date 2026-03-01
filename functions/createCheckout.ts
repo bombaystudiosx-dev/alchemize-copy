@@ -48,13 +48,11 @@ Deno.serve(async (req) => {
       },
     };
 
-    // Add 7-day free trial for monthly plan
-    if (plan === 'monthly') {
-      sessionConfig.subscription_data = {
-        trial_period_days: 7,
-        metadata: { base44_app_id: Deno.env.get("BASE44_APP_ID"), plan },
-      };
-    }
+    // Add 7-day free trial
+    sessionConfig.subscription_data = {
+      trial_period_days: 7,
+      metadata: { base44_app_id: Deno.env.get("BASE44_APP_ID"), plan },
+    };
 
     if (customerEmail) {
       sessionConfig.customer_email = customerEmail;
