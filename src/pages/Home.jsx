@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import FeatureCarousel from '@/components/carousel/FeatureCarousel';
 import FeatureManager from '@/components/home/FeatureManager';
 import DailyAffirmationWidget from '@/components/home/DailyAffirmationWidget';
 import PullToRefresh from '@/components/common/PullToRefresh';
-import { Moon, Sparkles } from 'lucide-react';
+import { Moon, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 
@@ -15,6 +15,7 @@ export default function Home() {
   const [greeting, setGreeting] = useState('Welcome');
   const [showFeatureManager, setShowFeatureManager] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false);
 
   // Removed heavy JS particles — using CSS-only sparkles instead
 
@@ -40,6 +41,14 @@ export default function Home() {
       setCurrentTime(new Date());
     }, 1000);
 
+    // Check for checkout success
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'success') {
+      setShowCheckoutSuccess(true);
+      window.history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => setShowCheckoutSuccess(false), 4000);
+    }
+
     return () => clearInterval(timer);
     }, []);
 
@@ -55,6 +64,24 @@ export default function Home() {
 
   return (
     <CosmicBackground>
+      {/* Checkout Success Banner */}
+      <AnimatePresence>
+        {showCheckoutSuccess && (
+          <motion.div
+            initial={{ opacity: 0, y: -40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            className="fixed top-4 left-4 right-4 z-50 bg-green-500/90 backdrop-blur-md rounded-2xl px-5 py-4 flex items-center gap-3 shadow-lg shadow-green-500/30"
+          >
+            <CheckCircle2 className="w-6 h-6 text-white flex-shrink-0" />
+            <div>
+              <p className="text-white font-bold text-sm">Welcome to Premium!</p>
+              <p className="text-white/80 text-xs">Your subscription is now active. Enjoy all features!</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
         {/* Lightweight CSS-only particles */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
