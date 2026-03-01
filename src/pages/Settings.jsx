@@ -6,13 +6,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Bug
+  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
-import { isDevMode, setDevMode, isProductionBuild } from '@/components/subscription/subscriptionHelper';
+
+
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
@@ -27,7 +28,6 @@ export default function Settings() {
   const [showHealth, setShowHealth] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
-  const [devModeOn, setDevModeOn] = useState(() => isDevMode());
 
   const navigate = useNavigate();
 
@@ -72,11 +72,7 @@ export default function Settings() {
 
         <div className="px-4 space-y-6">
           {/* ACCOUNT Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
+          <div>
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Account</h3>
             <div className="space-y-2">
               <Link to={createPageUrl('Profile')}>
@@ -97,14 +93,10 @@ export default function Settings() {
                 subtitle={user?.email || 'Not set'}
               />
             </div>
-          </motion.div>
+          </div>
 
           {/* PREMIUM Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
+          <div>
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Premium</h3>
             <div className="space-y-2">
               {user?.subscription_status === 'active' || user?.subscription_status === 'trialing' ? (
@@ -140,14 +132,10 @@ export default function Settings() {
                 </Link>
               )}
             </div>
-          </motion.div>
+          </div>
 
           {/* APP Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
+          <div>
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">App</h3>
             <div className="space-y-2">
               <SettingsRow
@@ -211,39 +199,13 @@ export default function Settings() {
                 onClick={() => setShowTheme(true)}
               />
 
-              {!isProductionBuild() && (
-                <SettingsRow
-                  icon={Shield}
-                  iconBg="bg-amber-500/20"
-                  iconColor="text-amber-400"
-                  title="Dev Mode (Bypass Paywalls)"
-                  subtitle={devModeOn ? 'All features unlocked' : 'Paywalls active'}
-                  toggle
-                  checked={devModeOn}
-                  onToggle={(val) => { setDevMode(val); setDevModeOn(val); }}
-                />
-              )}
-              {!isProductionBuild() && user?.role === 'admin' && (
-                <Link to={createPageUrl('Diagnostics')}>
-                  <SettingsRow
-                    icon={Bug}
-                    iconBg="bg-green-500/20"
-                    iconColor="text-green-400"
-                    title="Diagnostics"
-                    subtitle="Ship readiness & QA dashboard"
-                    onClick={() => {}}
-                  />
-                </Link>
-              )}
+
+
             </div>
-          </motion.div>
+          </div>
 
           {/* DATA Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
+          <div>
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Data</h3>
             <div className="space-y-2">
               <SettingsRow
@@ -263,15 +225,10 @@ export default function Settings() {
                 onClick={() => setShowDeleteAccount(true)}
               />
             </div>
-          </motion.div>
+          </div>
 
           {/* Sign Out */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35 }}
-            className="pt-2"
-          >
+          <div className="pt-2">
             <button
               onClick={handleLogout}
               className="w-full py-4 rounded-2xl border border-red-500/30 bg-red-500/10 flex items-center justify-center gap-2 text-red-400 font-semibold text-base hover:bg-red-500/20 transition-colors"
@@ -279,17 +236,12 @@ export default function Settings() {
               <LogOut className="w-5 h-5" />
               Sign Out
             </button>
-          </motion.div>
+          </div>
 
           {/* Version */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="text-center pb-4"
-          >
+          <div className="text-center pb-4">
             <p className="text-xs text-white/30">Alchemize v1.0.0</p>
-          </motion.div>
+          </div>
         </div>
 
         {/* Dialogs */}
