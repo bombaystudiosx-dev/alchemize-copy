@@ -5,7 +5,7 @@ import { ChevronLeft, ClipboardCopy, Trash2, Download } from 'lucide-react';
 import { getEvents, clearEvents, copyReport } from '@/components/common/appLogger';
 import useBackNav from '@/components/common/useBackNav';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
-import { isProductionBuild } from '@/components/subscription/subscriptionHelper';
+
 
 import ShipScore from '@/components/diagnostics/ShipScore';
 import RouteInventory from '@/components/diagnostics/RouteInventory';
@@ -31,18 +31,7 @@ export default function Diagnostics() {
     }).catch(() => {});
   }, []);
 
-  // Block non-admin and production access
-  if (isProductionBuild()) {
-    return (
-      <CosmicBackground>
-        <div className="min-h-screen flex items-center justify-center px-6">
-          <div className="text-center">
-            <p className="text-white/60 text-sm">QA Dashboard not available in production builds.</p>
-          </div>
-        </div>
-      </CosmicBackground>
-    );
-  }
+
 
   const handleSmokeToggle = (key, val) => {
     const next = { ...smokeResults, [key]: smokeResults[key] === val ? null : val };
