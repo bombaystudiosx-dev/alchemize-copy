@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
-import { isDevMode, setDevMode } from '@/components/subscription/subscriptionHelper';
+import { isDevMode, setDevMode, isProductionBuild } from '@/components/subscription/subscriptionHelper';
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
@@ -211,24 +211,26 @@ export default function Settings() {
                 onClick={() => setShowTheme(true)}
               />
 
-              <SettingsRow
-                icon={Shield}
-                iconBg="bg-amber-500/20"
-                iconColor="text-amber-400"
-                title="Dev Mode (Bypass Paywalls)"
-                subtitle={devModeOn ? 'All features unlocked' : 'Paywalls active'}
-                toggle
-                checked={devModeOn}
-                onToggle={(val) => { setDevMode(val); setDevModeOn(val); }}
-              />
-              {user?.role === 'admin' && (
+              {!isProductionBuild() && (
+                <SettingsRow
+                  icon={Shield}
+                  iconBg="bg-amber-500/20"
+                  iconColor="text-amber-400"
+                  title="Dev Mode (Bypass Paywalls)"
+                  subtitle={devModeOn ? 'All features unlocked' : 'Paywalls active'}
+                  toggle
+                  checked={devModeOn}
+                  onToggle={(val) => { setDevMode(val); setDevModeOn(val); }}
+                />
+              )}
+              {!isProductionBuild() && user?.role === 'admin' && (
                 <Link to={createPageUrl('Diagnostics')}>
                   <SettingsRow
                     icon={Bug}
                     iconBg="bg-green-500/20"
                     iconColor="text-green-400"
                     title="Diagnostics"
-                    subtitle="System checks & event log"
+                    subtitle="Ship readiness & QA dashboard"
                     onClick={() => {}}
                   />
                 </Link>
