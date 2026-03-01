@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { isDevMode } from '@/components/subscription/subscriptionHelper';
+
+
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/components/supabaseClient';
 
@@ -43,7 +44,7 @@ export default function Splash() {
   const getNextUrl = () => {
     const onboarded = localStorage.getItem('onboarding_complete');
     const skipped = localStorage.getItem('skipped_premium');
-    if (isDevMode() || (onboarded && skipped)) return createPageUrl('Home');
+    if (onboarded && skipped) return createPageUrl('Home');
     if (onboarded) return createPageUrl('Premium');
     return createPageUrl('Onboarding');
   };
