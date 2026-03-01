@@ -106,10 +106,9 @@ export default function Splash() {
     <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-contain bg-top bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699b885148fb20799f795d54/077939e2d_IMG_2450.jpg)',
-          backgroundColor: '#0a0118'
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699b885148fb20799f795d54/3c0c9d3d3_IMG_2647.png)'
         }}
       />
 
