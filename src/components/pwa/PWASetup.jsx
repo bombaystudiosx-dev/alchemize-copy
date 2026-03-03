@@ -1,89 +1,90 @@
 import { useEffect } from 'react';
 
+const ICON_URL = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/5ffac4ad0_Untitleddesign.png';
+
+const MANIFEST_DATA = {
+  name: 'Alchemize',
+  short_name: 'Alchemize',
+  description: 'Unlock your highest self with Alchemize - your personal cosmos for manifestation, goal setting, habit tracking, and more.',
+  start_url: '/',
+  display: 'standalone',
+  background_color: '#0a0118',
+  theme_color: '#8b5cf6',
+  orientation: 'portrait',
+  scope: '/',
+  categories: ['health', 'lifestyle', 'productivity'],
+  lang: 'en-US',
+  icons: [
+    { src: ICON_URL, sizes: '72x72',   type: 'image/png' },
+    { src: ICON_URL, sizes: '96x96',   type: 'image/png' },
+    { src: ICON_URL, sizes: '128x128', type: 'image/png' },
+    { src: ICON_URL, sizes: '144x144', type: 'image/png' },
+    { src: ICON_URL, sizes: '152x152', type: 'image/png' },
+    { src: ICON_URL, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+    { src: ICON_URL, sizes: '384x384', type: 'image/png' },
+    { src: ICON_URL, sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+  ],
+};
+
 export default function PWASetup() {
   useEffect(() => {
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/service-worker.js')
-          .then((registration) => {
-            console.log('Service Worker registered:', registration);
-          })
-          .catch((error) => {
-            console.log('Service Worker registration failed:', error);
-          });
-      });
+    const injected = [];
+
+    const addMeta = (name, content) => {
+      const el = document.createElement('meta');
+      el.name = name;
+      el.content = content;
+      document.head.appendChild(el);
+      injected.push(el);
+    };
+
+    const addLink = (rel, href, extra = {}) => {
+      const el = document.createElement('link');
+      el.rel = rel;
+      el.href = href;
+      Object.entries(extra).forEach(([k, v]) => el.setAttribute(k, v));
+      document.head.appendChild(el);
+      injected.push(el);
+    };
+
+    // --- Inject dynamic manifest via Blob URL ---
+    const existingManifest = document.querySelector('link[rel="manifest"]');
+    if (existingManifest) {
+      existingManifest.remove();
     }
+    const blob = new Blob([JSON.stringify(MANIFEST_DATA)], { type: 'application/json' });
+    const manifestBlobUrl = URL.createObjectURL(blob);
+    addLink('manifest', manifestBlobUrl);
 
-    // Add manifest link to head
-    const manifestLink = document.createElement('link');
-    manifestLink.rel = 'manifest';
-    manifestLink.href = '/manifest.json';
-    document.head.appendChild(manifestLink);
+    // --- Meta tags ---
+    addMeta('theme-color', '#8b5cf6');
+    addMeta('description', MANIFEST_DATA.description);
+    addMeta('mobile-web-app-capable', 'yes');
+    addMeta('apple-mobile-web-app-capable', 'yes');
+    addMeta('apple-mobile-web-app-status-bar-style', 'black-translucent');
+    addMeta('apple-mobile-web-app-title', 'Alchemize');
 
-    // Add theme color meta
-    const themeColorMeta = document.createElement('meta');
-    themeColorMeta.name = 'theme-color';
-    themeColorMeta.content = '#8b5cf6';
-    document.head.appendChild(themeColorMeta);
+    // --- Apple touch icon ---
+    addLink('apple-touch-icon', ICON_URL);
+    addLink('apple-touch-startup-image', ICON_URL);
 
-    // Add apple mobile web app capable
-    const appleMeta = document.createElement('meta');
-    appleMeta.name = 'apple-mobile-web-app-capable';
-    appleMeta.content = 'yes';
-    document.head.appendChild(appleMeta);
-
-    // Add apple status bar style
-    const appleStatusBar = document.createElement('meta');
-    appleStatusBar.name = 'apple-mobile-web-app-status-bar-style';
-    appleStatusBar.content = 'black-translucent';
-    document.head.appendChild(appleStatusBar);
-
-    // Add apple touch icon
-    const appleTouchIcon = document.createElement('link');
-    appleTouchIcon.rel = 'apple-touch-icon';
-    appleTouchIcon.href = 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/5ffac4ad0_Untitleddesign.png';
-    document.head.appendChild(appleTouchIcon);
-
-    // Viewport for native feel — disable user scaling
+    // --- Viewport ---
     const existingViewport = document.querySelector('meta[name="viewport"]');
     if (existingViewport) {
       existingViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
-    } else {
-      const viewport = document.createElement('meta');
-      viewport.name = 'viewport';
-      viewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
-      document.head.appendChild(viewport);
     }
 
-    // Mobile web app title
-    const appTitle = document.createElement('meta');
-    appTitle.name = 'apple-mobile-web-app-title';
-    appTitle.content = 'Alchemize';
-    document.head.appendChild(appTitle);
-
-    // Apple touch startup image (splash screen)
-    const startupImage = document.createElement('link');
-    startupImage.rel = 'apple-touch-startup-image';
-    startupImage.href = '/icons/icon-512x512.png';
-    document.head.appendChild(startupImage);
-
-    // mobile-web-app-capable for Android/Chrome
-    const mobileCapable = document.createElement('meta');
-    mobileCapable.name = 'mobile-web-app-capable';
-    mobileCapable.content = 'yes';
-    document.head.appendChild(mobileCapable);
+    // --- Service Worker ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js', { scope: '/' })
+        .then((reg) => console.log('SW registered:', reg.scope))
+        .catch((err) => console.log('SW registration failed:', err));
+    }
 
     return () => {
-      document.head.removeChild(manifestLink);
-      document.head.removeChild(themeColorMeta);
-      document.head.removeChild(appleMeta);
-      document.head.removeChild(appleStatusBar);
-      document.head.removeChild(appleTouchIcon);
-      document.head.removeChild(appTitle);
-      document.head.removeChild(startupImage);
-      document.head.removeChild(mobileCapable);
+      injected.forEach(el => el.parentNode && el.parentNode.removeChild(el));
+      URL.revokeObjectURL(manifestBlobUrl);
     };
   }, []);
 
