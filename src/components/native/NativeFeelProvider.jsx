@@ -22,9 +22,6 @@ export default function NativeFeelProvider() {
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
         font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-        position: fixed;
-        inset: 0;
-        overflow: hidden;
         background: #0a0118 !important;
         margin: 0 !important;
         padding: 0 !important;
@@ -44,14 +41,9 @@ export default function NativeFeelProvider() {
 
       #root {
         width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
-        position: relative;
         min-height: 100dvh;
         background: #0a0118;
+        position: relative;
       }
 
       .min-h-screen {
