@@ -113,9 +113,9 @@ export default function Splash() {
 
       {/* Language Toggle */}
       <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: checkingSession ? 0 : 1 }}
+        transition={{ duration: 0.2 }}
         className="absolute top-6 right-6 z-20 flex items-center gap-2 bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5"
       >
         <button
