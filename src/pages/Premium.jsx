@@ -46,7 +46,8 @@ export default function Premium() {
         }
       }
     } catch (e) {
-      alert('Something went wrong. Please try again.');
+      const errorMessage = e.response?.data?.error || e.message || 'Something went wrong. Please try again.';
+      alert('Checkout error: ' + errorMessage);
     } finally {
       setLoading(false);
     }
