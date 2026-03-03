@@ -4,9 +4,7 @@ import Stripe from 'npm:stripe@17.7.0';
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
 
 const PRICES = {
-  monthly: Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
-  semiannual: Deno.env.get("STRIPE_SEMIANNUAL_PRICE_ID") || Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
-  annual: Deno.env.get("STRIPE_ANNUAL_PRICE_ID") || Deno.env.get("STRIPE_MONTHLY_PRICE_ID"),
+  monthly: Deno.env.get("STRIPE_MONTHLY_PRICE_ID")
 };
 
 Deno.serve(async (req) => {
