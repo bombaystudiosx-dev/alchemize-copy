@@ -12,7 +12,6 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 const PUBLIC_PAGES = ['Splash', 'Terms', 'Privacy', 'Onboarding', 'Premium'];
 
-// Loading fallback component
 const LoadingFallback = () => (
   <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
     <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
@@ -25,7 +24,6 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = PUBLIC_PAGES.includes(currentPageName);
 
-  // Memoize bottom padding calculation - MUST be before any early returns
   const bottomPadding = useMemo(() => 
     HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
     [currentPageName]
@@ -42,7 +40,6 @@ export default function Layout({ children, currentPageName }) {
         setIsAuthenticated(true);
         return;
       }
-      // Also check Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         setIsAuthenticated(true);
