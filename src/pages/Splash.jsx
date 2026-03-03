@@ -150,9 +150,9 @@ export default function Splash() {
 
         {/* Auth Box */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7, type: 'spring', stiffness: 200 }}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: checkingSession ? 0 : 1, scale: checkingSession ? 0.95 : 1 }}
+          transition={{ duration: 0.3 }}
           className="relative w-full max-w-xs mt-4"
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-amber-500 to-purple-600 rounded-2xl blur-lg opacity-50 animate-pulse" />
