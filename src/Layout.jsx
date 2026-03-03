@@ -25,6 +25,12 @@ export default function Layout({ children, currentPageName }) {
 
   const isPublicPage = PUBLIC_PAGES.includes(currentPageName);
 
+  // Memoize bottom padding calculation - MUST be before any early returns
+  const bottomPadding = useMemo(() => 
+    HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
+    [currentPageName]
+  );
+
   const checkAuth = useCallback(async () => {
     if (isPublicPage) {
       setIsAuthenticated(true);
