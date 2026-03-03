@@ -89,12 +89,6 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
-  // Memoize bottom padding calculation
-  const bottomPadding = useMemo(() => 
-    HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
-    [currentPageName]
-  );
-
   return (
     <ErrorBoundary>
       <AppToastProvider>
