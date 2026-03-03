@@ -63,6 +63,18 @@ export default function PWASetup() {
     appTitle.content = 'Alchemize';
     document.head.appendChild(appTitle);
 
+    // Apple touch startup image (splash screen)
+    const startupImage = document.createElement('link');
+    startupImage.rel = 'apple-touch-startup-image';
+    startupImage.href = '/icons/icon-512x512.png';
+    document.head.appendChild(startupImage);
+
+    // mobile-web-app-capable for Android/Chrome
+    const mobileCapable = document.createElement('meta');
+    mobileCapable.name = 'mobile-web-app-capable';
+    mobileCapable.content = 'yes';
+    document.head.appendChild(mobileCapable);
+
     return () => {
       document.head.removeChild(manifestLink);
       document.head.removeChild(themeColorMeta);
@@ -70,6 +82,8 @@ export default function PWASetup() {
       document.head.removeChild(appleStatusBar);
       document.head.removeChild(appleTouchIcon);
       document.head.removeChild(appTitle);
+      document.head.removeChild(startupImage);
+      document.head.removeChild(mobileCapable);
     };
   }, []);
 
