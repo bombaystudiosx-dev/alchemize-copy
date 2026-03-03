@@ -74,13 +74,8 @@ export default function PWASetup() {
       existingViewport.content = 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
     }
 
-    // --- Service Worker ---
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/service-worker.js', { scope: '/' })
-        .then((reg) => console.log('SW registered:', reg.scope))
-        .catch((err) => console.log('SW registration failed:', err));
-    }
+    // Service worker disabled — Base44 doesn't support static file hosting
+    // PWA still works for Add to Home Screen via manifest
 
     return () => {
       injected.forEach(el => el.parentNode && el.parentNode.removeChild(el));
