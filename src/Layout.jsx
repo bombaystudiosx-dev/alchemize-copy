@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/components/supabaseClient';
 import { Loader2 } from 'lucide-react';
@@ -11,6 +11,13 @@ import { AppToastProvider } from '@/components/common/AppToast';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 const PUBLIC_PAGES = ['Splash', 'Terms', 'Privacy', 'Onboarding', 'Premium'];
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
+    <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+  </div>
+);
 
 export default function Layout({ children, currentPageName }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -76,21 +83,33 @@ export default function Layout({ children, currentPageName }) {
     );
   }
 
+  // Memoize bottom padding calculation
+  const bottomPadding = useMemo(() => 
+    HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
+    [currentPageName]
+  );
+
   return (
     <ErrorBoundary>
       <AppToastProvider>
         <NativeFeelProvider />
         <PWASetup />
         <InstallPrompt />
-        <div className="min-h-screen" style={{
-          paddingTop: 'env(safe-area-inset-top)',
-          paddingBottom: HIDDEN_TAB_PAGES.includes(currentPageName) ? 0 : `calc(${TAB_BAR_HEIGHT + 20}px + env(safe-area-inset-bottom))`,
-          background: '#0a0118',
-        }}>
-          <PageTransition pageKey={currentPageName}>
-            {children}
-          </PageTransition>
-        </div>
+        <Suspense fallback={<LoadingFallback />}>
+          <div 
+            className="min-h-screen" 
+            style={{
+              paddingTop: 'env(safe-area-inset-top)',
+              paddingBottom: bottomPadding,
+              background: '#0a0118',
+              willChange: 'contents',
+            }}
+          >
+            <PageTransition pageKey={currentPageName}>
+              {children}
+            </PageTransition>
+          </div>
+        </Suspense>
         <BottomTabBar currentPageName={currentPageName} />
       </AppToastProvider>
     </ErrorBoundary>
