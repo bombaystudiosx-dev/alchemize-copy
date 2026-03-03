@@ -132,9 +132,9 @@ export default function Splash() {
 
         {/* Tagline */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: checkingSession ? 0 : 1 }}
+          transition={{ duration: 0.25 }}
           className="text-lg md:text-xl mb-8 tracking-wide text-center font-semibold"
           style={{
             background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
