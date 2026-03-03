@@ -1,18 +1,16 @@
 import React, { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// iOS-native spring timing (60fps optimized)
-const spring = {
-  type: 'spring',
-  stiffness: 380,
-  damping: 35,
-  mass: 0.8,
+// Fast snappy transitions
+const transition = {
+  duration: 0.15,
+  ease: [0.25, 0.1, 0.25, 1],
 };
 
 const variants = {
-  initial: { opacity: 0, x: 20 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -10 },
+  initial: { opacity: 0.6 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 function PageTransition({ children, pageKey }) {
@@ -24,7 +22,7 @@ function PageTransition({ children, pageKey }) {
         initial="initial"
         animate="animate"
         exit="exit"
-        transition={spring}
+        transition={transition}
         style={{
           background: '#0a0118',
           minHeight: '100dvh',

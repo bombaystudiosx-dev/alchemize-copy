@@ -106,7 +106,7 @@ function FeatureCarousel() {
             return (
               <div
                 key={feature.id}
-                className="absolute transition-all duration-300 ease-out"
+                className="absolute transition-all duration-150 ease-out"
                 style={{
                   transform: `translateX(${offset * 85}%) scale(${isActive ? 1 : 0.78})`,
                   opacity: isActive ? 1 : 0.4,
@@ -166,7 +166,7 @@ function FeatureCarousel() {
         <button
           key={index}
           onClick={() => goTo(index)}
-          className={`rounded-full transition-all duration-200 ${
+          className={`rounded-full transition-all duration-100 ${
           currentIndex === index ?
           'w-7 h-2 bg-gradient-to-r from-purple-500 to-indigo-500' :
           'w-2 h-2 bg-white/30'}`
