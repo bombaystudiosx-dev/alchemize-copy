@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, memo } from 'react';
 import { Loader2 } from 'lucide-react';
 
-const THRESHOLD = 70;
-const MAX_PULL = 120;
+const THRESHOLD = 60;
+const MAX_PULL = 100;
 
-export default function PullToRefresh({ onRefresh, children, className = '' }) {
+function PullToRefresh({ onRefresh, children, className = '' }) {
   const [pullDistance, setPullDistance] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const startY = useRef(0);
@@ -13,7 +13,6 @@ export default function PullToRefresh({ onRefresh, children, className = '' }) {
 
   const handleTouchStart = useCallback((e) => {
     if (refreshing) return;
-    // Only start pull if scrolled to top
     const scrollTop = containerRef.current?.scrollTop ?? window.scrollY;
     if (scrollTop <= 0) {
       startY.current = e.touches[0].clientY;
@@ -23,12 +22,11 @@ export default function PullToRefresh({ onRefresh, children, className = '' }) {
 
   const handleTouchMove = useCallback((e) => {
     if (!pulling.current || refreshing) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - startY.current;
+    const diff = e.touches[0].clientY - startY.current;
     if (diff > 0) {
-      // Diminishing pull effect
-      const distance = Math.min(MAX_PULL, diff * 0.5);
-      setPullDistance(distance);
+      // iOS-native rubber band effect
+      const distance = Math.min(MAX_PULL, diff * 0.45);
+      requestAnimationFrame(() => setPullDistance(distance));
     } else {
       pulling.current = false;
       setPullDistance(0);
@@ -40,16 +38,18 @@ export default function PullToRefresh({ onRefresh, children, className = '' }) {
     pulling.current = false;
     
     if (pullDistance >= THRESHOLD && !refreshing) {
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate(15);
       setRefreshing(true);
       setPullDistance(THRESHOLD);
       try {
         await onRefresh();
       } finally {
         setRefreshing(false);
-        setPullDistance(0);
+        requestAnimationFrame(() => setPullDistance(0));
       }
     } else {
-      setPullDistance(0);
+      requestAnimationFrame(() => setPullDistance(0));
     }
   }, [pullDistance, refreshing, onRefresh]);
 
@@ -62,21 +62,27 @@ export default function PullToRefresh({ onRefresh, children, className = '' }) {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
+      style={{ touchAction: 'pan-y' }}
     >
-      {/* Pull indicator */}
+      {/* Pull indicator - GPU accelerated */}
       <div
-        className="flex items-center justify-center overflow-hidden transition-all duration-200 ease-out"
+        className="flex items-center justify-center overflow-hidden"
         style={{ 
-          height: pullDistance > 0 || refreshing ? Math.max(pullDistance, refreshing ? 48 : 0) : 0,
-          opacity: progress
+          height: pullDistance > 0 || refreshing ? Math.max(pullDistance, refreshing ? 44 : 0) : 0,
+          opacity: progress,
+          transition: pulling.current ? 'none' : 'all 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
+          transform: 'translateZ(0)',
         }}
       >
         <div 
           className="flex items-center justify-center"
-          style={{ transform: `rotate(${progress * 360}deg)` }}
+          style={{ 
+            transform: `rotate(${progress * 360}deg) translateZ(0)`,
+            transition: refreshing ? 'none' : 'transform 0.1s ease-out',
+          }}
         >
           <Loader2 
-            className={`w-6 h-6 text-purple-400 ${refreshing ? 'animate-spin' : ''}`}
+            className={`w-5 h-5 text-purple-400 ${refreshing ? 'animate-spin' : ''}`}
           />
         </div>
       </div>
@@ -84,3 +90,5 @@ export default function PullToRefresh({ onRefresh, children, className = '' }) {
     </div>
   );
 }
+
+export default memo(PullToRefresh);
