@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { base44 } from '@/api/base44Client';
@@ -23,7 +23,7 @@ const features = [
   { id: 'settings', title: 'Settings', description: 'Customize your Alchemize experience', icon: Settings, route: 'Settings', gradient: 'from-slate-500 to-gray-600', image: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/4edaa444a_20250831_0435_DreamyGlowingKey_remix_01k3zyegxfez6ad6hbe52apr18.jpg' }
 ];
 
-export default function FeatureCarousel() {
+function FeatureCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [visibleFeatures, setVisibleFeatures] = useState(features);
   const [user, setUser] = useState(null);
@@ -76,10 +76,12 @@ export default function FeatureCarousel() {
     const elapsed = Date.now() - touchStartTime.current;
     const velocity = Math.abs(diff) / elapsed;
 
-    // Swipe threshold: 40px or fast flick
-    if (Math.abs(diff) > 40 || velocity > 0.3) {
-      if (diff > 0) goTo(currentIndex + 1);
-      else goTo(currentIndex - 1);
+    // Swipe threshold: 30px or fast flick (more responsive)
+    if (Math.abs(diff) > 30 || velocity > 0.25) {
+      requestAnimationFrame(() => {
+        if (diff > 0) goTo(currentIndex + 1);
+        else goTo(currentIndex - 1);
+      });
     }
   }, [currentIndex, goTo]);
 
@@ -180,3 +182,5 @@ export default function FeatureCarousel() {
     </div>
   );
 }
+
+export default memo(FeatureCarousel);

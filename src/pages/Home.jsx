@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
@@ -52,7 +52,7 @@ export default function Home() {
     return () => clearInterval(timer);
     }, []);
 
-  const firstName = user?.full_name?.split(' ')[0] || 'Seeker';
+  const firstName = useMemo(() => user?.full_name?.split(' ')[0] || 'Seeker', [user?.full_name]);
 
   const handleRefresh = useCallback(async () => {
     try {
