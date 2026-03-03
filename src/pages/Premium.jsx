@@ -35,16 +35,15 @@ export default function Premium() {
   const [loading, setLoading] = useState(false);
 
   const handleSubscribe = async () => {
-    if (window.self !== window.top) {
-      alert('Checkout works only from the published app. Please open the app directly.');
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await base44.functions.invoke('createCheckout', { plan: selectedPlan });
       if (response.data?.url) {
-        window.location.href = response.data.url;
+        if (window.self !== window.top) {
+          window.open(response.data.url, '_blank');
+        } else {
+          window.location.href = response.data.url;
+        }
       }
     } catch (e) {
       alert('Something went wrong. Please try again.');
