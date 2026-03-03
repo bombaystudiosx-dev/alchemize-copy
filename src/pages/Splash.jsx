@@ -48,14 +48,6 @@ export default function Splash() {
     return () => { mounted = false; };
   }, [navigate, getNextUrl]);
 
-  const getNextUrl = () => {
-    const onboarded = localStorage.getItem('onboarding_complete');
-    const skipped = localStorage.getItem('skipped_premium');
-    if (onboarded && skipped) return createPageUrl('Home');
-    if (onboarded) return createPageUrl('Premium');
-    return createPageUrl('Onboarding');
-  };
-
   const handleGoogle = () => {
     base44.auth.loginWithProvider('google', getNextUrl());
   };
