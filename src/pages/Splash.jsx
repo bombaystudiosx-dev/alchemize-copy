@@ -93,23 +93,23 @@ export default function Splash() {
 
   const unlockSelf = language === 'es' ? 'Desbloquea Tu Mejor Versión' : 'Unlock Your Highest Self';
 
-  if (checkingSession) {
-    return (
-      <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
-      {/* Background Image */}
+      {/* Background Image - preload */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699b885148fb20799f795d54/3c0c9d3d3_IMG_2647.png)'
+          backgroundImage: 'url(https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699b885148fb20799f795d54/3c0c9d3d3_IMG_2647.png)',
+          transform: 'translateZ(0)',
         }}
       />
+
+      {/* Loading overlay */}
+      {checkingSession && (
+        <div className="absolute inset-0 z-50 bg-[#0a0118] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
+        </div>
+      )}
 
       {/* Language Toggle */}
       <motion.div
