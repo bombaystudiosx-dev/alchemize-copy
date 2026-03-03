@@ -72,12 +72,8 @@ export default function NativeFeelProvider() {
       img, video {
         -webkit-user-drag: none;
         user-select: none;
-        pointer-events: none;
         image-rendering: -webkit-optimize-contrast;
         content-visibility: auto;
-      }
-      a img, button img, [role="button"] img {
-        pointer-events: auto;
       }
 
       /* Hardware-accelerated scroll containers */
