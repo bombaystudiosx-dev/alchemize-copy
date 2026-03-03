@@ -32,7 +32,6 @@ export default function Splash() {
     localStorage.setItem('app_language', language);
   }, [language]);
 
-  // Fast auth check - no await chain
   useEffect(() => {
     let mounted = true;
     base44.auth.isAuthenticated()
@@ -95,7 +94,6 @@ export default function Splash() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
-      {/* Background Image - preload */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
@@ -104,14 +102,12 @@ export default function Splash() {
         }}
       />
 
-      {/* Loading overlay */}
       {checkingSession && (
         <div className="absolute inset-0 z-50 bg-[#0a0118] flex items-center justify-center">
           <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
         </div>
       )}
 
-      {/* Language Toggle */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: checkingSession ? 0 : 1 }}
@@ -129,8 +125,6 @@ export default function Splash() {
       </motion.div>
 
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-end px-6 pt-16 pb-12">
-
-        {/* Tagline */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: checkingSession ? 0 : 1 }}
@@ -148,7 +142,6 @@ export default function Splash() {
           {unlockSelf}
         </motion.p>
 
-        {/* Auth Box */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: checkingSession ? 0 : 1, scale: checkingSession ? 0.95 : 1 }}
@@ -158,8 +151,6 @@ export default function Splash() {
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-amber-500 to-purple-600 rounded-2xl blur-lg opacity-50 animate-pulse" />
 
           <div className="relative bg-black/60 backdrop-blur-md rounded-xl p-6 border border-white/10 space-y-3">
-
-            {/* Email toggle / form */}
             <AnimatePresence mode="wait">
               {!showEmailForm ? (
                 <motion.button
@@ -184,7 +175,6 @@ export default function Splash() {
                   onSubmit={handleEmailAuth}
                   className="space-y-3"
                 >
-                  {/* Sign In / Sign Up Toggle Tabs */}
                   <div className="flex bg-white/10 rounded-lg p-1 gap-1">
                     <button
                       type="button"
@@ -228,7 +218,6 @@ export default function Splash() {
                     </button>
                   </div>
 
-                  {/* Remember Me */}
                   {!isSignUp && (
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -266,7 +255,6 @@ export default function Splash() {
               )}
             </AnimatePresence>
 
-            {/* Apple Sign In */}
             <button
               onClick={handleApple}
               className="w-full py-3 px-5 bg-white rounded-xl flex items-center justify-center gap-3 text-black font-semibold text-sm hover:bg-white/90 transition-colors"
@@ -277,7 +265,6 @@ export default function Splash() {
               Sign in with Apple
             </button>
 
-            {/* Terms */}
             <div className="flex items-center justify-center gap-3 text-xs text-white/40 pt-1">
               <Link to={createPageUrl('Terms')} className="hover:text-white/70 transition-colors">Terms</Link>
               <span>•</span>
