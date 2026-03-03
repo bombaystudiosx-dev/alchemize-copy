@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
-
-
 import { base44 } from '@/api/base44Client';
 import { supabase } from '@/components/supabaseClient';
 
@@ -22,24 +20,33 @@ export default function Splash() {
   const [rememberMe, setRememberMe] = useState(true);
   const [checkingSession, setCheckingSession] = useState(true);
 
+  const getNextUrl = useCallback(() => {
+    const onboarded = localStorage.getItem('onboarding_complete');
+    const skipped = localStorage.getItem('skipped_premium');
+    if (onboarded && skipped) return createPageUrl('Home');
+    if (onboarded) return createPageUrl('Premium');
+    return createPageUrl('Onboarding');
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('app_language', language);
-    window.dispatchEvent(new Event('language-changed'));
   }, [language]);
 
-  // Auto-redirect if already authenticated
+  // Fast auth check - no await chain
   useEffect(() => {
-    (async () => {
-      try {
-        const authed = await base44.auth.isAuthenticated();
+    let mounted = true;
+    base44.auth.isAuthenticated()
+      .then(authed => {
+        if (!mounted) return;
         if (authed) {
           navigate(getNextUrl());
-          return;
+        } else {
+          setCheckingSession(false);
         }
-      } catch {}
-      setCheckingSession(false);
-    })();
-  }, []);
+      })
+      .catch(() => mounted && setCheckingSession(false));
+    return () => { mounted = false; };
+  }, [navigate, getNextUrl]);
 
   const getNextUrl = () => {
     const onboarded = localStorage.getItem('onboarding_complete');
