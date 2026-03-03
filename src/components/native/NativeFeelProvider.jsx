@@ -133,21 +133,11 @@ export default function NativeFeelProvider() {
     };
     document.addEventListener('touchmove', preventZoom, { passive: false });
 
-    // Prevent double-tap zoom
-    let lastTap = 0;
-    const preventDoubleTapZoom = (e) => {
-      const now = Date.now();
-      if (now - lastTap < 300) e.preventDefault();
-      lastTap = now;
-    };
-    document.addEventListener('touchend', preventDoubleTapZoom, { passive: false });
-
     return () => {
       const el = document.getElementById('native-feel-styles');
       if (el) el.remove();
       document.removeEventListener('contextmenu', preventContextMenu);
       document.removeEventListener('touchmove', preventZoom);
-      document.removeEventListener('touchend', preventDoubleTapZoom);
     };
   }, []);
 
