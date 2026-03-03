@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
       // No authenticated user, that's fine
     }
 
-    const origin = req.headers.get('origin') || req.headers.get('referer') || '';
+    const origin = req.headers.get('origin') || req.headers.get('referer') || 'https://alchemize.com';
 
     // Build proper success/cancel URLs
     const baseUrl = origin.replace(/\/$/, '');
