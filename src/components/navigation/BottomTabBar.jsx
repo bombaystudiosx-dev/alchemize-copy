@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Home, Flame, Compass, User } from 'lucide-react';
@@ -49,7 +49,7 @@ const TABS = [
 
 export const HIDDEN_TAB_PAGES = ['Splash', 'Terms', 'Privacy', 'AgentChat', 'Premium', 'Paywall', 'Profile', 'Onboarding'];
 
-export default function BottomTabBar({ currentPageName }) {
+function BottomTabBar({ currentPageName }) {
   const location = useLocation();
   const navigate = useNavigate();
   const hidden = HIDDEN_TAB_PAGES.includes(currentPageName);
@@ -100,21 +100,23 @@ export default function BottomTabBar({ currentPageName }) {
     }
   }, [location.pathname, location.search]);
 
-  if (hidden) return null;
-
-  const onTabPress = (tab) => {
-    // Haptic feedback
-    if (navigator.vibrate) navigator.vibrate(8);
+  const onTabPress = useCallback((tab) => {
+    // Haptic feedback (iOS + Android)
+    if (navigator.vibrate) navigator.vibrate(10);
     
     if (tab.key === currentTab) {
-      // Re-tap active tab → pop to root
+      // Re-tap active tab → pop to root with smooth scroll
       navigate(createPageUrl(tab.rootPage));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
       return;
     }
     const last = lastRouteByTab[tab.key];
     navigate(last || createPageUrl(tab.rootPage));
-  };
+  }, [currentTab, lastRouteByTab, navigate]);
+
+  if (hidden) return null;
 
   return (
     <nav
@@ -196,3 +198,5 @@ export default function BottomTabBar({ currentPageName }) {
     </nav>
   );
 }
+
+export default memo(BottomTabBar);
