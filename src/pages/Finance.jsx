@@ -349,8 +349,7 @@ export default function Finance() {
             </div>
           </CosmicCard>
 
-          {/* 12-Month Year Calendar */}
-          <YearCalendar incomes={incomes} expenses={expenses} />
+
 
           {/* Calendars */}
           <div className="space-y-4">
