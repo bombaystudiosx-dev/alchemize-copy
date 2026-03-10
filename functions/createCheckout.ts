@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@17.7.0';
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
@@ -14,23 +14,30 @@ Deno.serve(async (req) => {
 
     const priceId = PRICES[plan] || PRICES['monthly'];
     if (!priceId) {
-      return Response.json({ error: 'Stripe price ID not configured. Please set STRIPE_MONTHLY_PRICE_ID.' }, { status: 500 });
+      return Response.json({ error: 'Stripe price ID not configured.' }, { status: 500 });
     }
 
-    // Try to get user email for pre-fill, but don't require auth
-    let customerEmail;
-    try {
-      const user = await base44.auth.me();
-      customerEmail = user?.email;
-    } catch (e) {
-      // No authenticated user, that's fine
+    const user = await base44.auth.me();
+    if (!user) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Redirect to billing portal if already subscribed
+    if (user.subscriptionStatus === 'active' || user.subscriptionStatus === 'trialing' || user.stripeCustomerId) {
+        if (user.stripeCustomerId) {
+            const portalSession = await stripe.billingPortal.sessions.create({
+                customer: user.stripeCustomerId,
+                return_url: req.headers.get('origin') + '/Home',
+            });
+            console.log('Redirecting to portal for user:', user.id);
+            return Response.json({ url: portalSession.url });
+        }
     }
 
     const origin = req.headers.get('origin') || req.headers.get('referer') || 'https://alchemize.com';
-
-    // Build proper success/cancel URLs
     const baseUrl = origin.replace(/\/$/, '');
-    const successUrl = `${baseUrl}/Home?checkout=success`;
+    
+    const successUrl = `${baseUrl}/Home?checkout=success&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${baseUrl}/Premium?checkout=cancel`;
 
     const sessionConfig = {
@@ -39,26 +46,21 @@ Deno.serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: successUrl,
       cancel_url: cancelUrl,
+      client_reference_id: user.id,
+      customer_email: user.email,
       metadata: {
         base44_app_id: Deno.env.get("BASE44_APP_ID"),
         plan,
-        user_email: customerEmail || '',
+        userId: user.id
       },
+      subscription_data: {
+        trial_period_days: 3,
+        metadata: { base44_app_id: Deno.env.get("BASE44_APP_ID"), plan, userId: user.id },
+      }
     };
-
-    // Add 7-day free trial
-    sessionConfig.subscription_data = {
-      trial_period_days: 3,
-      metadata: { base44_app_id: Deno.env.get("BASE44_APP_ID"), plan },
-    };
-
-    if (customerEmail) {
-      sessionConfig.customer_email = customerEmail;
-    }
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
-
-    console.log('Checkout session created:', session.id, 'plan:', plan);
+    console.log('Checkout session created:', session.id);
     return Response.json({ url: session.url });
   } catch (error) {
     console.error('Checkout error:', error.message);

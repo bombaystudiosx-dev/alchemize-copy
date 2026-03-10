@@ -34,9 +34,23 @@ export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState('monthly');
   const [loading, setLoading] = useState(false);
 
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('checkout') === 'cancel') {
+      alert('Checkout was cancelled. You have not been charged.');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   const handleSubscribe = async () => {
     setLoading(true);
     try {
+      const isAuthenticated = await base44.auth.isAuthenticated();
+      if (!isAuthenticated) {
+        base44.auth.redirectToLogin(window.location.href);
+        return;
+      }
+      
       const response = await base44.functions.invoke('createCheckout', { plan: selectedPlan });
       if (response.data?.url) {
         if (window.self !== window.top) {
@@ -173,7 +187,7 @@ export default function Premium() {
             ) : (
               <>
                 <Sparkles className="w-5 h-5" />
-                Start 72-Hour Free Trial
+                {PLANS.find(p => p.id === selectedPlan)?.trial ? 'Start Free Trial' : 'Upgrade Now'}
               </>
             )}
           </motion.button>

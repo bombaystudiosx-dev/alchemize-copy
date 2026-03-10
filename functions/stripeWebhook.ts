@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 import Stripe from 'npm:stripe@17.7.0';
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY"));
@@ -23,20 +23,19 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const email = session.customer_email || session.customer_details?.email;
-        console.log('Checkout completed:', session.id, 'email:', email);
+        const userId = session.client_reference_id || session.metadata?.userId;
+        console.log('Checkout completed:', session.id, 'userId:', userId);
         
-        if (email) {
+        if (userId) {
           try {
-            const users = await base44.asServiceRole.entities.User.filter({ email });
-            if (users.length > 0) {
-              await base44.asServiceRole.entities.User.update(users[0].id, {
-                subscription_status: 'active',
-                stripe_customer_id: session.customer,
-                subscription_plan: session.metadata?.plan || 'unknown',
-              });
-              console.log('User subscription activated for:', email);
-            }
+            await base44.asServiceRole.entities.User.update(userId, {
+              subscriptionStatus: 'active',
+              stripeCustomerId: session.customer,
+              planName: session.metadata?.plan || 'monthly',
+              accessLevel: 'Pro',
+              billingStatus: 'paid'
+            });
+            console.log('User subscription activated for ID:', userId);
           } catch (e) {
             console.error('Error updating user on checkout:', e.message);
           }
@@ -47,28 +46,29 @@ Deno.serve(async (req) => {
       case 'customer.subscription.updated': {
         const subscription = event.data.object;
         const status = subscription.status;
-        console.log('Subscription event:', event.type, 'status:', status);
+        const plan = subscription.items?.data?.[0]?.price?.nickname || subscription.items?.data?.[0]?.price?.id || 'monthly';
+        const customerId = subscription.customer;
+        const trialStart = subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null;
+        const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null;
         
         try {
-          const customerId = subscription.customer;
           const customer = await stripe.customers.retrieve(customerId);
           const email = customer.email;
           if (email) {
             const users = await base44.asServiceRole.entities.User.filter({ email });
             if (users.length > 0) {
-              const plan = subscription.items?.data?.[0]?.price?.nickname || 
-                           subscription.items?.data?.[0]?.price?.id || 'unknown';
-              const periodEnd = subscription.current_period_end
-                ? new Date(subscription.current_period_end * 1000).toISOString()
-                : null;
-              await base44.asServiceRole.entities.User.update(users[0].id, {
-                subscription_status: status,
-                stripe_customer_id: customerId,
-                stripe_subscription_id: subscription.id,
-                subscription_plan: plan,
-                subscription_period_end: periodEnd,
+              const user = users[0];
+              await base44.asServiceRole.entities.User.update(user.id, {
+                subscriptionStatus: status,
+                stripeCustomerId: customerId,
+                stripeSubscriptionId: subscription.id,
+                planName: plan,
+                trialStartDate: trialStart,
+                trialEndDate: trialEnd,
+                billingStatus: status === 'past_due' ? 'failed' : 'active',
+                accessLevel: (status === 'active' || status === 'trialing') ? 'Pro' : 'Free'
               });
-              console.log('User subscription updated:', email, 'status:', status, 'plan:', plan);
+              console.log('User subscription updated:', email, 'status:', status);
             }
           }
         } catch (e) {
@@ -78,23 +78,19 @@ Deno.serve(async (req) => {
       }
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
-        console.log('Subscription cancelled:', subscription.id);
-        
         try {
           const customerId = subscription.customer;
           const customer = await stripe.customers.retrieve(customerId);
-          const email = customer.email;
-          if (email) {
-            const users = await base44.asServiceRole.entities.User.filter({ email });
+          if (customer.email) {
+            const users = await base44.asServiceRole.entities.User.filter({ email: customer.email });
             if (users.length > 0) {
               await base44.asServiceRole.entities.User.update(users[0].id, {
-                subscription_status: 'cancelled',
-                stripe_subscription_id: subscription.id,
-                subscription_period_end: subscription.current_period_end
-                  ? new Date(subscription.current_period_end * 1000).toISOString()
-                  : null,
+                subscriptionStatus: 'cancelled',
+                stripeSubscriptionId: subscription.id,
+                billingStatus: 'cancelled',
+                accessLevel: 'Free'
               });
-              console.log('User subscription cancelled:', email);
+              console.log('User subscription cancelled:', customer.email);
             }
           }
         } catch (e) {
@@ -102,50 +98,6 @@ Deno.serve(async (req) => {
         }
         break;
       }
-      case 'invoice.paid': {
-        const invoice = event.data.object;
-        const customerId = invoice.customer;
-        console.log('Invoice paid:', invoice.id, 'amount:', invoice.amount_paid);
-        try {
-          const customer = await stripe.customers.retrieve(customerId);
-          const email = customer.email;
-          if (email) {
-            const users = await base44.asServiceRole.entities.User.filter({ email });
-            if (users.length > 0) {
-              await base44.asServiceRole.entities.User.update(users[0].id, {
-                subscription_status: 'active',
-                stripe_customer_id: customerId,
-              });
-              console.log('Invoice paid, subscription kept active for:', email);
-            }
-          }
-        } catch (e) {
-          console.error('Error handling invoice.paid:', e.message);
-        }
-        break;
-      }
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object;
-        console.log('Invoice payment failed:', invoice.id);
-        try {
-          const customer = await stripe.customers.retrieve(invoice.customer);
-          const email = customer.email;
-          if (email) {
-            const users = await base44.asServiceRole.entities.User.filter({ email });
-            if (users.length > 0) {
-              await base44.asServiceRole.entities.User.update(users[0].id, {
-                subscription_status: 'past_due',
-              });
-              console.log('User marked past_due due to failed payment:', email);
-            }
-          }
-        } catch (e) {
-          console.error('Error handling invoice.payment_failed:', e.message);
-        }
-        break;
-      }
-      default:
-        console.log('Unhandled event type:', event.type);
     }
 
     return Response.json({ received: true });

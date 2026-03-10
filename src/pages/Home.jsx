@@ -42,12 +42,25 @@ export default function Home() {
     }, 1000);
 
     // Check for checkout success
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('checkout') === 'success') {
-      setShowCheckoutSuccess(true);
-      window.history.replaceState({}, '', window.location.pathname);
-      setTimeout(() => setShowCheckoutSuccess(false), 4000);
-    }
+    const checkCheckout = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('session_id');
+      if (params.get('checkout') === 'success' || sessionId) {
+        if (sessionId) {
+          try {
+            await base44.functions.invoke('verifySession', { session_id: sessionId });
+            await loadUser();
+          } catch (e) {
+            console.error('Session verify error:', e);
+          }
+        }
+        setShowCheckoutSuccess(true);
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(() => setShowCheckoutSuccess(false), 4000);
+        window.dispatchEvent(new Event('features-updated'));
+      }
+    };
+    checkCheckout();
 
     return () => clearInterval(timer);
   }, []);
