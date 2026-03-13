@@ -10,7 +10,14 @@ export default function PremiumGate({ featureId, children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+    const loadUser = () => {
+      base44.auth.me().then(u => { setUser(u); setLoading(false); }).catch(() => setLoading(false));
+    };
+    loadUser();
+    
+    // Listen for subscription updates
+    window.addEventListener('features-updated', loadUser);
+    return () => window.removeEventListener('features-updated', loadUser);
   }, []);
 
   if (loading) return null;

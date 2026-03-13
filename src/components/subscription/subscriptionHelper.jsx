@@ -2,7 +2,18 @@
 export const FREE_FEATURE_IDS = ['manifestation', 'affirmations', 'gratitude'];
 
 export function isPremiumUser(user) {
-  return user?.subscription_status === 'active' || user?.subscription_status === 'trialing';
+  // Check all possible subscription status fields (old and new schema)
+  const oldStatus = user?.subscription_status;
+  const newStatus = user?.subscriptionStatus;
+  const accessLevel = user?.accessLevel;
+  
+  return (
+    oldStatus === 'active' || 
+    oldStatus === 'trialing' || 
+    newStatus === 'active' || 
+    newStatus === 'trialing' ||
+    accessLevel === 'Pro'
+  );
 }
 
 export function isFeatureLocked(featureId, user) {
