@@ -17,8 +17,8 @@ import useBackNav from '@/components/common/useBackNav';
 import { toast } from '@/components/common/AppToast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import BottomSheet from '@/components/native/BottomSheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import WorkoutLogDialog from '@/components/fitness/WorkoutLogDialog';
 import { format, startOfWeek, isWithinInterval, addDays } from 'date-fns';
 
 const workoutTypes = {
@@ -34,13 +34,6 @@ const workoutTypes = {
 export default function Fitness() {
   const [showWorkoutDialog, setShowWorkoutDialog] = useState(false);
   const [showMetricsDialog, setShowMetricsDialog] = useState(false);
-  const [newWorkout, setNewWorkout] = useState({ 
-    type: 'strength', 
-    duration_minutes: '', 
-    notes: '', 
-    date: format(new Date(), 'yyyy-MM-dd'),
-    calories_burned: ''
-  });
   const [newMetrics, setNewMetrics] = useState({
     date: format(new Date(), 'yyyy-MM-dd'),
     weight: '',
@@ -53,7 +46,6 @@ export default function Fitness() {
     muscle_mass: '',
     notes: ''
   });
-  const [showWorkoutTypeSheet, setShowWorkoutTypeSheet] = useState(false);
   const queryClient = useQueryClient();
   const goBack = useBackNav('Home', 'Fitness');
 
@@ -76,13 +68,19 @@ export default function Fitness() {
   const createWorkoutMutation = useMutation({
     mutationFn: (data) => base44.entities.Workout.create({
       ...data,
-      duration_minutes: parseInt(data.duration_minutes),
-      calories_burned: data.calories_burned ? parseInt(data.calories_burned) : null
+      duration_minutes: parseInt(data.duration_minutes, 10),
+      calories_burned: data.calories_burned ? parseInt(data.calories_burned, 10) : null,
+      workout_name: data.workout_name || null,
+      notes: data.notes || null,
+      workout_datetime: data.workout_datetime || null,
+      is_estimated: !!data.is_estimated,
+      intensity_estimate: data.intensity_estimate || null,
+      description_text: data.description_text || null,
+      workout_source: data.workout_source || 'manual',
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['workouts']);
       setShowWorkoutDialog(false);
-      setNewWorkout({ type: 'strength', duration_minutes: '', notes: '', date: format(new Date(), 'yyyy-MM-dd'), calories_burned: '' });
       toast('Workout logged ✓');
     },
     onError: (e) => toast(e?.message || 'Save failed', 'error')
@@ -150,7 +148,7 @@ export default function Fitness() {
   const weekEnd = addDays(weekStart, 6);
   
   const thisWeekWorkouts = workouts.filter(w => 
-    isWithinInterval(new Date(w.date), { start: weekStart, end: weekEnd })
+    isWithinInterval(new Date(w.workout_datetime || w.date), { start: weekStart, end: weekEnd })
   );
 
   const totalMinutes = thisWeekWorkouts.reduce((sum, w) => sum + (w.duration_minutes || 0), 0);
@@ -368,8 +366,23 @@ export default function Fitness() {
                              <span className="relative">{type.emoji}</span>
                            </div>
                            <div className="flex-1">
-                             <p className="font-semibold text-white capitalize mb-1">{workout.type}</p>
-                             <div className="flex items-center gap-3 text-sm">
+                             <div className="flex items-center gap-2 flex-wrap mb-1">
+                               <p className="font-semibold text-white">{workout.workout_name || workout.type}</p>
+                               <span className="text-[10px] uppercase tracking-[0.2em] text-white/35 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+                                 {workout.type}
+                               </span>
+                               {workout.is_estimated && (
+                                 <span className="text-[10px] uppercase tracking-[0.2em] text-purple-200 bg-purple-500/15 border border-purple-400/20 px-2 py-0.5 rounded-full">
+                                   Estimated
+                                 </span>
+                               )}
+                               {workout.intensity_estimate && (
+                                 <span className="text-[10px] uppercase tracking-[0.2em] text-orange-200 bg-orange-500/15 border border-orange-400/20 px-2 py-0.5 rounded-full">
+                                   {workout.intensity_estimate}
+                                 </span>
+                               )}
+                             </div>
+                             <div className="flex items-center gap-3 text-sm flex-wrap">
                                <span className="flex items-center gap-1.5 text-blue-400">
                                  <Clock className="w-3.5 h-3.5" />
                                  <span className="font-medium">{workout.duration_minutes}</span>
@@ -388,8 +401,8 @@ export default function Fitness() {
                              )}
                            </div>
                            <div className="text-right flex flex-col items-end gap-1">
-                             <p className="text-sm font-medium text-white/70">{format(new Date(workout.date), 'MMM d')}</p>
-                             <p className="text-xs text-white/40">{format(new Date(workout.date), 'yyyy')}</p>
+                             <p className="text-sm font-medium text-white/70">{format(new Date(workout.workout_datetime || workout.date), 'MMM d')}</p>
+                             <p className="text-xs text-white/40">{format(new Date(workout.workout_datetime || workout.date), 'h:mm a')}</p>
                            </div>
                            <button
                              onClick={() => deleteWorkoutMutation.mutate(workout.id)}
@@ -588,80 +601,12 @@ export default function Fitness() {
           </TabsContent>
         </Tabs>
 
-        {/* Workout Dialog */}
-        <Dialog open={showWorkoutDialog} onOpenChange={setShowWorkoutDialog}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-red-500/30 text-white max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2">
-                <Dumbbell className="w-5 h-5 text-red-400" />
-                Log Workout
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="space-y-4 mt-4">
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Workout Type</label>
-                <button
-                  type="button"
-                  onClick={() => setShowWorkoutTypeSheet(true)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
-                >
-                  <span>{workoutTypes[newWorkout.type]?.emoji} {newWorkout.type.charAt(0).toUpperCase() + newWorkout.type.slice(1)}</span>
-                  <span className="text-white/40">▾</span>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Duration (min)</label>
-                  <CosmicInput
-                    type="number"
-                    value={newWorkout.duration_minutes}
-                    onChange={(e) => setNewWorkout({ ...newWorkout, duration_minutes: e.target.value })}
-                    placeholder="30"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-sm text-purple-200/70 mb-2 block">Calories</label>
-                  <CosmicInput
-                    type="number"
-                    value={newWorkout.calories_burned}
-                    onChange={(e) => setNewWorkout({ ...newWorkout, calories_burned: e.target.value })}
-                    placeholder="200"
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Date</label>
-                <CosmicInput
-                  type="date"
-                  value={newWorkout.date}
-                  onChange={(e) => setNewWorkout({ ...newWorkout, date: e.target.value })}
-                />
-              </div>
-              
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Notes</label>
-                <Textarea
-                  value={newWorkout.notes}
-                  onChange={(e) => setNewWorkout({ ...newWorkout, notes: e.target.value })}
-                  placeholder="How did it feel?"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-                />
-              </div>
-              
-              <GlowButton
-                onClick={() => createWorkoutMutation.mutate(newWorkout)}
-                disabled={!newWorkout.duration_minutes || createWorkoutMutation.isPending}
-                className="w-full"
-              >
-                {createWorkoutMutation.isPending ? 'Logging...' : 'Log Workout'}
-              </GlowButton>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <WorkoutLogDialog
+          open={showWorkoutDialog}
+          onOpenChange={setShowWorkoutDialog}
+          onSave={(data) => createWorkoutMutation.mutate(data)}
+          isSaving={createWorkoutMutation.isPending}
+        />
 
         {/* Body Metrics Dialog */}
         <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
@@ -792,18 +737,7 @@ export default function Fitness() {
           </DialogContent>
         </Dialog>
 
-        <BottomSheet
-          open={showWorkoutTypeSheet}
-          onOpenChange={setShowWorkoutTypeSheet}
-          title="Workout Type"
-          value={newWorkout.type}
-          onSelect={(val) => setNewWorkout({ ...newWorkout, type: val })}
-          options={Object.entries(workoutTypes).map(([key, { emoji }]) => ({
-            value: key,
-            label: key.charAt(0).toUpperCase() + key.slice(1),
-            icon: emoji
-          }))}
-        />
+
       </div>
     </CosmicBackground>
     </PremiumGate>
