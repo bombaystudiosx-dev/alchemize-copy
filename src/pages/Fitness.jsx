@@ -161,11 +161,11 @@ export default function Fitness() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.workout_datetime || b.date) - new Date(a.workout_datetime || a.date));
     let checkDate = new Date(today);
     
     for (const workout of sortedWorkouts) {
-      const workoutDate = new Date(workout.date);
+      const workoutDate = new Date(workout.workout_datetime || workout.date);
       workoutDate.setHours(0, 0, 0, 0);
       
       const diffDays = Math.floor((checkDate - workoutDate) / (1000 * 60 * 60 * 24));
