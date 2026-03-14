@@ -14,7 +14,7 @@ import { logEvent } from '@/components/common/appLogger';
 
 export default function GratitudeJournal() {
   const [showEntryForm, setShowEntryForm] = useState(false);
-  const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+  const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
   const [formDate, setFormDate] = useState(null);
   const [dayDialog, setDayDialog] = useState(null);
   const queryClient = useQueryClient();
@@ -33,7 +33,7 @@ export default function GratitudeJournal() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gratitude'] });
       setShowEntryForm(false);
-      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
       setFormDate(null);
       toast('Entry saved ✓', 'success');
       logEvent('save', 'Journal', 'save_result', 'success');
@@ -59,13 +59,14 @@ export default function GratitudeJournal() {
       gratitude_1: newEntry.gratitude_1,
       gratitude_2: newEntry.gratitude_2 || null,
       gratitude_3: newEntry.gratitude_3 || null,
+      reflection: newEntry.reflection || null,
       date: dateToUse
     });
   };
 
   const openForm = (date = null) => {
     setFormDate(date);
-    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
     setDayDialog(null);
     setShowEntryForm(true);
   };
@@ -200,6 +201,12 @@ export default function GratitudeJournal() {
                   {entry.gratitude_3 && (
                     <p className="text-white/80 text-sm leading-relaxed">{entry.gratitude_3}</p>
                   )}
+                  {entry.reflection && (
+                    <div className="mt-3 rounded-xl bg-white/5 border border-white/10 p-3">
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-white/35 mb-2">Optional: What could I have done better today?</p>
+                      <p className="text-white/70 text-sm leading-relaxed">{entry.reflection}</p>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -271,6 +278,16 @@ export default function GratitudeJournal() {
                       rows={3}
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-purple-300/70 mb-1 block">Optional: What could I have done better today?</label>
+                    <textarea
+                      placeholder="Optional reflection..."
+                      value={newEntry.reflection}
+                      onChange={(e) => setNewEntry({ ...newEntry, reflection: e.target.value })}
+                      className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
+                      rows={3}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex gap-4 mt-6 pb-safe">
@@ -278,7 +295,7 @@ export default function GratitudeJournal() {
                     type="button"
                     onClick={() => {
                       setShowEntryForm(false);
-                      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '' });
+                      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
                       setFormDate(null);
                     }}
                     className="flex-1 py-4 rounded-xl bg-gray-600 hover:bg-gray-700 text-white font-semibold transition-colors"
@@ -341,6 +358,12 @@ export default function GratitudeJournal() {
                       )}
                       {entry.gratitude_3 && (
                         <p className="text-white/80 leading-relaxed text-sm">{entry.gratitude_3}</p>
+                      )}
+                      {entry.reflection && (
+                        <div className="mt-3 rounded-xl bg-white/5 border border-white/10 p-3">
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-white/35 mb-2">Optional: What could I have done better today?</p>
+                          <p className="text-white/70 text-sm leading-relaxed">{entry.reflection}</p>
+                        </div>
                       )}
                     </div>
                   ))}
