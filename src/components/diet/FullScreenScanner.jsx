@@ -312,6 +312,7 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
           fat_grams: { type: "number" },
           sugar_grams: { type: "number" },
           fiber_grams: { type: "number" },
+          sodium_mg: { type: "number" },
           confidence_score: { type: "number" },
           items_detected: {
             type: "array",
