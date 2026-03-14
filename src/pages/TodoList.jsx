@@ -160,6 +160,14 @@ export default function TodoList() {
                   style={{ fontFamily: "'Courier New', 'Lucida Console', monospace" }}
                 />
               )}
+              <button
+                type="button"
+                onClick={() => setNewTodo({ ...newTodo, urgent: !newTodo.urgent })}
+                className={`w-full px-4 py-2.5 rounded-full border text-sm transition-all flex items-center justify-center gap-2 ${newTodo.urgent ? 'bg-red-500/15 border-red-500/40 text-red-100' : 'bg-amber-50/10 border-amber-300/20 text-amber-100/80'}`}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                {newTodo.urgent ? 'Urgent task enabled' : 'Mark task as urgent'}
+              </button>
             </form>
 
             <div className="flex gap-2 mb-4">
