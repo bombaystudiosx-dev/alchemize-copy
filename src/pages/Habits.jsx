@@ -127,7 +127,7 @@ export default function Habits() {
   });
   
   // Save to database whenever data changes (debounced) — skip on first load
-  const isFirstLoad = React.useRef(true);
+  const isFirstLoad = useRef(true);
   useEffect(() => {
     if (isLoading || habitRecord === undefined) return;
     if (isFirstLoad.current) {
