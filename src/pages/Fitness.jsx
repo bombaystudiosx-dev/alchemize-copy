@@ -146,8 +146,9 @@ export default function Fitness() {
 
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
   const weekEnd = addDays(weekStart, 6);
+  const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.workout_datetime || b.date) - new Date(a.workout_datetime || a.date));
   
-  const thisWeekWorkouts = workouts.filter(w => 
+  const thisWeekWorkouts = sortedWorkouts.filter(w => 
     isWithinInterval(new Date(w.workout_datetime || w.date), { start: weekStart, end: weekEnd })
   );
 
@@ -156,12 +157,10 @@ export default function Fitness() {
 
   // Calculate streak
   const calculateStreak = () => {
-    if (workouts.length === 0) return 0;
+    if (sortedWorkouts.length === 0) return 0;
     let streak = 0;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.workout_datetime || b.date) - new Date(a.workout_datetime || a.date));
     let checkDate = new Date(today);
     
     for (const workout of sortedWorkouts) {
@@ -350,7 +349,7 @@ export default function Fitness() {
               ) : (
                 <div className="space-y-3">
                   <AnimatePresence>
-                    {workouts.map((workout, index) => {
+                    {sortedWorkouts.map((workout, index) => {
                       const type = workoutTypes[workout.type] || workoutTypes.other;
                       return (
                         <motion.div
