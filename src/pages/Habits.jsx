@@ -3,12 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import CosmicCard from '@/components/cosmic/CosmicCard';
 // Navigation handled by bottom tab bar
-import { Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2, Edit, X } from 'lucide-react';
+import { Play, Pause, Plus, Minus, Award, Zap, PlusCircle, Trash2, Edit, X, Bell } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import { format } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import CosmicInput from '@/components/cosmic/CosmicInput';
 import TimerView from '@/components/habits/TimerView';
+import HabitFormDialog from '@/components/habits/HabitFormDialog';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import PullToRefresh from '@/components/common/PullToRefresh';
@@ -65,6 +64,13 @@ const getDefaultHabitsData = () => {
   };
 };
 
+const normalizeHabit = (habit) => ({
+  ...habit,
+  reminder_enabled: !!habit?.reminder_enabled,
+  reminder_time: habit?.reminder_time || '08:00',
+  last_reminder_date: habit?.last_reminder_date || null,
+});
+
 export default function Habits() {
   const queryClient = useQueryClient();
   
@@ -78,32 +84,30 @@ export default function Habits() {
     }
   });
   
-  const [habitsData, setHabitsData] = useState(getDefaultHabitsData());
+  const [habitsData, setHabitsData] = useState({
+    ...getDefaultHabitsData(),
+    habits: getDefaultHabitsData().habits.map(normalizeHabit)
+  });
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [activeTimerView, setActiveTimerView] = useState(null);
-  const [newHabit, setNewHabit] = useState({
-    name: '',
-    icon: '⭐',
-    type: 'check',
-    goal: 1,
-    unit: 'session',
-    color: '#9B5DE5'
-  });
+  const [editingHabit, setEditingHabit] = useState(null);
   
   // Load habit data from database
   useEffect(() => {
     if (habitRecord?.habit_data) {
-      // Migrate old format to new format
       if (habitRecord.habit_data.sections) {
         const migratedHabits = habitRecord.habit_data.sections.flatMap(s => 
-          s.habits.map(h => ({ ...h, color: h.ui?.color || s.color }))
+          s.habits.map(h => normalizeHabit({ ...h, color: h.ui?.color || s.color }))
         );
         setHabitsData({
           user_data: habitRecord.habit_data.user_data || { total_xp: 0, total_energy: 0 },
           habits: migratedHabits
         });
       } else {
-        setHabitsData(habitRecord.habit_data);
+        setHabitsData({
+          ...habitRecord.habit_data,
+          habits: (habitRecord.habit_data.habits || []).map(normalizeHabit)
+        });
       }
     }
   }, [habitRecord]);
@@ -193,7 +197,6 @@ export default function Habits() {
   }, []);
 
   const playAlarm = (habitName) => {
-    // Audio alarm
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     for (let i = 0; i < 5; i++) {
       setTimeout(() => {
@@ -209,8 +212,7 @@ export default function Habits() {
         oscillator.stop(audioContext.currentTime + 0.3);
       }, i * 400);
     }
-    
-    // Browser notification
+
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('🎉 Habit Complete!', {
         body: `Great job! You completed "${habitName}"`,
@@ -220,12 +222,50 @@ export default function Habits() {
       });
     }
   };
+
+  const sendHabitReminder = (habitName) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Habit reminder', {
+        body: `Time for ${habitName}`,
+        icon: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png',
+      });
+    }
+  };
   
   // Request notification permission on mount
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = format(new Date(), 'HH:mm');
+      const today = format(new Date(), 'yyyy-MM-dd');
+
+      setHabitsData((prev) => {
+        let changed = false;
+        const habits = prev.habits.map((habit) => {
+          const isCompleted = (habit.completion_log || []).some((log) => log.date === today);
+          if (
+            habit.reminder_enabled &&
+            habit.reminder_time === now &&
+            habit.last_reminder_date !== today &&
+            !isCompleted
+          ) {
+            changed = true;
+            sendHabitReminder(habit.name);
+            return { ...habit, last_reminder_date: today };
+          }
+          return habit;
+        });
+
+        return changed ? { ...prev, habits } : prev;
+      });
+    }, 30000);
+
+    return () => clearInterval(interval);
   }, []);
   
 
@@ -288,57 +328,72 @@ export default function Habits() {
 
   const maxStreak = Math.max(...(habitsData.habits.map(h => h.streak || 0)));
 
-  const addNewHabit = () => {
-    if (!newHabit.name.trim()) return;
-    
+  const handleSaveHabit = async (habitForm) => {
+    if (habitForm.reminder_enabled && 'Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+
+    if (editingHabit) {
+      setHabitsData((prev) => ({
+        ...prev,
+        habits: prev.habits.map((habit) => habit.id === editingHabit.id ? normalizeHabit({
+          ...habit,
+          name: habitForm.name,
+          icon: habitForm.icon,
+          goal: habitForm.goal,
+          unit: habitForm.unit,
+          color: habitForm.color,
+          reminder_enabled: habitForm.reminder_enabled,
+          reminder_time: habitForm.reminder_time,
+          progress: { ...habit.progress, type: habitForm.type },
+          timer: habitForm.type === 'timer'
+            ? (habit.timer || {
+                status: 'stopped',
+                elapsed_seconds: 0,
+                remaining_seconds: habitForm.goal * 60,
+              })
+            : undefined,
+        }) : habit),
+      }));
+      setEditingHabit(null);
+      return;
+    }
+
     setHabitsData(prev => {
-      const habitId = `hbt_${newHabit.name.toLowerCase().replace(/\s/g, '')}_${Date.now().toString(36)}`;
-      
-      const newHabitData = {
+      const habitId = `hbt_${habitForm.name.toLowerCase().replace(/\s/g, '')}_${Date.now().toString(36)}`;
+      const newHabitData = normalizeHabit({
         id: habitId,
-        name: newHabit.name,
-        icon: newHabit.icon,
-        goal: parseInt(newHabit.goal) || 1,
-        unit: newHabit.unit,
-        progress: { 
-          type: newHabit.type, 
-          value: 0 
-        },
+        name: habitForm.name,
+        icon: habitForm.icon,
+        goal: habitForm.goal,
+        unit: habitForm.unit,
+        progress: { type: habitForm.type, value: 0 },
         streak: 0,
-        xp_reward: newHabit.type === 'timer' ? 15 : 5,
-        energy_reward: newHabit.type === 'timer' ? 4 : 2,
+        xp_reward: habitForm.type === 'timer' ? 15 : 5,
+        energy_reward: habitForm.type === 'timer' ? 4 : 2,
         completion_log: [],
-        color: newHabit.color
-      };
-      
-      if (newHabit.type === 'timer') {
+        color: habitForm.color,
+        reminder_enabled: habitForm.reminder_enabled,
+        reminder_time: habitForm.reminder_time,
+      });
+
+      if (habitForm.type === 'timer') {
         newHabitData.timer = {
           status: 'stopped',
           elapsed_seconds: 0,
-          remaining_seconds: (parseInt(newHabit.goal) || 1) * 60
+          remaining_seconds: habitForm.goal * 60,
         };
       }
-      
+
       return {
         ...prev,
-        habits: [...prev.habits, newHabitData]
+        habits: [...prev.habits, newHabitData],
       };
     });
-    
+
     setShowAddDialog(false);
-    setNewHabit({
-      name: '',
-      icon: '⭐',
-      type: 'check',
-      goal: 1,
-      unit: 'session',
-      color: '#9B5DE5'
-    });
   };
 
-  const icons = ['⭐', '💪', '📚', '🎯', '🧘‍♀️', '🏃', '💧', '🍎', '🎨', '🎵', '✍️', '🧠'];
-  const colors = ['#9B5DE5', '#00B4D8', '#0077B6', '#FF6B6B', '#FFB347', '#FF8C00', '#5BC0BE', '#00BFFF', '#10b981', '#f59e0b', '#ec4899'];
-  
   const deleteHabit = (habitId) => {
     setHabitsData(prev => ({
       ...prev,
@@ -456,7 +511,7 @@ export default function Habits() {
                             <span className="text-2xl">{habit.icon}</span>
                             <div className="flex-1">
                               <h3 className="font-medium text-white">{habit.name}</h3>
-                              <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <p className="text-xs text-white/50">
                                   {habit.progress.value} / {habit.goal} {habit.unit}
                                 </p>
@@ -464,6 +519,12 @@ export default function Habits() {
                                   <div className="flex items-center gap-1 text-amber-400 text-xs">
                                     <span>🔥</span>
                                     <span>{habit.streak}</span>
+                                  </div>
+                                )}
+                                {habit.reminder_enabled && (
+                                  <div className="flex items-center gap-1 text-cyan-300 text-xs bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-400/20">
+                                    <Bell className="w-3 h-3" />
+                                    <span>{habit.reminder_time}</span>
                                   </div>
                                 )}
                               </div>
@@ -483,6 +544,12 @@ export default function Habits() {
                                 </div>
                               </div>
                             </div>
+                            <button
+                              onClick={() => setEditingHabit(habit)}
+                              className="p-1 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
+                            >
+                              <Edit className="w-4 h-4 text-white/80" />
+                            </button>
                             <button
                               onClick={() => deleteHabit(habit.id)}
                               className="p-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-all"
@@ -538,119 +605,20 @@ export default function Habits() {
         </div>
       </PullToRefresh>
 
-      {/* Add Habit Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-orange-500/30 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <PlusCircle className="w-5 h-5 text-orange-400" />
-              Add New Habit
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4 mt-4">
-            <div>
-              <label className="text-sm text-purple-200/70 mb-2 block">Habit Name</label>
-              <input
-                type="text"
-                value={newHabit.name}
-                onChange={(e) => setNewHabit({ ...newHabit, name: e.target.value })}
-                placeholder="e.g., Morning Workout"
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 outline-none focus:border-purple-500/50"
-              />
-            </div>
-            
-            <div>
-              <label className="text-sm text-purple-200/70 mb-2 block">Icon</label>
-              <div className="flex flex-wrap gap-2">
-                {icons.map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    onClick={() => setNewHabit({ ...newHabit, icon })}
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-2xl transition-all ${
-                      newHabit.icon === icon 
-                        ? 'bg-orange-500/30 scale-110' 
-                        : 'bg-white/10 hover:bg-white/20'
-                    }`}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm text-purple-200/70 mb-2 block">Color</label>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    onClick={() => setNewHabit({ ...newHabit, color })}
-                    className={`w-10 h-10 rounded-lg transition-all ${
-                      newHabit.color === color 
-                        ? 'ring-2 ring-white scale-110' 
-                        : 'hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm text-purple-200/70 mb-2 block">Type</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setNewHabit({ ...newHabit, type: 'check', unit: 'session', goal: 1 })}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all ${
-                    newHabit.type === 'check' 
-                      ? 'bg-orange-500/30 border border-orange-500/50' 
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  ✓ Check
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setNewHabit({ ...newHabit, type: 'timer', unit: 'minutes', goal: 15 })}
-                  className={`py-2 px-3 rounded-lg text-sm transition-all ${
-                    newHabit.type === 'timer' 
-                      ? 'bg-orange-500/30 border border-orange-500/50' 
-                      : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  ⏱ Timer
-                </button>
-              </div>
-            </div>
+      <HabitFormDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        onSave={handleSaveHabit}
+        title="Add New Habit"
+      />
 
-            {newHabit.type === 'timer' && (
-              <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Goal (minutes)</label>
-                <input
-                  type="number"
-                  value={newHabit.goal}
-                  onChange={(e) => setNewHabit({ ...newHabit, goal: e.target.value })}
-                  className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white outline-none focus:border-purple-500/50"
-                  min="1"
-                />
-              </div>
-            )}
-            
-            <button
-              type="button"
-              onClick={addNewHabit}
-              disabled={!newHabit.name.trim()}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-orange-500 to-purple-600 hover:from-orange-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              Add Habit
-            </button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <HabitFormDialog
+        open={!!editingHabit}
+        onOpenChange={(open) => !open && setEditingHabit(null)}
+        initialData={editingHabit}
+        onSave={handleSaveHabit}
+        title="Edit Habit"
+      />
 
       {/* Timer View */}
       <AnimatePresence>
