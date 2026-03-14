@@ -12,7 +12,7 @@ export default function WeekCalendar({ selectedDate, onSelectDate, dailyData, ca
       dayName: format(date, 'EEE'),
       dayNum: format(date, 'd'),
       isToday: offset === 0,
-      isSelected: isSameDay(date, new Date(selectedDate))
+      isSelected: format(date, 'yyyy-MM-dd') === selectedDate
     };
   });
 

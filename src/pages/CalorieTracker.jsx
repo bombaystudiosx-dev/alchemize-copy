@@ -152,11 +152,19 @@ export default function CalorieTracker() {
   };
 
   const handleFoodScanned = withLock((foodData) => {
-    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
+    createFoodMutation.mutate({
+      ...foodData,
+      meal_type: activeMealType,
+      logged_at: `${selectedDate}T12:00:00`,
+    });
   });
 
   const handleQuickFoodAdd = withLock((foodData) => {
-    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
+    createFoodMutation.mutate({
+      ...foodData,
+      meal_type: activeMealType,
+      logged_at: foodData.logged_at || `${selectedDate}T12:00:00`,
+    });
   });
 
   const handleDescribeFoodAdd = withLock((foodData) => {
