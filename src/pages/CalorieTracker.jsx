@@ -15,7 +15,7 @@ import WeekCalendar from '@/components/diet/WeekCalendar';
 import MealSection from '@/components/diet/MealSection';
 import FullScreenScanner from '@/components/diet/FullScreenScanner';
 import QuickAddSheet from '@/components/diet/QuickAddSheet';
-import MealPlanDialog from '@/components/diet/MealPlanDialog';
+import DescribeFoodSheet from '@/components/diet/DescribeFoodSheet';
 import PullToRefresh from '@/components/common/PullToRefresh';
 
 const DEFAULT_GOALS = {
@@ -33,7 +33,7 @@ export default function CalorieTracker() {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [activeMealType, setActiveMealType] = useState('breakfast');
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [showMealPlanner, setShowMealPlanner] = useState(false);
+  const [showDescribeFood, setShowDescribeFood] = useState(false);
   const [goalDraft, setGoalDraft] = useState(null);
   const queryClient = useQueryClient();
 
@@ -163,6 +163,10 @@ export default function CalorieTracker() {
     createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
   });
 
+  const handleDescribeFoodAdd = withLock((foodData) => {
+    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
+  });
+
   const handleSaveFood = (food) => {
     saveFoodMutation.mutate({
       food_name: food.food_name, serving_description: food.serving_description,
@@ -198,6 +202,50 @@ export default function CalorieTracker() {
       </div>
 
       <div className="px-5 space-y-5" style={{ paddingBottom: 'calc(140px + env(safe-area-inset-bottom))' }}>
+        <div className="rounded-3xl bg-white/[0.05] border border-white/10 p-4 space-y-4">
+          <div>
+            <p className="text-white font-semibold text-base">Log food faster</p>
+            <p className="text-white/45 text-xs mt-1">Choose a meal, then scan, describe, or add food without extra scrolling.</p>
+          </div>
+
+          <div className="grid grid-cols-4 gap-2">
+            {['breakfast', 'lunch', 'dinner', 'snack'].map((meal) => (
+              <button
+                key={meal}
+                type="button"
+                onClick={() => setActiveMealType(meal)}
+                className={`h-10 rounded-2xl text-xs font-medium capitalize transition-all ${activeMealType === meal ? 'bg-white text-black' : 'bg-white/[0.06] text-white/60 border border-white/10'}`}
+              >
+                {meal}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <button
+              onClick={() => setShowScanner(true)}
+              className="h-14 rounded-2xl bg-white text-black flex items-center justify-center gap-2 font-semibold"
+            >
+              <Camera className="w-4 h-4" />
+              Scan Food
+            </button>
+            <button
+              onClick={() => setShowDescribeFood(true)}
+              className="h-14 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-white flex items-center justify-center gap-2 font-medium"
+            >
+              <Sparkles className="w-4 h-4 text-purple-300" />
+              Describe Food
+            </button>
+            <button
+              onClick={() => setShowQuickAdd(true)}
+              className="h-14 rounded-2xl bg-white/[0.06] border border-white/10 text-white flex items-center justify-center gap-2 font-medium"
+            >
+              <Plus className="w-4 h-4" />
+              Quick Add
+            </button>
+          </div>
+        </div>
+
         <WeekCalendar
           selectedDate={selectedDate}
           onSelectDate={setSelectedDate}
@@ -206,29 +254,6 @@ export default function CalorieTracker() {
         />
 
         <MacroDashboard totals={totals} goals={goals} />
-
-        {/* Quick actions */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => { setActiveMealType('snack'); setShowScanner(true); }}
-            className="flex-1 h-12 rounded-xl bg-white flex items-center justify-center gap-2"
-          >
-            <Camera className="w-4 h-4 text-black" />
-            <span className="text-black text-sm font-semibold">Scan</span>
-          </button>
-          <button
-            onClick={() => setShowMealPlanner(true)}
-            className="h-12 w-12 rounded-xl bg-white/[0.06] flex items-center justify-center"
-          >
-            <Sparkles className="w-4 h-4 text-white/50" />
-          </button>
-          <button
-            onClick={() => { setActiveMealType('snack'); setShowQuickAdd(true); }}
-            className="h-12 w-12 rounded-xl bg-white/[0.06] flex items-center justify-center"
-          >
-            <Plus className="w-4 h-4 text-white/50" />
-          </button>
-        </div>
 
         {/* Meals */}
         <div className="space-y-5">
@@ -268,13 +293,15 @@ export default function CalorieTracker() {
         )}
       </AnimatePresence>
 
-      {/* Meal Planner */}
-      <MealPlanDialog
-        open={showMealPlanner}
-        onOpenChange={setShowMealPlanner}
-        selectedDate={selectedDate}
-        onAddFoods={(foodData) => createFoodMutation.mutate(foodData)}
-      />
+      <AnimatePresence>
+        {showDescribeFood && (
+          <DescribeFoodSheet
+            open={showDescribeFood}
+            onClose={() => setShowDescribeFood(false)}
+            onAdd={handleDescribeFoodAdd}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={(o) => { setShowGoalsDialog(o); if (!o) setGoalDraft(null); }}>
