@@ -1,5 +1,5 @@
 import React from 'react';
-import { format, addDays, subDays, isSameDay } from 'date-fns';
+import { format, addDays, subDays } from 'date-fns';
 import { motion } from 'framer-motion';
 
 export default function WeekCalendar({ selectedDate, onSelectDate, dailyData, calorieGoal }) {
