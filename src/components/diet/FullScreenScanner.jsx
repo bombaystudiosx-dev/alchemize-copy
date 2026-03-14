@@ -415,16 +415,16 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
           {/* Bottom actions */}
           <div className="flex-shrink-0 px-8 pb-[calc(env(safe-area-inset-bottom)+24px)]">
             <div className="flex items-center gap-4">
-              <label className="relative w-14 h-14 rounded-full bg-white/10 flex items-center justify-center overflow-hidden cursor-pointer">
+              <label className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center cursor-pointer">
                 <Image className="w-6 h-6 text-white/60" />
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFile}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="hidden"
                 />
               </label>
-              <label className="relative flex-1 h-14 rounded-full bg-white flex items-center justify-center gap-3 overflow-hidden cursor-pointer">
+              <label className="flex-1 h-14 rounded-full bg-white flex items-center justify-center gap-3 cursor-pointer">
                 <Camera className="w-5 h-5 text-black" />
                 <span className="text-black font-semibold">Take Photo</span>
                 <input
@@ -432,7 +432,7 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
                   accept="image/*"
                   capture="environment"
                   onChange={handleFile}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  className="hidden"
                 />
               </label>
             </div>

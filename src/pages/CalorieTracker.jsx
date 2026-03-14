@@ -15,7 +15,7 @@ import WeekCalendar from '@/components/diet/WeekCalendar';
 import MealSection from '@/components/diet/MealSection';
 import FullScreenScanner from '@/components/diet/FullScreenScanner';
 import QuickAddSheet from '@/components/diet/QuickAddSheet';
-import DescribeFoodSheet from '@/components/diet/DescribeFoodSheet';
+import DescribeFoodCard from '@/components/diet/DescribeFoodCard';
 import PullToRefresh from '@/components/common/PullToRefresh';
 
 const DEFAULT_GOALS = {
@@ -39,7 +39,6 @@ export default function CalorieTracker() {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [activeMealType, setActiveMealType] = useState('breakfast');
   const [showQuickAdd, setShowQuickAdd] = useState(false);
-  const [showDescribeFood, setShowDescribeFood] = useState(false);
   const [goalDraft, setGoalDraft] = useState(null);
   const queryClient = useQueryClient();
 
@@ -171,7 +170,7 @@ export default function CalorieTracker() {
     createFoodMutation.mutate({
       ...foodData,
       meal_type: activeMealType,
-      logged_at: foodData.logged_at || `${selectedDate}T12:00:00`,
+      logged_at: `${selectedDate}T12:00:00`,
     });
   });
 
@@ -185,9 +184,9 @@ export default function CalorieTracker() {
   };
 
   const handleRefresh = () => Promise.all([
-    queryClient.invalidateQueries(['foodLogs']),
-    queryClient.invalidateQueries(['savedFoods']),
-    queryClient.invalidateQueries(['nutritionGoals']),
+    queryClient.invalidateQueries({ queryKey: ['foodLogs'] }),
+    queryClient.invalidateQueries({ queryKey: ['savedFoods'] }),
+    queryClient.invalidateQueries({ queryKey: ['nutritionGoals'] }),
   ]);
 
   return (
@@ -229,20 +228,13 @@ export default function CalorieTracker() {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               onClick={() => setShowScanner(true)}
               className="h-14 rounded-2xl bg-white text-black flex items-center justify-center gap-2 font-semibold"
             >
               <Camera className="w-4 h-4" />
-              Scan Food
-            </button>
-            <button
-              onClick={() => setShowDescribeFood(true)}
-              className="h-14 rounded-2xl bg-purple-500/15 border border-purple-400/20 text-white flex items-center justify-center gap-2 font-medium"
-            >
-              <Sparkles className="w-4 h-4 text-purple-300" />
-              Describe Food
+              Take a Photo
             </button>
             <button
               onClick={() => setShowQuickAdd(true)}
@@ -252,6 +244,13 @@ export default function CalorieTracker() {
               Quick Add
             </button>
           </div>
+
+          <DescribeFoodCard
+            mealType={activeMealType}
+            selectedDate={selectedDate}
+            onAdd={handleDescribeFoodAdd}
+            isSaving={createFoodMutation.isPending}
+          />
         </div>
 
         <WeekCalendar
@@ -297,16 +296,6 @@ export default function CalorieTracker() {
             onClose={() => setShowQuickAdd(false)}
             onAdd={handleQuickFoodAdd}
             savedFoods={savedFoods}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showDescribeFood && (
-          <DescribeFoodSheet
-            open={showDescribeFood}
-            onClose={() => setShowDescribeFood(false)}
-            onAdd={handleDescribeFoodAdd}
           />
         )}
       </AnimatePresence>
