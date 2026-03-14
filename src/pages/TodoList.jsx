@@ -3,14 +3,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Loader2, Pencil, AlertTriangle } from 'lucide-react';
+import TaskEditDialog from '@/components/tasks/TaskEditDialog';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 export default function TodoList() {
-  const [newTodo, setNewTodo] = useState({ text: '', notes: '' });
+  const [newTodo, setNewTodo] = useState({ text: '', notes: '', urgent: false });
   const [showNotes, setShowNotes] = useState(false);
+  const [filter, setFilter] = useState('all');
+  const [editingTodo, setEditingTodo] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: todos = [], isLoading } = useQuery({
@@ -22,8 +25,16 @@ export default function TodoList() {
     mutationFn: (data) => base44.entities.TodoItem.create({ ...data, order: todos.length }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
-      setNewTodo({ text: '', notes: '' });
+      setNewTodo({ text: '', notes: '', urgent: false });
       setShowNotes(false);
+    }
+  });
+
+  const editTodoMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.TodoItem.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+      setEditingTodo(null);
     }
   });
 
@@ -57,6 +68,10 @@ export default function TodoList() {
       addTodoMutation.mutate(newTodo);
     }
   };
+
+  const visibleTodos = [...todos]
+    .sort((a, b) => Number(!!b.urgent) - Number(!!a.urgent))
+    .filter((todo) => filter === 'urgent' ? todo.urgent : true);
 
   return (
     <PremiumGate featureId="todo">
@@ -147,13 +162,26 @@ export default function TodoList() {
               )}
             </form>
 
+            <div className="flex gap-2 mb-4">
+              {['all', 'urgent'].map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setFilter(value)}
+                  className={`px-3 py-1.5 rounded-full text-xs uppercase tracking-[0.2em] transition-all ${filter === value ? 'bg-amber-100 text-amber-900' : 'bg-amber-50/10 text-amber-100/60 border border-amber-200/15'}`}
+                >
+                  {value === 'all' ? 'All tasks' : 'Urgent'}
+                </button>
+              ))}
+            </div>
+
             {/* Todo items */}
             <div className="space-y-3 pb-8">
               {isLoading ? (
                 <div className="text-center py-12">
                   <Loader2 className="w-10 h-10 animate-spin mx-auto text-amber-400" />
                 </div>
-              ) : todos.length === 0 ? (
+              ) : visibleTodos.length === 0 ? (
                 <div className="text-center py-16">
                   <p 
                     className="text-amber-100/80 text-lg mb-2" 
@@ -170,14 +198,14 @@ export default function TodoList() {
                 </div>
               ) : (
                 <AnimatePresence>
-                  {todos.map((todo, index) => (
+                  {visibleTodos.map((todo, index) => (
                     <motion.div
                       key={todo.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ delay: index * 0.05 }}
-                      className="flex items-start gap-4 p-4 bg-amber-50/85 rounded-2xl border border-amber-700/20 group hover:bg-amber-50/95 hover:shadow-xl transition-all backdrop-blur-sm"
+                      className={`flex items-start gap-4 p-4 rounded-2xl border group hover:shadow-xl transition-all backdrop-blur-sm ${todo.urgent ? 'bg-red-50/90 border-red-500/30 hover:bg-red-50' : 'bg-amber-50/85 border-amber-700/20 hover:bg-amber-50/95'}`}
                       style={{ boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)' }}
                     >
                       <button
@@ -189,24 +217,39 @@ export default function TodoList() {
                         </svg>
                       </button>
                       <div className="flex-1">
-                        <p 
-                          className="text-amber-900 leading-relaxed"
-                          style={{ fontFamily: "'Courier New', 'Lucida Console', monospace", fontSize: '15px' }}
-                        >
-                          {todo.text}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <p 
+                            className={`${todo.urgent ? 'text-red-950' : 'text-amber-900'} leading-relaxed`}
+                            style={{ fontFamily: "'Courier New', 'Lucida Console', monospace", fontSize: '15px' }}
+                          >
+                            {todo.text}
+                          </p>
+                          {todo.urgent && (
+                            <span className="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold uppercase tracking-[0.2em]">
+                              Urgent
+                            </span>
+                          )}
+                        </div>
                         {todo.notes && (
-                          <p className="text-amber-800/60 text-sm mt-1" style={{ fontFamily: "'Courier New', monospace" }}>
+                          <p className={`${todo.urgent ? 'text-red-800/70' : 'text-amber-800/60'} text-sm mt-1`} style={{ fontFamily: "'Courier New', monospace" }}>
                             {todo.notes}
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={() => deleteTodoMutation.mutate(todo.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-100 rounded-lg transition-all"
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </button>
+                      <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <button
+                          onClick={() => setEditingTodo(todo)}
+                          className="p-1.5 hover:bg-white/60 rounded-lg transition-all"
+                        >
+                          <Pencil className="w-4 h-4 text-amber-900" />
+                        </button>
+                        <button
+                          onClick={() => deleteTodoMutation.mutate(todo.id)}
+                          className="p-1.5 hover:bg-red-100 rounded-lg transition-all"
+                        >
+                          <Trash2 className="w-4 h-4 text-red-600" />
+                        </button>
+                      </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -215,6 +258,13 @@ export default function TodoList() {
           </div>
         </motion.div>
       </div>
+      <TaskEditDialog
+        open={!!editingTodo}
+        onOpenChange={(open) => !open && setEditingTodo(null)}
+        task={editingTodo}
+        isSaving={editTodoMutation.isPending}
+        onSave={(data) => editTodoMutation.mutate({ id: editingTodo.id, data })}
+      />
     </div>
     </PremiumGate>
   );
