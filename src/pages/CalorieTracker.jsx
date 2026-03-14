@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
-import { ArrowLeft, Camera, Sparkles, Plus, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, Camera, Plus, SlidersHorizontal } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -94,12 +94,12 @@ export default function CalorieTracker() {
       return { prev };
     },
     onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['foodLogs'], ctx.prev); },
-    onSettled: () => queryClient.invalidateQueries(['foodLogs'])
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['foodLogs'] })
   });
 
   const saveFoodMutation = useMutation({
     mutationFn: (data) => base44.entities.SavedFood.create(data),
-    onSuccess: () => queryClient.invalidateQueries(['savedFoods'])
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedFoods'] })
   });
 
   const updateGoalsMutation = useMutation({
@@ -108,7 +108,7 @@ export default function CalorieTracker() {
       return base44.entities.NutritionGoal.create(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['nutritionGoals']);
+      queryClient.invalidateQueries({ queryKey: ['nutritionGoals'] });
       setShowGoalsDialog(false);
       setGoalDraft(null);
     }
