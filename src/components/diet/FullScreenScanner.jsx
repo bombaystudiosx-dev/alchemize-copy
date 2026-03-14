@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, Image, Loader2, RotateCcw, ChevronUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
@@ -251,8 +251,6 @@ export default function FullScreenScanner({ open, onClose, onFoodLogged }) {
   const [imagePreview, setImagePreview] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [result, setResult] = useState(null);
-  const fileInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
 
   const reset = useCallback(() => {
     setStep('capture');
@@ -270,6 +268,7 @@ export default function FullScreenScanner({ open, onClose, onFoodLogged }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
     setError(null);
     setImagePreview(URL.createObjectURL(file));
     setStep('analyzing');
@@ -374,10 +373,6 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]"
     >
-      {/* Hidden inputs */}
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFile} className="hidden" />
-      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
-
       {/* Capture step */}
       {step === 'capture' && (
         <div className="h-full flex flex-col">
@@ -420,19 +415,26 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
           {/* Bottom actions */}
           <div className="flex-shrink-0 px-8 pb-[calc(env(safe-area-inset-bottom)+24px)]">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center"
-              >
+              <label className="relative w-14 h-14 rounded-full bg-white/10 flex items-center justify-center overflow-hidden cursor-pointer">
                 <Image className="w-6 h-6 text-white/60" />
-              </button>
-              <button
-                onClick={() => cameraInputRef.current?.click()}
-                className="flex-1 h-14 rounded-full bg-white flex items-center justify-center gap-3"
-              >
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFile}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </label>
+              <label className="relative flex-1 h-14 rounded-full bg-white flex items-center justify-center gap-3 overflow-hidden cursor-pointer">
                 <Camera className="w-5 h-5 text-black" />
                 <span className="text-black font-semibold">Take Photo</span>
-              </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFile}
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                />
+              </label>
             </div>
           </div>
         </div>

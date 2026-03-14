@@ -27,6 +27,12 @@ const DEFAULT_GOALS = {
   daily_fiber: 30
 };
 
+const getLocalDateKey = (value) => {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  return format(new Date(value), 'yyyy-MM-dd');
+};
+
 export default function CalorieTracker() {
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [showScanner, setShowScanner] = useState(false);
@@ -75,7 +81,7 @@ export default function CalorieTracker() {
   const createFoodMutation = useMutation({
     mutationFn: (data) => base44.entities.FoodLog.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['foodLogs']);
+      queryClient.invalidateQueries({ queryKey: ['foodLogs'] });
       setShowQuickAdd(false);
     }
   });
@@ -110,14 +116,7 @@ export default function CalorieTracker() {
   });
 
   const todayLogs = useMemo(() => {
-    const today = new Date(selectedDate);
-    return foodLogs.filter(log => {
-      const logDateStr = log.logged_at || log.date;
-      if (!logDateStr) return false;
-      const logDate = new Date(logDateStr);
-      if (isNaN(logDate.getTime())) return false;
-      return logDate.toDateString() === today.toDateString();
-    });
+    return foodLogs.filter((log) => getLocalDateKey(log.logged_at || log.date) === selectedDate);
   }, [foodLogs, selectedDate]);
 
   const totals = useMemo(() => ({
@@ -131,12 +130,9 @@ export default function CalorieTracker() {
 
   const dailyData = useMemo(() => {
     const data = {};
-    foodLogs.forEach(log => {
-      const dateStr = log.logged_at || log.date;
-      if (!dateStr) return;
-      const logDate = new Date(dateStr);
-      if (isNaN(logDate.getTime())) return;
-      const dateKey = logDate.toISOString().split('T')[0];
+    foodLogs.forEach((log) => {
+      const dateKey = getLocalDateKey(log.logged_at || log.date);
+      if (!dateKey) return;
       if (!data[dateKey]) data[dateKey] = 0;
       data[dateKey] += log.calories || 0;
     });
@@ -164,7 +160,11 @@ export default function CalorieTracker() {
   });
 
   const handleDescribeFoodAdd = withLock((foodData) => {
-    createFoodMutation.mutate({ ...foodData, meal_type: activeMealType });
+    createFoodMutation.mutate({
+      ...foodData,
+      meal_type: activeMealType,
+      logged_at: foodData.logged_at || `${selectedDate}T12:00:00`,
+    });
   });
 
   const handleSaveFood = (food) => {
