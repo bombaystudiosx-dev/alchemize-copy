@@ -132,6 +132,9 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
           <X className="w-4 h-4 text-white" />
         </button>
         <div className="absolute bottom-3 left-4 right-4">
+          <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-300/20 mb-2">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-purple-100">AI Estimate</span>
+          </div>
           <h2 className="text-white font-bold text-xl leading-tight">{result.food_name}</h2>
           <p className="text-white/50 text-xs mt-0.5">{result.serving_description}</p>
         </div>
@@ -350,10 +353,13 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
       fat_grams: data.fat_grams,
       sugar_grams: data.sugar_grams,
       fiber_grams: data.fiber_grams,
+      sodium_mg: data.sodium_mg,
       image_url: imageUrl,
       confidence_score: data.confidence_score,
       logged_at: new Date().toISOString(),
-      source_type: 'camera'
+      source_type: 'camera',
+      is_estimated: true,
+      estimation_source: 'image'
     });
     onClose();
   };

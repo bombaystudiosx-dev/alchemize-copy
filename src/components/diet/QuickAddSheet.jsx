@@ -129,10 +129,10 @@ export default function QuickAddSheet({ open, onClose, onAdd, savedFoods = [] })
             <div className="mb-5">
               <div className="flex items-center gap-1.5 mb-2">
                 <Sparkles className="w-3 h-3 text-purple-400" />
-                <span className="text-[10px] text-purple-400 uppercase tracking-wider font-medium">AI Result</span>
+                <span className="text-[10px] text-purple-400 uppercase tracking-wider font-medium">AI Estimate</span>
               </div>
               <button
-                onClick={() => logFood({ ...aiResult, source_type: 'manual' })}
+                onClick={() => logFood({ ...aiResult, source_type: 'manual', is_estimated: true, estimation_source: 'lookup' })}
                 className="w-full flex items-center gap-3 p-3.5 bg-purple-500/10 border border-purple-500/15 rounded-xl text-left"
               >
                 <div className="flex-1">

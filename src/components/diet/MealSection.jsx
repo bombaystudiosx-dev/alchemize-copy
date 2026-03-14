@@ -45,8 +45,18 @@ export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, 
                 <img src={food.image_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-white/80 text-sm font-medium truncate">{food.food_name}</p>
-                <div className="flex gap-3 mt-0.5">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-white/80 text-sm font-medium truncate">{food.food_name}</p>
+                  {food.is_estimated && (
+                    <span className="px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-400/20 text-[10px] uppercase tracking-[0.15em] text-purple-200">
+                      Estimated
+                    </span>
+                  )}
+                </div>
+                {food.serving_description && (
+                  <p className="text-white/25 text-[10px] mt-1 truncate">{food.serving_description}</p>
+                )}
+                <div className="flex gap-3 mt-1">
                   <span className="text-white/20 text-[10px] tabular-nums">P {Math.round(food.protein_grams || 0)}g</span>
                   <span className="text-white/20 text-[10px] tabular-nums">C {Math.round(food.carb_grams || 0)}g</span>
                   <span className="text-white/20 text-[10px] tabular-nums">F {Math.round(food.fat_grams || 0)}g</span>
