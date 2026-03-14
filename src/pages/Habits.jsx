@@ -347,11 +347,11 @@ export default function Habits() {
           reminder_time: habitForm.reminder_time,
           progress: { ...habit.progress, type: habitForm.type },
           timer: habitForm.type === 'timer'
-            ? (habit.timer || {
-                status: 'stopped',
-                elapsed_seconds: 0,
-                remaining_seconds: habitForm.goal * 60,
-              })
+            ? {
+                status: habit.timer?.status || 'stopped',
+                elapsed_seconds: habit.timer?.elapsed_seconds || 0,
+                remaining_seconds: Math.max((habitForm.goal * 60) - (habit.timer?.elapsed_seconds || 0), 0),
+              }
             : undefined,
         }) : habit),
       }));
