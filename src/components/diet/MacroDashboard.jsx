@@ -9,6 +9,7 @@ export default function MacroDashboard({ totals, goals }) {
     { label: 'Protein', value: totals.protein, goal: goals.daily_protein, color: '#22d3ee' },
     { label: 'Carbs', value: totals.carbs, goal: goals.daily_carbs, color: '#a78bfa' },
     { label: 'Fat', value: totals.fat, goal: goals.daily_fat, color: '#fbbf24' },
+    { label: 'Fiber', value: totals.fiber, goal: goals.daily_fiber, color: '#34d399' },
   ];
 
   const circumference = 2 * Math.PI * 58;

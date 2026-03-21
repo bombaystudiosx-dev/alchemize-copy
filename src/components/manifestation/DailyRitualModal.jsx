@@ -125,11 +125,13 @@ export default function DailyRitualModal({ tiles, onComplete }) {
                   className="absolute -inset-4 rounded-3xl blur-2xl"
                   style={{ background: moodColor.glow }}
                 />
-                <img
-                  src={currentTile.image_url}
-                  alt={currentTile.title}
-                  className="relative w-64 h-64 md:w-80 md:h-80 object-cover rounded-2xl shadow-2xl"
-                />
+                <div className="relative w-[78vw] max-w-[320px] h-[52vh] max-h-[420px] rounded-2xl bg-black/30 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl">
+                  <img
+                    src={currentTile.image_url}
+                    alt={currentTile.title}
+                    className="relative w-full h-full object-contain rounded-2xl shadow-2xl"
+                  />
+                </div>
               </motion.div>
             )}
 

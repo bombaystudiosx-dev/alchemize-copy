@@ -121,8 +121,10 @@ export default function HabitFormDialog({ open, onOpenChange, initialData, onSav
                 min="1"
                 value={form.goal}
                 onChange={(e) => setForm({ ...form, goal: e.target.value })}
+                placeholder="Target amount to complete"
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none focus:border-purple-500/50"
               />
+              <p className="text-xs text-white/35 mt-1">Goal = the target amount you want to complete.</p>
             </div>
             <div>
               <label className="text-sm text-purple-200/70 mb-2 block">Unit</label>
@@ -131,8 +133,10 @@ export default function HabitFormDialog({ open, onOpenChange, initialData, onSav
                 value={form.type === 'timer' ? 'minutes' : form.unit}
                 onChange={(e) => setForm({ ...form, unit: e.target.value })}
                 disabled={form.type === 'timer'}
+                placeholder="minutes, glasses, pages, reps"
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none focus:border-purple-500/50 disabled:opacity-50"
               />
+              <p className="text-xs text-white/35 mt-1">Unit = how progress is measured.</p>
             </div>
           </div>
 

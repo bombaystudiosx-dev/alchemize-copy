@@ -16,6 +16,7 @@ import MealSection from '@/components/diet/MealSection';
 import FullScreenScanner from '@/components/diet/FullScreenScanner';
 import QuickAddSheet from '@/components/diet/QuickAddSheet';
 import DescribeFoodCard from '@/components/diet/DescribeFoodCard';
+import EditFoodDialog from '@/components/diet/EditFoodDialog';
 import PullToRefresh from '@/components/common/PullToRefresh';
 
 const DEFAULT_GOALS = {
@@ -39,6 +40,7 @@ export default function CalorieTracker() {
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
   const [activeMealType, setActiveMealType] = useState('breakfast');
   const [showQuickAdd, setShowQuickAdd] = useState(false);
+  const [editingFood, setEditingFood] = useState(null);
   const [goalDraft, setGoalDraft] = useState(null);
   const queryClient = useQueryClient();
 
@@ -100,6 +102,14 @@ export default function CalorieTracker() {
   const saveFoodMutation = useMutation({
     mutationFn: (data) => base44.entities.SavedFood.create(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['savedFoods'] })
+  });
+
+  const updateFoodMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.FoodLog.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['foodLogs'] });
+      setEditingFood(null);
+    }
   });
 
   const updateGoalsMutation = useMutation({
@@ -272,6 +282,7 @@ export default function CalorieTracker() {
               onAddFood={handleAddFood}
               onDeleteFood={(id) => deleteFoodMutation.mutate(id)}
               onSaveFood={handleSaveFood}
+              onEditFood={setEditingFood}
             />
           ))}
         </div>
@@ -300,6 +311,24 @@ export default function CalorieTracker() {
         )}
       </AnimatePresence>
 
+      <EditFoodDialog
+        open={!!editingFood}
+        onOpenChange={(open) => !open && setEditingFood(null)}
+        food={editingFood}
+        isSaving={updateFoodMutation.isPending}
+        onSave={(food) => updateFoodMutation.mutate({ id: food.id, data: {
+          food_name: food.food_name,
+          serving_description: food.serving_description,
+          calories: food.calories,
+          protein_grams: food.protein_grams,
+          carb_grams: food.carb_grams,
+          fat_grams: food.fat_grams,
+          sugar_grams: food.sugar_grams,
+          fiber_grams: food.fiber_grams,
+          sodium_mg: food.sodium_mg,
+        } })}
+      />
+
       {/* Goals Dialog */}
       <Dialog open={showGoalsDialog} onOpenChange={(o) => { setShowGoalsDialog(o); if (!o) setGoalDraft(null); }}>
         <DialogContent className="bg-[#1a0a2e] border-purple-500/20 max-w-sm">
@@ -313,6 +342,7 @@ export default function CalorieTracker() {
                 { label: 'Protein', key: 'daily_protein', unit: 'g' },
                 { label: 'Carbs', key: 'daily_carbs', unit: 'g' },
                 { label: 'Fat', key: 'daily_fat', unit: 'g' },
+                { label: 'Fiber', key: 'daily_fiber', unit: 'g' },
               ].map(({ label, key, unit }) => (
                 <div key={key}>
                   <label className="text-white/40 text-xs mb-1 block">{label} ({unit})</label>

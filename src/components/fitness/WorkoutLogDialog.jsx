@@ -62,6 +62,9 @@ export default function WorkoutLogDialog({ open, onOpenChange, onSave, isSaving 
       is_estimated: false,
       intensity_estimate: null,
       description_text: null,
+      routine_description: manualWorkout.routine_description?.trim() || null,
+      routine_sets: manualWorkout.routine_sets ? parseInt(manualWorkout.routine_sets, 10) : null,
+      routine_reps: manualWorkout.routine_reps ? parseInt(manualWorkout.routine_reps, 10) : null,
     });
   };
 
@@ -209,9 +212,42 @@ Keep the numbers realistic and conservative.`,
               <Textarea
                 value={manualWorkout.notes}
                 onChange={(e) => setManualWorkout({ ...manualWorkout, notes: e.target.value })}
-                placeholder="How did it feel?"
+                placeholder="Describe workout"
                 className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
               />
+            </div>
+
+            <div className="rounded-2xl bg-white/[0.05] border border-white/10 p-4 space-y-3">
+              <p className="text-sm text-white font-medium">Current Workout Routine</p>
+              <div>
+                <label className="text-xs text-white/40 block mb-1">Workout description (optional)</label>
+                <Textarea
+                  value={manualWorkout.routine_description || ''}
+                  onChange={(e) => setManualWorkout({ ...manualWorkout, routine_description: e.target.value })}
+                  placeholder="Bench press, incline dumbbells, cable flys"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/35"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Sets (optional)</label>
+                  <CosmicInput
+                    type="number"
+                    value={manualWorkout.routine_sets || ''}
+                    onChange={(e) => setManualWorkout({ ...manualWorkout, routine_sets: e.target.value })}
+                    placeholder="4"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-white/40 block mb-1">Reps (optional)</label>
+                  <CosmicInput
+                    type="number"
+                    value={manualWorkout.routine_reps || ''}
+                    onChange={(e) => setManualWorkout({ ...manualWorkout, routine_reps: e.target.value })}
+                    placeholder="12"
+                  />
+                </div>
+              </div>
             </div>
 
             <GlowButton onClick={handleManualSave} disabled={!manualWorkout.duration_minutes || isSaving} className="w-full">

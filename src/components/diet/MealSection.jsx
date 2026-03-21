@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, Bookmark } from 'lucide-react';
+import { Plus, Trash2, Bookmark, Pencil } from 'lucide-react';
 
 const mealConfig = {
   breakfast: { label: 'Breakfast', time: 'Morning' },
@@ -9,7 +9,7 @@ const mealConfig = {
   snack: { label: 'Snacks', time: 'Anytime' }
 };
 
-export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, onSaveFood }) {
+export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, onSaveFood, onEditFood }) {
   const config = mealConfig[mealType];
   const totalCalories = foods.reduce((sum, f) => sum + (f.calories || 0), 0);
 
@@ -64,6 +64,14 @@ export default function MealSection({ mealType, foods, onAddFood, onDeleteFood, 
               </div>
               <span className="text-white/50 text-sm font-semibold tabular-nums flex-shrink-0">{Math.round(food.calories)}</span>
               <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                {onEditFood && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onEditFood(food); }}
+                    className="p-1.5 text-white/20 hover:text-cyan-300 transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 {!food.saved_food_id && onSaveFood && (
                   <button
                     onClick={(e) => { e.stopPropagation(); onSaveFood(food); }}
