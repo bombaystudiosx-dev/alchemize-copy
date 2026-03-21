@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Plus, Heart } from 'lucide-react';
-import { format } from 'date-fns';
+import { ArrowLeft, Plus, Heart, Pencil } from 'lucide-react';
+import { addMonths, format, subMonths } from 'date-fns';
+import MonthNavigator from '@/components/common/MonthNavigator';
 import PullToRefresh from '@/components/common/PullToRefresh';
 import useBackNav from '@/components/common/useBackNav';
 import { toast } from '@/components/common/AppToast';
@@ -17,6 +18,8 @@ export default function GratitudeJournal() {
   const [newEntry, setNewEntry] = useState({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
   const [formDate, setFormDate] = useState(null);
   const [dayDialog, setDayDialog] = useState(null);
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
   const queryClient = useQueryClient();
   const goBack = useBackNav('Home', 'Journal');
 
@@ -44,6 +47,18 @@ export default function GratitudeJournal() {
     }
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.GratitudeEntry.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gratitude'] });
+      setShowEntryForm(false);
+      setEditingEntry(null);
+      setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
+      setFormDate(null);
+      toast('Entry updated ✓', 'success');
+    }
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.GratitudeEntry.delete(id),
     onSuccess: () => {
@@ -55,18 +70,31 @@ export default function GratitudeJournal() {
     if (!newEntry.gratitude_1?.trim()) return;
     const dateToUse = formDate || format(new Date(), 'yyyy-MM-dd');
     logEvent('save', 'Journal', 'save_attempt', 'pending');
-    createMutation.mutate({
+    const payload = {
       gratitude_1: newEntry.gratitude_1,
       gratitude_2: newEntry.gratitude_2 || null,
       gratitude_3: newEntry.gratitude_3 || null,
       reflection: newEntry.reflection || null,
       date: dateToUse
-    });
+    };
+
+    if (editingEntry) {
+      updateMutation.mutate({ id: editingEntry.id, data: payload });
+      return;
+    }
+
+    createMutation.mutate(payload);
   };
 
-  const openForm = (date = null) => {
-    setFormDate(date);
-    setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
+  const openForm = (date = null, entry = null) => {
+    setFormDate(date || entry?.date || null);
+    setEditingEntry(entry || null);
+    setNewEntry(entry ? {
+      gratitude_1: entry.gratitude_1 || '',
+      gratitude_2: entry.gratitude_2 || '',
+      gratitude_3: entry.gratitude_3 || '',
+      reflection: entry.reflection || ''
+    } : { gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
     setDayDialog(null);
     setShowEntryForm(true);
   };
@@ -102,8 +130,14 @@ export default function GratitudeJournal() {
       </div>
 
       {/* Calendar View */}
-      <div className="px-6 mb-4">
+      <div className="px-4 mb-3">
         <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 backdrop-blur-xl rounded-xl p-3 border border-white/10">
+          <MonthNavigator
+            currentMonth={calendarMonth}
+            onPrev={() => setCalendarMonth(subMonths(calendarMonth, 1))}
+            onNext={() => setCalendarMonth(addMonths(calendarMonth, 1))}
+            className="mb-3"
+          />
           <div className="grid grid-cols-7 gap-1.5 mb-1.5">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
               <div key={day} className="text-center text-xs text-white/50 font-medium">
@@ -113,9 +147,10 @@ export default function GratitudeJournal() {
           </div>
           <div className="grid grid-cols-7 gap-1.5">
             {(() => {
+              const firstDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
+              const lastDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 0);
+              const monthBase = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1);
               const today = new Date();
-              const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-              const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
               const startDay = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
               const daysInMonth = lastDay.getDate();
               const days = [];
@@ -125,7 +160,7 @@ export default function GratitudeJournal() {
               }
               
               for (let day = 1; day <= daysInMonth; day++) {
-                const date = format(new Date(today.getFullYear(), today.getMonth(), day), 'yyyy-MM-dd');
+                const date = format(new Date(monthBase.getFullYear(), monthBase.getMonth(), day), 'yyyy-MM-dd');
                 const hasEntry = entries.some(e => e.date === date);
                 const isToday = format(today, 'yyyy-MM-dd') === date;
                 
@@ -184,12 +219,20 @@ export default function GratitudeJournal() {
               >
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <p className="text-xs text-purple-300/60">{format(new Date(entry.date), 'MMM d, yyyy')}</p>
-                  <button
-                    onClick={() => deleteMutation.mutate(entry.id)}
-                    className="opacity-0 group-hover:opacity-100 text-xs text-red-400 hover:text-red-300 transition-all px-1.5 py-0.5 rounded hover:bg-red-500/10"
-                  >
-                    Delete
-                  </button>
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                    <button
+                      onClick={() => openForm(entry.date, entry)}
+                      className="text-xs text-cyan-300 hover:text-cyan-200 px-1.5 py-0.5 rounded hover:bg-cyan-500/10"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteMutation.mutate(entry.id)}
+                      className="text-xs text-red-400 hover:text-red-300 px-1.5 py-0.5 rounded hover:bg-red-500/10"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 <div className="space-y-1.5">
                   {entry.gratitude_1 && (
@@ -239,15 +282,15 @@ export default function GratitudeJournal() {
               </div>
 
               {/* Scrollable body */}
-              <div className="flex-1 overflow-y-auto px-6 pb-6 pt-2">
-                <h2 className="text-2xl font-bold text-center mb-1 text-purple-300">
-                  Add Gratitude
+              <div className="flex-1 overflow-y-auto px-4 pb-5 pt-2">
+                <h2 className="text-xl font-bold text-center mb-1 text-purple-300">
+                  {editingEntry ? 'Edit Gratitude' : 'Add Gratitude'}
                 </h2>
                 <p className="text-center text-purple-200/60 text-sm mb-5">
                   {formDate ? `For ${format(new Date(formDate), 'MMMM d, yyyy')}` : 'What are you grateful for today?'}
                 </p>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div>
                     <label className="text-xs text-purple-300/70 mb-1 block">Entry 1</label>
                     <textarea
@@ -255,7 +298,7 @@ export default function GratitudeJournal() {
                       value={newEntry.gratitude_1}
                       onChange={(e) => setNewEntry({ ...newEntry, gratitude_1: e.target.value })}
                       className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                      rows={3}
+                      rows={2}
                     />
                   </div>
                   <div>
@@ -265,7 +308,7 @@ export default function GratitudeJournal() {
                       value={newEntry.gratitude_2}
                       onChange={(e) => setNewEntry({ ...newEntry, gratitude_2: e.target.value })}
                       className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                      rows={3}
+                      rows={2}
                     />
                   </div>
                   <div>
@@ -275,7 +318,7 @@ export default function GratitudeJournal() {
                       value={newEntry.gratitude_3}
                       onChange={(e) => setNewEntry({ ...newEntry, gratitude_3: e.target.value })}
                       className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                      rows={3}
+                      rows={2}
                     />
                   </div>
                   <div>
@@ -285,7 +328,7 @@ export default function GratitudeJournal() {
                       value={newEntry.reflection}
                       onChange={(e) => setNewEntry({ ...newEntry, reflection: e.target.value })}
                       className="w-full bg-black/30 border-2 border-purple-500/30 rounded-xl px-4 py-3 text-white placeholder:text-gray-500 focus:outline-none focus:border-purple-500 transition-colors resize-none"
-                      rows={3}
+                      rows={2}
                     />
                   </div>
                 </div>

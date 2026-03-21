@@ -8,14 +8,15 @@ import GlowButton from '@/components/cosmic/GlowButton';
 import CosmicInput from '@/components/cosmic/CosmicInput';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2, Briefcase, User } from 'lucide-react';
+import { ArrowLeft, Plus, Calendar, Clock, Bell, Trash2, Edit2, Briefcase, User, CalendarPlus } from 'lucide-react';
 import PremiumGate from '@/components/subscription/PremiumGate';
+import AppointmentMonthCalendar from '@/components/appointments/AppointmentMonthCalendar';
 import useBackNav from '@/components/common/useBackNav';
 import { toast } from '@/components/common/AppToast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { format, isToday, isTomorrow, isPast, isFuture } from 'date-fns';
+import { format, isToday, isTomorrow, isPast, isFuture, addMonths, subMonths } from 'date-fns';
 
 export default function Appointments() {
   const [showDialog, setShowDialog] = useState(false);
@@ -29,6 +30,7 @@ export default function Appointments() {
     reminder: true
   });
   const [activeTab, setActiveTab] = useState('personal');
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const queryClient = useQueryClient();
   const goBack = useBackNav('Home', 'Appointments');
 
@@ -42,13 +44,13 @@ export default function Appointments() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Appointment.create(data),
-    onSuccess: () => { queryClient.invalidateQueries(['appointments']); closeDialog(); toast('Appointment saved ✓'); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['appointments'] }); closeDialog(); toast('Appointment saved ✓'); },
     onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Appointment.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries(['appointments']); closeDialog(); toast('Appointment updated ✓'); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['appointments'] }); closeDialog(); toast('Appointment updated ✓'); },
     onError: (e) => toast(e?.message || 'Save failed', 'error')
   });
 
