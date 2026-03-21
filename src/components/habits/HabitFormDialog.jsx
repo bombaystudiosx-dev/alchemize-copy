@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Bell, PlusCircle, Pencil } from 'lucide-react';
+import BottomSheet from '@/components/native/BottomSheet';
 
 const icons = ['⭐', '💪', '📚', '🎯', '🧘‍♀️', '🏃', '💧', '🍎', '🎨', '🎵', '✍️', '🧠'];
 const colors = ['#9B5DE5', '#00B4D8', '#0077B6', '#FF6B6B', '#FFB347', '#FF8C00', '#5BC0BE', '#00BFFF', '#10b981', '#f59e0b', '#ec4899'];
@@ -19,6 +20,9 @@ const buildInitialForm = (initialData) => ({
 
 export default function HabitFormDialog({ open, onOpenChange, initialData, onSave, title = 'Add Habit' }) {
   const [form, setForm] = useState(buildInitialForm(initialData));
+  const [showIconSheet, setShowIconSheet] = useState(false);
+  const [showColorSheet, setShowColorSheet] = useState(false);
+  const [showTypeSheet, setShowTypeSheet] = useState(false);
 
   useEffect(() => {
     setForm(buildInitialForm(initialData));
@@ -39,7 +43,32 @@ export default function HabitFormDialog({ open, onOpenChange, initialData, onSav
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <BottomSheet
+        open={showIconSheet}
+        onOpenChange={setShowIconSheet}
+        title="Habit Icon"
+        value={form.icon}
+        onSelect={(value) => setForm({ ...form, icon: value })}
+        options={icons.map((icon) => ({ value: icon, label: icon, icon }))}
+      />
+      <BottomSheet
+        open={showColorSheet}
+        onOpenChange={setShowColorSheet}
+        title="Habit Color"
+        value={form.color}
+        onSelect={(value) => setForm({ ...form, color: value })}
+        options={colors.map((color, index) => ({ value: color, label: `Color ${index + 1}`, icon: '●' }))}
+      />
+      <BottomSheet
+        open={showTypeSheet}
+        onOpenChange={setShowTypeSheet}
+        title="Habit Type"
+        value={form.type}
+        onSelect={(value) => setForm({ ...form, type: value, unit: value === 'timer' ? 'minutes' : 'session', goal: value === 'timer' && form.goal === '1' ? '15' : form.goal })}
+        options={[{ value: 'check', label: 'Check', icon: '✓' }, { value: 'timer', label: 'Timer', icon: '⏱' }]}
+      />
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-orange-500/30 text-white max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
@@ -62,55 +91,38 @@ export default function HabitFormDialog({ open, onOpenChange, initialData, onSav
 
           <div>
             <label className="text-sm text-purple-200/70 mb-2 block">Icon</label>
-            <div className="flex flex-wrap gap-2">
-              {icons.map((icon) => (
-                <button
-                  key={icon}
-                  type="button"
-                  onClick={() => setForm({ ...form, icon })}
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center text-2xl transition-all ${
-                    form.icon === icon ? 'bg-orange-500/30 scale-110' : 'bg-white/10 hover:bg-white/20'
-                  }`}
-                >
-                  {icon}
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowIconSheet(true)}
+              className="w-full min-h-11 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+            >
+              <span className="text-2xl leading-none">{form.icon}</span>
+              <span className="text-white/40">▾</span>
+            </button>
           </div>
 
           <div>
             <label className="text-sm text-purple-200/70 mb-2 block">Color</label>
-            <div className="flex flex-wrap gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setForm({ ...form, color })}
-                  className={`w-10 h-10 rounded-lg transition-all ${form.color === color ? 'ring-2 ring-white scale-110' : 'hover:scale-105'}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowColorSheet(true)}
+              className="w-full min-h-11 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+            >
+              <span className="flex items-center gap-3"><span className="w-5 h-5 rounded-full border border-white/20" style={{ backgroundColor: form.color }} /> Current color</span>
+              <span className="text-white/40">▾</span>
+            </button>
           </div>
 
           <div>
             <label className="text-sm text-purple-200/70 mb-2 block">Type</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, type: 'check', unit: 'session', goal: '1' })}
-                className={`py-2.5 px-3 rounded-lg text-sm transition-all ${form.type === 'check' ? 'bg-orange-500/30 border border-orange-500/50' : 'bg-white/10 hover:bg-white/20'}`}
-              >
-                ✓ Check
-              </button>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, type: 'timer', unit: 'minutes', goal: form.goal === '1' ? '15' : form.goal })}
-                className={`py-2.5 px-3 rounded-lg text-sm transition-all ${form.type === 'timer' ? 'bg-orange-500/30 border border-orange-500/50' : 'bg-white/10 hover:bg-white/20'}`}
-              >
-                ⏱ Timer
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowTypeSheet(true)}
+              className="w-full min-h-11 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+            >
+              <span>{form.type === 'timer' ? '⏱ Timer' : '✓ Check'}</span>
+              <span className="text-white/40">▾</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -179,5 +191,6 @@ export default function HabitFormDialog({ open, onOpenChange, initialData, onSav
         </div>
       </DialogContent>
     </Dialog>
+    </>
   );
 }
