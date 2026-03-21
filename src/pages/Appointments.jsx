@@ -92,11 +92,35 @@ export default function Appointments() {
     setShowDialog(true);
   };
 
+  const buildCalendarUrl = (appointment) => {
+    const start = `${appointment.date.replace(/-/g, '')}T${(appointment.time || '09:00').replace(':', '')}00`;
+    const endDate = `${appointment.date.replace(/-/g, '')}T${(appointment.time || '09:00').replace(':', '')}00`;
+    const details = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `SUMMARY:${appointment.title}`,
+      `DTSTART:${start}`,
+      `DTEND:${endDate}`,
+      `DESCRIPTION:${appointment.notes || ''}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\n');
+    return `data:text/calendar;charset=utf-8,${encodeURIComponent(details)}`;
+  };
+
   const handleSubmit = () => {
+    const payload = {
+      ...newAppointment,
+      title: newAppointment.title.trim(),
+      notes: newAppointment.notes?.trim() || '',
+    };
+    if (!payload.title) return;
+
     if (editingAppointment) {
-      updateMutation.mutate({ id: editingAppointment.id, data: newAppointment });
+      updateMutation.mutate({ id: editingAppointment.id, data: payload });
     } else {
-      createMutation.mutate(newAppointment);
+      createMutation.mutate(payload);
     }
   };
 
@@ -141,7 +165,17 @@ export default function Appointments() {
           </button>
         </motion.header>
 
-        <div className="px-6">
+        <div className="px-6 space-y-5">
+          <AppointmentMonthCalendar
+            currentMonth={currentMonth}
+            setCurrentMonth={setCurrentMonth}
+            appointments={appointments}
+            onDaySelect={(date) => {
+              setNewAppointment((prev) => ({ ...prev, date }));
+              setEditingAppointment(null);
+              setShowDialog(true);
+            }}
+          />
           {/* Category Tabs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -257,6 +291,13 @@ export default function Appointments() {
                                 {appointment.reminder && (
                                   <Bell className="w-4 h-4 text-blue-400" />
                                 )}
+                                <a
+                                  href={buildCalendarUrl(appointment)}
+                                  download={`${appointment.title || 'appointment'}.ics`}
+                                  className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <CalendarPlus className="w-4 h-4 text-blue-300" />
+                                </a>
                                 <button
                                   onClick={() => openEditDialog(appointment)}
                                   className="p-1 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -313,7 +354,7 @@ export default function Appointments() {
         </div>
 
         {/* Add/Edit Dialog */}
-        <Dialog open={showDialog} onOpenChange={closeDialog}>
+        <Dialog open={showDialog} onOpenChange={(open) => { if (!open) closeDialog(); }}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-blue-500/30 text-white max-w-md">
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
@@ -401,7 +442,7 @@ export default function Appointments() {
               
               <GlowButton
                 onClick={handleSubmit}
-                disabled={!newAppointment.title || createMutation.isPending || updateMutation.isPending}
+                disabled={!newAppointment.title.trim() || createMutation.isPending || updateMutation.isPending}
                 className="w-full"
               >
                 {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingAppointment ? 'Update Appointment' : 'Add Appointment'}
