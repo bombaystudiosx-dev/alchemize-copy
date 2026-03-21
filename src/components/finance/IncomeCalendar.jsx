@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
+import { addMonths, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, subMonths } from 'date-fns';
+import MonthNavigator from '@/components/common/MonthNavigator';
 import { motion } from 'framer-motion';
 import { Trash2, X, Pencil } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,8 +8,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll, onEditIncome }) {
   const [selectedDay, setSelectedDay] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date();
-  const monthStart = startOfMonth(today);
+  const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(today);
   const calendarStart = startOfWeek(monthStart);
   const calendarEnd = endOfWeek(monthEnd);
@@ -31,11 +33,12 @@ export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll, on
   return (
     <>
       <div className="bg-white/5 rounded-xl p-4 border border-green-500/30">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-white font-semibold flex items-center gap-2">
-            <span className="text-green-400">💰</span>
-            Income Calendar - {format(today, 'MMMM yyyy')}
-          </h3>
+        <div className="mb-3 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-white font-semibold flex items-center gap-2">
+              <span className="text-green-400">💰</span>
+              Income Calendar
+            </h3>
           {incomes.length > 0 && onClearAll && (
             <button
               onClick={onClearAll}
@@ -45,6 +48,12 @@ export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll, on
               Clear All
             </button>
           )}
+          </div>
+          <MonthNavigator
+            currentMonth={currentMonth}
+            onPrev={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            onNext={() => setCurrentMonth(addMonths(currentMonth, 1))}
+          />
         </div>
       <div className="grid grid-cols-7 gap-1">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -53,7 +62,7 @@ export default function IncomeCalendar({ incomes, onDeleteIncome, onClearAll, on
         {days.map((day, idx) => {
           const dayIncomes = getIncomeForDay(day);
           const totalIncome = dayIncomes.reduce((sum, inc) => sum + (inc.income_gross || 0), 0);
-          const isCurrentMonth = day.getMonth() === today.getMonth();
+          const isCurrentMonth = day.getMonth() === currentMonth.getMonth() && day.getFullYear() === currentMonth.getFullYear();
           const isToday = isSameDay(day, today);
 
           return (

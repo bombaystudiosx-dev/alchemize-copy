@@ -107,7 +107,7 @@ export default function Finance() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['financialIncomes']);
+      queryClient.invalidateQueries({ queryKey: ['financialIncomes'] });
       setShowIncomeDialog(false);
       setEditingIncome(null);
       setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
@@ -132,7 +132,7 @@ export default function Finance() {
       return base44.entities.FinancialExpense.create(expenseData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['financialExpenses']);
+      queryClient.invalidateQueries({ queryKey: ['financialExpenses'] });
       setShowExpenseDialog(false);
       setEditingExpense(null);
       setNewExpense({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
@@ -208,8 +208,9 @@ export default function Finance() {
       return base44.entities.FinancialNote.create(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['financialNotes']);
+      queryClient.invalidateQueries({ queryKey: ['financialNotes'] });
       setShowNotesDialog(false);
+      toast('Notes saved ✓');
     }
   });
 
@@ -255,10 +256,10 @@ export default function Finance() {
 
   const handleRefresh = async () => {
     await Promise.all([
-      queryClient.invalidateQueries(['financialIncomes']),
-      queryClient.invalidateQueries(['financialExpenses']),
-      queryClient.invalidateQueries(['financialNotes']),
-      queryClient.invalidateQueries(['financeNotes']),
+      queryClient.invalidateQueries({ queryKey: ['financialIncomes'] }),
+      queryClient.invalidateQueries({ queryKey: ['financialExpenses'] }),
+      queryClient.invalidateQueries({ queryKey: ['financialNotes'] }),
+      queryClient.invalidateQueries({ queryKey: ['financeNotes'] }),
     ]);
   };
 
@@ -620,6 +621,53 @@ export default function Finance() {
           onSelect={(val) => setNewExpense({ ...newExpense, expense_category: val })}
           options={expenseCategories.map(cat => ({ value: cat, label: cat }))}
         />
+
+        <Dialog open={showNotesDialog} onOpenChange={setShowNotesDialog}>
+          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-yellow-500/30 text-white max-w-md max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-white">Edit Financial Notes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Important Login Info</label>
+                <textarea
+                  value={notesForm.note_login_info}
+                  onChange={(e) => setNotesForm({ ...notesForm, note_login_info: e.target.value })}
+                  className="w-full min-h-[100px] rounded-xl bg-white/10 border border-white/20 p-3 text-white outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-purple-200/70 mb-2 block">Total Debt Notes</label>
+                <textarea
+                  value={notesForm.note_total_debt}
+                  onChange={(e) => setNotesForm({ ...notesForm, note_total_debt: e.target.value })}
+                  className="w-full min-h-[100px] rounded-xl bg-white/10 border border-white/20 p-3 text-white outline-none"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Debt Amount</label>
+                  <CosmicInput type="number" value={notesForm.debt_amount} onChange={(e) => setNotesForm({ ...notesForm, debt_amount: parseFloat(e.target.value) || 0 })} />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Debt Due Date</label>
+                  <CosmicInput type="date" value={notesForm.debt_due_date} onChange={(e) => setNotesForm({ ...notesForm, debt_due_date: e.target.value })} />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Savings</label>
+                  <CosmicInput type="number" value={notesForm.savings_amount} onChange={(e) => setNotesForm({ ...notesForm, savings_amount: parseFloat(e.target.value) || 0 })} />
+                </div>
+                <div>
+                  <label className="text-sm text-purple-200/70 mb-2 block">Emergency Fund</label>
+                  <CosmicInput type="number" value={notesForm.emergency_fund} onChange={(e) => setNotesForm({ ...notesForm, emergency_fund: parseFloat(e.target.value) || 0 })} />
+                </div>
+              </div>
+              <GlowButton onClick={() => updateNotesMutation.mutate(notesForm)} className="w-full" disabled={updateNotesMutation.isPending}>
+                {updateNotesMutation.isPending ? 'Saving...' : 'Save Notes'}
+              </GlowButton>
+            </div>
+          </DialogContent>
+        </Dialog>
 
       </PullToRefresh>
     </CosmicBackground>

@@ -24,7 +24,7 @@ export default function FinanceNotepad({ notes }) {
       return base44.entities.FinanceNote.create({ content: text, date: new Date().toISOString().split('T')[0] });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['financeNotes']);
+      queryClient.invalidateQueries({ queryKey: ['financeNotes'] });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }
