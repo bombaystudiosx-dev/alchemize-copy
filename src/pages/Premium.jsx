@@ -9,6 +9,7 @@ import {
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { FREE_FEATURE_IDS } from '@/components/subscription/subscriptionHelper';
+import CheckoutConsentDialog from '@/components/subscription/CheckoutConsentDialog';
 
 const PLANS = [
   {
@@ -33,6 +34,7 @@ const FEATURES = [
 export default function Premium() {
   const [selectedPlan, setSelectedPlan] = useState('monthly');
   const [loading, setLoading] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
 
   React.useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -42,7 +44,7 @@ export default function Premium() {
     }
   }, []);
 
-  const handleSubscribe = async () => {
+  const proceedToCheckout = async () => {
     setLoading(true);
     try {
       const isAuthenticated = await base44.auth.isAuthenticated();
@@ -64,7 +66,12 @@ export default function Premium() {
       alert('Checkout error: ' + errorMessage);
     } finally {
       setLoading(false);
+      setShowConsent(false);
     }
+  };
+
+  const handleSubscribe = async () => {
+    setShowConsent(true);
   };
 
   return (
@@ -244,6 +251,12 @@ export default function Premium() {
             </div>
           </div>
         </motion.div>
+        <CheckoutConsentDialog
+          open={showConsent}
+          onOpenChange={setShowConsent}
+          onAccept={proceedToCheckout}
+          loading={loading}
+        />
       </div>
     </div>
   );

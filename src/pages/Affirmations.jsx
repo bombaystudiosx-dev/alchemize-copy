@@ -27,8 +27,8 @@ const categoryEmojis = {
 
 export default function Affirmations() {
   const [showDialog, setShowDialog] = useState(false);
-  const [editingAppointment, setEditingAppointment] = useState(null);
-  const [newAffirmation, setNewAffirmation] = useState({ text: '', category: 'self-love' });
+  const [editingAffirmation, setEditingAffirmation] = useState(null);
+  const [newAffirmation, setNewAffirmation] = useState({ text: '', category: '' });
   const [filter, setFilter] = useState('all');
   const [showCategorySheet, setShowCategorySheet] = useState(false);
   const queryClient = useQueryClient();
@@ -43,9 +43,13 @@ export default function Affirmations() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Affirmation.create(data),
+    mutationFn: (data) => {
+      const payload = { text: data.text };
+      if (data.category) payload.category = data.category;
+      return base44.entities.Affirmation.create(payload);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries(['affirmations']);
+      queryClient.invalidateQueries({ queryKey: ['affirmations'] });
       setShowDialog(false);
       setEditingAppointment(null);
       setNewAffirmation({ text: '', category: 'self-love' });
@@ -55,7 +59,11 @@ export default function Affirmations() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Affirmation.update(id, data),
+    mutationFn: ({ id, data }) => {
+      const payload = { text: data.text };
+      if (data.category) payload.category = data.category;
+      return base44.entities.Affirmation.update(id, payload);
+    },
     onMutate: async ({ id, data }) => {
       await queryClient.cancelQueries({ queryKey: ['affirmations'] });
       const prev = queryClient.getQueryData(['affirmations']);
@@ -66,7 +74,7 @@ export default function Affirmations() {
     },
     onError: (err, vars, ctx) => { if (ctx?.prev) queryClient.setQueryData(['affirmations'], ctx.prev); },
     onSettled: () => {
-      queryClient.invalidateQueries(['affirmations']);
+      queryClient.invalidateQueries({ queryKey: ['affirmations'] });
       setShowDialog(false);
       setEditingAppointment(null);
       setNewAffirmation({ text: '', category: 'self-love' });
@@ -183,7 +191,7 @@ export default function Affirmations() {
                   }
                 `}
               >
-                {cat === 'favorites' ? '⭐ ' : cat !== 'all' ? categoryEmojis[cat] + ' ' : ''}
+                {cat === 'favorites' ? '⭐ ' : cat !== 'all' ? (categoryEmojis[cat] || '') + ' ' : ''}
                 {cat.charAt(0).toUpperCase() + cat.slice(1).replace('-', ' ')}
               </button>
             ))}
@@ -222,14 +230,14 @@ export default function Affirmations() {
                   >
                     <CosmicCard className="flex items-center gap-4">
                       <span className="text-2xl">
-                        {categoryEmojis[affirmation.category]}
+                        {categoryEmojis[affirmation.category] || '✨'}
                       </span>
                       <p className="flex-1 text-white/90">{affirmation.text}</p>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
-                            setEditingAppointment(affirmation);
-                            setNewAffirmation({ text: affirmation.text, category: affirmation.category });
+                            setEditingAffirmation(affirmation);
+                            setNewAffirmation({ text: affirmation.text, category: affirmation.category || '' });
                             setShowDialog(true);
                           }}
                           className="p-2 rounded-full hover:bg-white/10 transition-colors"
@@ -268,7 +276,7 @@ export default function Affirmations() {
             <DialogHeader>
               <DialogTitle className="text-white flex items-center gap-2">
                 <Heart className="w-5 h-5 text-pink-400" />
-                {editingAppointment ? 'Edit Affirmation' : 'Add Affirmation'}
+                {editingAffirmation ? 'Edit Affirmation' : 'Add Affirmation'}
               </DialogTitle>
             </DialogHeader>
             
@@ -284,29 +292,36 @@ export default function Affirmations() {
               </div>
               
               <div>
-                <label className="text-sm text-purple-200/70 mb-2 block">Category</label>
+                <label className="text-sm text-purple-200/70 mb-2 block">Category (optional)</label>
                 <button
                   type="button"
                   onClick={() => setShowCategorySheet(true)}
                   className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
                 >
-                  <span>{categoryEmojis[newAffirmation.category]} {newAffirmation.category.charAt(0).toUpperCase() + newAffirmation.category.slice(1).replace('-', ' ')}</span>
+                  <span>{newAffirmation.category ? `${categoryEmojis[newAffirmation.category]} ${newAffirmation.category.charAt(0).toUpperCase() + newAffirmation.category.slice(1).replace('-', ' ')}` : 'No category'}</span>
                   <span className="text-white/40">▾</span>
                 </button>
               </div>
               
+              <button
+                type="button"
+                onClick={() => setNewAffirmation({ ...newAffirmation, category: '' })}
+                className="w-full py-2 rounded-xl bg-white/5 border border-white/10 text-white/70 text-sm"
+              >
+                Clear Category
+              </button>
               <GlowButton
                 onClick={() => {
-                  if (editingAppointment) {
-                    updateMutation.mutate({ id: editingAppointment.id, data: newAffirmation });
+                  if (editingAffirmation) {
+                    updateMutation.mutate({ id: editingAffirmation.id, data: newAffirmation });
                   } else {
                     createMutation.mutate(newAffirmation);
                   }
                 }}
-                disabled={!newAffirmation.text || createMutation.isPending || updateMutation.isPending}
+                disabled={!newAffirmation.text.trim() || createMutation.isPending || updateMutation.isPending}
                 className="w-full"
               >
-                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingAppointment ? 'Update Affirmation' : 'Add Affirmation'}
+                {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingAffirmation ? 'Update Affirmation' : 'Add Affirmation'}
               </GlowButton>
             </div>
           </DialogContent>

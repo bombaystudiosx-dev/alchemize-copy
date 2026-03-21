@@ -17,6 +17,8 @@ import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
 import ResetDataDialog from '@/components/settings/ResetDataDialog';
+import BottomSheet from '@/components/native/BottomSheet';
+import { communityLinks } from '@/lib/communityLinks';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -27,6 +29,8 @@ export default function Settings() {
   const [showHealth, setShowHealth] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(false);
+  const [landingPage, setLandingPage] = useState(localStorage.getItem('preferred_landing_page') || 'Splash');
 
   const navigate = useNavigate();
 
@@ -34,6 +38,10 @@ export default function Settings() {
     const fetchUser = async () => {
       const userData = await base44.auth.me();
       setUser(userData);
+      if (userData?.preferred_landing_page) {
+        setLandingPage(userData.preferred_landing_page);
+        localStorage.setItem('preferred_landing_page', userData.preferred_landing_page);
+      }
     };
     fetchUser();
   }, []);
@@ -193,9 +201,35 @@ export default function Settings() {
                 subtitle={themeLabel}
                 onClick={() => setShowTheme(true)}
               />
+              <SettingsRow
+                icon={Sparkles}
+                iconBg="bg-amber-500/20"
+                iconColor="text-amber-400"
+                title="Landing Page"
+                subtitle={landingPage}
+                onClick={() => setShowLandingPage(true)}
+              />
 
 
 
+            </div>
+          </div>
+
+          <div>
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Community</h3>
+            <div className="space-y-2">
+              {communityLinks.map((link) => (
+                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer">
+                  <SettingsRow
+                    icon={Heart}
+                    iconBg="bg-pink-500/20"
+                    iconColor="text-pink-400"
+                    title={link.label}
+                    subtitle={link.description}
+                    onClick={() => {}}
+                  />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -246,6 +280,18 @@ export default function Settings() {
         <AppleHealthDialog open={showHealth} onOpenChange={setShowHealth} />
         <ThemeDialog open={showTheme} onOpenChange={setShowTheme} />
         <ResetDataDialog open={showResetData} onOpenChange={setShowResetData} />
+        <BottomSheet
+          open={showLandingPage}
+          onOpenChange={setShowLandingPage}
+          title="Landing Page"
+          value={landingPage}
+          onSelect={async (value) => {
+            setLandingPage(value);
+            localStorage.setItem('preferred_landing_page', value);
+            await base44.auth.updateMe({ preferred_landing_page: value });
+          }}
+          options={['Splash', 'Home', 'Journal', 'CalorieTracker', 'Habits', 'Fitness', 'Appointments', 'ManifestationBoard', 'Finance', 'Affirmations', 'TodoList'].map((page) => ({ value: page, label: page }))}
+        />
 
         {/* About Dialog */}
         <Dialog open={showAbout} onOpenChange={setShowAbout}>

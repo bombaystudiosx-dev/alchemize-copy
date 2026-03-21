@@ -12,7 +12,6 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
-const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
@@ -41,12 +40,15 @@ const AuthenticatedApp = () => {
     }
   }
 
+  const preferredMainPageKey = localStorage.getItem('preferred_landing_page') || mainPageKey;
+  const LandingPage = Pages[preferredMainPageKey] || Pages[mainPageKey] || <></>;
+
   // Render the main app
   return (
     <Routes>
       <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
+        <LayoutWrapper currentPageName={preferredMainPageKey}>
+          <LandingPage />
         </LayoutWrapper>
       } />
       {Object.entries(Pages).map(([path, Page]) => (
