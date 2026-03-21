@@ -63,7 +63,6 @@ export default function Affirmations() {
       const payload = {};
       if (typeof data.text === 'string') payload.text = data.text;
       if (data.category) payload.category = data.category;
-      if (data.category === '') payload.category = null;
       if (typeof data.is_favorite === 'boolean') payload.is_favorite = data.is_favorite;
       return base44.entities.Affirmation.update(id, payload);
     },
