@@ -93,15 +93,17 @@ export default function Appointments() {
   };
 
   const buildCalendarUrl = (appointment) => {
+    const startDate = new Date(`${appointment.date}T${appointment.time || '09:00'}:00`);
+    const endDate = new Date(startDate.getTime() + (30 * 60 * 1000));
     const start = `${appointment.date.replace(/-/g, '')}T${(appointment.time || '09:00').replace(':', '')}00`;
-    const endDate = `${appointment.date.replace(/-/g, '')}T${(appointment.time || '09:00').replace(':', '')}00`;
+    const end = `${endDate.getFullYear()}${String(endDate.getMonth() + 1).padStart(2, '0')}${String(endDate.getDate()).padStart(2, '0')}T${String(endDate.getHours()).padStart(2, '0')}${String(endDate.getMinutes()).padStart(2, '0')}00`;
     const details = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'BEGIN:VEVENT',
       `SUMMARY:${appointment.title}`,
       `DTSTART:${start}`,
-      `DTEND:${endDate}`,
+      `DTEND:${end}`,
       `DESCRIPTION:${appointment.notes || ''}`,
       'END:VEVENT',
       'END:VCALENDAR'

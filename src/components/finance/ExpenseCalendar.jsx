@@ -11,7 +11,7 @@ export default function ExpenseCalendar({ expenses, onDeleteExpense, onEditExpen
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const today = new Date();
   const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(today);
+  const monthEnd = endOfMonth(currentMonth);
   const calendarStart = startOfWeek(monthStart);
   const calendarEnd = endOfWeek(monthEnd);
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });

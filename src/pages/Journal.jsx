@@ -265,7 +265,10 @@ export default function GratitudeJournal() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowEntryForm(false)}
+              onClick={() => {
+                setShowEntryForm(false);
+                setEditingEntry(null);
+              }}
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             />
             <motion.div
