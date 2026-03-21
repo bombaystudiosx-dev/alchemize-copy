@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
 import PullToRefresh from '@/components/common/PullToRefresh';
+import BottomSheet from '@/components/native/BottomSheet';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import useBackNav from '@/components/common/useBackNav';
 import { toast } from '@/components/common/AppToast';
@@ -27,6 +28,7 @@ const statusConfig = {
 export default function Goals() {
   const [showDialog, setShowDialog] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
+  const [showStatusSheet, setShowStatusSheet] = useState(false);
   const [newGoal, setNewGoal] = useState({ title: '', description: '', target_date: '', status: 'not_started', progress: 0 });
   const queryClient = useQueryClient();
   const goBack = useBackNav('Home', 'Goals');
@@ -41,14 +43,34 @@ export default function Goals() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Goal.create(data),
-    onSuccess: () => { queryClient.invalidateQueries(['goals']); closeDialog(); toast('Goal created ✓'); },
-    onError: (e) => toast(e?.message || 'Save failed', 'error')
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['goals'] });
+      const prev = queryClient.getQueryData(['goals']);
+      queryClient.setQueryData(['goals'], (old = []) => [{ id: `temp-${Date.now()}`, ...data }, ...old]);
+      return { prev };
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['goals'] }); closeDialog(); toast('Goal created ✓'); },
+    onError: (e, data, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['goals'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['goals'] })
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Goal.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries(['goals']); closeDialog(); toast('Goal updated ✓'); },
-    onError: (e) => toast(e?.message || 'Save failed', 'error')
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['goals'] });
+      const prev = queryClient.getQueryData(['goals']);
+      queryClient.setQueryData(['goals'], (old = []) => old.map((goal) => goal.id === id ? { ...goal, ...data } : goal));
+      return { prev };
+    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['goals'] }); closeDialog(); toast('Goal updated ✓'); },
+    onError: (e, vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['goals'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['goals'] })
   });
 
   const deleteMutation = useMutation({
@@ -92,7 +114,7 @@ export default function Goals() {
   return (
     <PremiumGate featureId="goals">
     <CosmicBackground>
-      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['goals'])} className="min-h-screen pb-32">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['goals'] })} className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -222,6 +244,15 @@ export default function Goals() {
 
       </PullToRefresh>
 
+        <BottomSheet
+          open={showStatusSheet}
+          onOpenChange={setShowStatusSheet}
+          title="Goal Status"
+          value={newGoal.status}
+          onSelect={(value) => setNewGoal({ ...newGoal, status: value })}
+          options={Object.entries(statusConfig).map(([key, config]) => ({ value: key, label: config.label }))}
+        />
+
         {/* Add/Edit Dialog */}
         <Dialog open={showDialog} onOpenChange={closeDialog}>
           <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-amber-500/30 text-white max-w-md">
@@ -265,23 +296,14 @@ export default function Goals() {
                 <>
                   <div>
                     <label className="text-sm text-purple-200/70 mb-2 block">Status</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {Object.entries(statusConfig).map(([key, config]) => (
-                        <button
-                          key={key}
-                          onClick={() => setNewGoal({ ...newGoal, status: key })}
-                          className={`
-                            p-2 rounded-xl text-xs transition-all
-                            ${newGoal.status === key 
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white' 
-                              : 'bg-white/10 text-white/60'
-                            }
-                          `}
-                        >
-                          {config.label}
-                        </button>
-                      ))}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowStatusSheet(true)}
+                      className="w-full min-h-11 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white text-left flex items-center justify-between"
+                    >
+                      <span>{statusConfig[newGoal.status].label}</span>
+                      <span className="text-white/40">▾</span>
+                    </button>
                   </div>
                   
                   <div>

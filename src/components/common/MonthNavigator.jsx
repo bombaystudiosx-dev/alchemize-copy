@@ -8,7 +8,7 @@ export default function MonthNavigator({ currentMonth, onPrev, onNext, className
       <button
         type="button"
         onClick={onPrev}
-        className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/70"
+        className="w-11 h-11 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/70"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
@@ -18,7 +18,7 @@ export default function MonthNavigator({ currentMonth, onPrev, onNext, className
       <button
         type="button"
         onClick={onNext}
-        className="w-10 h-10 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/70"
+        className="w-11 h-11 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-white/70"
       >
         <ChevronRight className="w-5 h-5" />
       </button>

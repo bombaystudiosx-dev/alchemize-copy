@@ -5,7 +5,7 @@ import { Switch } from '@/components/ui/switch';
 export default function SettingsRow({ icon: Icon, iconBg, iconColor, title, subtitle, onClick, toggle, checked, onToggle }) {
   const content = (
     <div 
-      className="flex items-center gap-4 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md"
+      className="min-h-11 flex items-center gap-4 px-4 py-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md"
       onClick={!toggle ? onClick : undefined}
       style={{ cursor: !toggle && onClick ? 'pointer' : 'default' }}
     >

@@ -17,9 +17,9 @@ export default function GlowButton({
   };
   
   const sizes = {
-    sm: 'px-4 py-2 text-sm',
-    default: 'px-6 py-3 text-base',
-    lg: 'px-8 py-4 text-lg'
+    sm: 'px-4 min-h-11 min-w-11 text-sm',
+    default: 'px-6 min-h-11 min-w-11 text-base',
+    lg: 'px-8 min-h-12 min-w-12 text-lg'
   };
 
   return (

@@ -76,7 +76,10 @@ export default function Finance() {
   const financialNote = notesData[0] || { note_login_info: '', note_total_debt: '', debt_amount: 0, savings_amount: 0, emergency_fund: 0 };
 
   const createIncomeMutation = useMutation({
-    onError: (e) => toast(e?.message || 'Save failed', 'error'),
+    onError: (e, vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['financialIncomes'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
     mutationFn: (data) => {
       const income_gross = parseFloat(data.income_gross) || 0;
       const tax_percentage = parseFloat(data.tax_percentage) || 0;
@@ -106,17 +109,42 @@ export default function Finance() {
         income_date: data.income_date 
       });
     },
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['financialIncomes'] });
+      const prev = queryClient.getQueryData(['financialIncomes']);
+      const income_gross = parseFloat(data.income_gross) || 0;
+      const tax_percentage = parseFloat(data.tax_percentage) || 0;
+      const tax_amount = data.tax_amount ? parseFloat(data.tax_amount) : (income_gross * tax_percentage / 100);
+      const deductions = parseFloat(data.deductions) || 0;
+      const income_net = income_gross - tax_amount - deductions;
+      const optimisticIncome = {
+        id: editingIncome?.id || `temp-income-${Date.now()}`,
+        income_gross,
+        tax_amount,
+        tax_percentage,
+        deductions,
+        income_net,
+        income_category: data.income_category,
+        income_date: data.income_date,
+      };
+      queryClient.setQueryData(['financialIncomes'], (old = []) => editingIncome ? old.map((item) => item.id === editingIncome.id ? { ...item, ...optimisticIncome } : item) : [optimisticIncome, ...old]);
+      return { prev };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialIncomes'] });
       setShowIncomeDialog(false);
       setEditingIncome(null);
       setNewIncome({ income_gross: '', tax_percentage: '25', tax_amount: '', deductions: '', income_category: 'Salary', income_date: format(new Date(), 'yyyy-MM-dd') });
       toast('Income saved ✓');
-    }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['financialIncomes'] })
   });
 
   const createExpenseMutation = useMutation({
-    onError: (e) => toast(e?.message || 'Save failed', 'error'),
+    onError: (e, vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['financialExpenses'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
     mutationFn: (data) => {
       const expenseData = {
         expense_name: data.expense_name,
@@ -131,13 +159,27 @@ export default function Finance() {
       
       return base44.entities.FinancialExpense.create(expenseData);
     },
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['financialExpenses'] });
+      const prev = queryClient.getQueryData(['financialExpenses']);
+      const optimisticExpense = {
+        id: editingExpense?.id || `temp-expense-${Date.now()}`,
+        expense_name: data.expense_name,
+        expense_category: data.expense_category,
+        expense_amount: parseFloat(data.expense_amount) || 0,
+        expense_date: data.expense_date,
+      };
+      queryClient.setQueryData(['financialExpenses'], (old = []) => editingExpense ? old.map((item) => item.id === editingExpense.id ? { ...item, ...optimisticExpense } : item) : [optimisticExpense, ...old]);
+      return { prev };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialExpenses'] });
       setShowExpenseDialog(false);
       setEditingExpense(null);
       setNewExpense({ expense_name: '', expense_category: 'Bills', expense_amount: '', expense_date: format(new Date(), 'yyyy-MM-dd') });
       toast('Expense saved ✓');
-    }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['financialExpenses'] })
   });
 
   const deleteExpenseMutation = useMutation({
@@ -207,11 +249,21 @@ export default function Finance() {
       }
       return base44.entities.FinancialNote.create(data);
     },
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['financialNotes'] });
+      const prev = queryClient.getQueryData(['financialNotes']);
+      queryClient.setQueryData(['financialNotes'], notesData[0] ? [{ ...notesData[0], ...data }] : [{ id: `temp-note-${Date.now()}`, ...data }]);
+      return { prev };
+    },
+    onError: (err, vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['financialNotes'], ctx.prev);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['financialNotes'] });
       setShowNotesDialog(false);
       toast('Notes saved ✓');
-    }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['financialNotes'] })
   });
 
   // Calculate period based on view mode

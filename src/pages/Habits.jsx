@@ -121,7 +121,16 @@ export default function Habits() {
         return await base44.entities.HabitProgress.create({ habit_data: data });
       }
     },
-    onSuccess: () => {
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['habitProgress'] });
+      const prev = queryClient.getQueryData(['habitProgress']);
+      queryClient.setQueryData(['habitProgress'], habitRecord ? { ...habitRecord, habit_data: data } : { id: 'optimistic-habit-progress', habit_data: data });
+      return { prev };
+    },
+    onError: (err, data, ctx) => {
+      if (ctx?.prev !== undefined) queryClient.setQueryData(['habitProgress'], ctx.prev);
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['habitProgress'] });
     }
   });

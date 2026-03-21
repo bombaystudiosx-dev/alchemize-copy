@@ -107,7 +107,7 @@ export default function BottomSheet({ open, onOpenChange, title, options = [], v
                     <button
                       key={option.value}
                       onClick={() => handleSelect(option.value)}
-                      className={`w-full flex items-center gap-4 px-4 py-4 rounded-2xl transition-all active:scale-[0.98] ${
+                      className={`w-full min-h-11 flex items-center gap-4 px-4 py-4 rounded-2xl transition-all active:scale-[0.98] ${
                         isSelected
                           ? 'bg-purple-500/20 border border-purple-500/40'
                           : 'bg-white/5 border border-transparent hover:bg-white/8'
