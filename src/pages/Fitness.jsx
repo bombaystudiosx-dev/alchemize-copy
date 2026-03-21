@@ -77,6 +77,9 @@ export default function Fitness() {
       intensity_estimate: data.intensity_estimate || null,
       description_text: data.description_text || null,
       workout_source: data.workout_source || 'manual',
+      routine_description: data.routine_description || null,
+      routine_sets: data.routine_sets || null,
+      routine_reps: data.routine_reps || null,
     }),
     onSuccess: () => {
       queryClient.invalidateQueries(['workouts']);

@@ -338,6 +338,7 @@ export default function GratitudeJournal() {
                     type="button"
                     onClick={() => {
                       setShowEntryForm(false);
+                      setEditingEntry(null);
                       setNewEntry({ gratitude_1: '', gratitude_2: '', gratitude_3: '', reflection: '' });
                       setFormDate(null);
                     }}
@@ -348,10 +349,10 @@ export default function GratitudeJournal() {
                   <button
                     type="button"
                     onClick={handleSave}
-                    disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending}
+                    disabled={!newEntry.gratitude_1?.trim() || createMutation.isPending || updateMutation.isPending}
                     className="flex-1 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-semibold shadow-lg shadow-purple-500/30 disabled:opacity-50"
                   >
-                    {createMutation.isPending ? 'Saving...' : 'Save'}
+                    {createMutation.isPending || updateMutation.isPending ? 'Saving...' : editingEntry ? 'Update' : 'Save'}
                   </button>
                 </div>
               </div>

@@ -24,6 +24,9 @@ const buildManualWorkout = () => ({
   duration_minutes: '',
   calories_burned: '',
   notes: '',
+  routine_description: '',
+  routine_sets: '',
+  routine_reps: '',
   date: format(new Date(), 'yyyy-MM-dd'),
   time: format(new Date(), 'HH:mm'),
 });

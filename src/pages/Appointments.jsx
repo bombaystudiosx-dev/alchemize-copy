@@ -63,7 +63,7 @@ export default function Appointments() {
       return { prev };
     },
     onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['appointments'], ctx.prev); },
-    onSettled: () => queryClient.invalidateQueries(['appointments'])
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['appointments'] })
   });
 
   const closeDialog = () => {
@@ -171,7 +171,14 @@ export default function Appointments() {
             setCurrentMonth={setCurrentMonth}
             appointments={appointments}
             onDaySelect={(date) => {
-              setNewAppointment((prev) => ({ ...prev, date }));
+              setNewAppointment({
+                title: '',
+                date,
+                time: '09:00',
+                category: activeTab,
+                notes: '',
+                reminder: true,
+              });
               setEditingAppointment(null);
               setShowDialog(true);
             }}

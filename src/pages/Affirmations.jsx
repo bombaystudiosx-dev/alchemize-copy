@@ -51,8 +51,8 @@ export default function Affirmations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['affirmations'] });
       setShowDialog(false);
-      setEditingAppointment(null);
-      setNewAffirmation({ text: '', category: 'self-love' });
+      setEditingAffirmation(null);
+      setNewAffirmation({ text: '', category: '' });
       toast('Affirmation saved ✓');
     },
     onError: (e) => toast(e?.message || 'Save failed', 'error')
@@ -60,8 +60,11 @@ export default function Affirmations() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => {
-      const payload = { text: data.text };
+      const payload = {};
+      if (typeof data.text === 'string') payload.text = data.text;
       if (data.category) payload.category = data.category;
+      if (data.category === '') payload.category = null;
+      if (typeof data.is_favorite === 'boolean') payload.is_favorite = data.is_favorite;
       return base44.entities.Affirmation.update(id, payload);
     },
     onMutate: async ({ id, data }) => {
@@ -76,8 +79,8 @@ export default function Affirmations() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['affirmations'] });
       setShowDialog(false);
-      setEditingAppointment(null);
-      setNewAffirmation({ text: '', category: 'self-love' });
+      setEditingAffirmation(null);
+      setNewAffirmation({ text: '', category: '' });
     }
   });
 
@@ -90,7 +93,7 @@ export default function Affirmations() {
       return { prev };
     },
     onError: (err, id, ctx) => { if (ctx?.prev) queryClient.setQueryData(['affirmations'], ctx.prev); },
-    onSettled: () => queryClient.invalidateQueries(['affirmations'])
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['affirmations'] })
   });
 
   const filteredAffirmations = filter === 'all' 
@@ -109,7 +112,7 @@ export default function Affirmations() {
 
   return (
     <CosmicBackground>
-      <PullToRefresh onRefresh={() => queryClient.invalidateQueries(['affirmations'])} className="min-h-screen pb-32">
+      <PullToRefresh onRefresh={() => queryClient.invalidateQueries({ queryKey: ['affirmations'] })} className="min-h-screen pb-32">
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -167,7 +170,7 @@ export default function Affirmations() {
                   "{todayAffirmation.text}"
                 </p>
                 <div className="mt-4 text-3xl">
-                  {categoryEmojis[todayAffirmation.category]}
+                  {categoryEmojis[todayAffirmation.category] || '✨'}
                 </div>
               </CosmicCard>
             </motion.div>
