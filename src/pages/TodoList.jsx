@@ -23,19 +23,32 @@ export default function TodoList() {
 
   const addTodoMutation = useMutation({
     mutationFn: (data) => base44.entities.TodoItem.create({ ...data, order: todos.length }),
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const prev = queryClient.getQueryData(['todos']);
+      const optimistic = { id: `temp-${Date.now()}`, ...data, order: todos.length, created_date: new Date().toISOString() };
+      queryClient.setQueryData(['todos'], (old = []) => [optimistic, ...old]);
+      return { prev };
+    },
+    onError: (err, data, ctx) => { if (ctx?.prev) queryClient.setQueryData(['todos'], ctx.prev); },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
       setNewTodo({ text: '', notes: '', urgent: false });
       setShowNotes(false);
-    }
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
   });
 
   const editTodoMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.TodoItem.update(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
-      setEditingTodo(null);
-    }
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const prev = queryClient.getQueryData(['todos']);
+      queryClient.setQueryData(['todos'], (old = []) => old.map(t => t.id === id ? { ...t, ...data } : t));
+      return { prev };
+    },
+    onError: (err, vars, ctx) => { if (ctx?.prev) queryClient.setQueryData(['todos'], ctx.prev); },
+    onSuccess: () => { setEditingTodo(null); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['todos'] })
   });
 
   const deleteTodoMutation = useMutation({

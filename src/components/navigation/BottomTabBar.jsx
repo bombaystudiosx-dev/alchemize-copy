@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { Home, Flame, Compass, User } from 'lucide-react';
@@ -6,14 +6,13 @@ import { motion } from 'framer-motion';
 
 export const TAB_BAR_HEIGHT = 56;
 
-const STORAGE_KEY_LAST = 'tabs:lastRouteByTab:v1';
-const STORAGE_KEY_SCROLL = 'tabs:scrollByRoute:v1';
-
-function loadRecord(key) {
-  try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch { return {}; }
+// Scroll preservation via sessionStorage (cleared on tab close, no cross-session bleed)
+const SCROLL_KEY = 'tabs:scrollByRoute:v1';
+function loadScrollRecord() {
+  try { return JSON.parse(sessionStorage.getItem(SCROLL_KEY) || '{}'); } catch { return {}; }
 }
-function saveRecord(key, v) {
-  try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
+function saveScrollRecord(v) {
+  try { sessionStorage.setItem(SCROLL_KEY, JSON.stringify(v)); } catch {}
 }
 
 const TABS = [
@@ -54,10 +53,14 @@ function BottomTabBar({ currentPageName }) {
   const navigate = useNavigate();
   const hidden = HIDDEN_TAB_PAGES.includes(currentPageName);
 
-  const [lastRouteByTab, setLastRouteByTab] = useState(() => ({
-    home: '', streaks: '', explore: '', profile: '',
-    ...loadRecord(STORAGE_KEY_LAST)
-  }));
+  // In-memory history stack per tab — no localStorage dependency
+  // Each tab key maps to a stack of full paths visited within that tab
+  const tabHistoryRef = useRef({
+    home: [],
+    streaks: [],
+    explore: [],
+    profile: [],
+  });
 
   // Determine current tab from page name
   const currentTab = useMemo(() => {
@@ -65,35 +68,34 @@ function BottomTabBar({ currentPageName }) {
     return tab?.key || 'home';
   }, [currentPageName]);
 
-  // Save last route per tab on navigation
+  // Push current path into the correct tab's history stack
   useEffect(() => {
     const fullPath = location.pathname + location.search + location.hash;
     const tab = TABS.find(t => t.pages.includes(currentPageName));
     if (!tab) return;
-
-    setLastRouteByTab(prev => {
-      const next = { ...prev, [tab.key]: fullPath };
-      saveRecord(STORAGE_KEY_LAST, next);
-      return next;
-    });
+    const stack = tabHistoryRef.current[tab.key];
+    // Avoid duplicate consecutive entries
+    if (stack[stack.length - 1] !== fullPath) {
+      stack.push(fullPath);
+    }
   }, [location.pathname, location.search, location.hash, currentPageName]);
 
-  // Scroll position preservation - save on scroll
+  // Scroll position preservation — save on scroll (sessionStorage, cleared on tab close)
   useEffect(() => {
     const onScroll = () => {
       const routeKey = location.pathname + location.search;
-      const store = loadRecord(STORAGE_KEY_SCROLL);
+      const store = loadScrollRecord();
       store[routeKey] = window.scrollY;
-      saveRecord(STORAGE_KEY_SCROLL, store);
+      saveScrollRecord(store);
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [location.pathname, location.search]);
 
-  // Scroll position preservation - restore on mount
+  // Scroll position preservation — restore on navigation
   useEffect(() => {
     const routeKey = location.pathname + location.search;
-    const store = loadRecord(STORAGE_KEY_SCROLL);
+    const store = loadScrollRecord();
     const y = store[routeKey];
     if (typeof y === 'number') {
       requestAnimationFrame(() => window.scrollTo({ top: y, behavior: 'auto' }));
@@ -101,20 +103,21 @@ function BottomTabBar({ currentPageName }) {
   }, [location.pathname, location.search]);
 
   const onTabPress = useCallback((tab) => {
-    // Haptic feedback (iOS + Android)
     if (navigator.vibrate) navigator.vibrate(10);
-    
+
     if (tab.key === currentTab) {
-      // Re-tap active tab → pop to root with smooth scroll
+      // Re-tap active tab → pop to root and scroll to top
+      tabHistoryRef.current[tab.key] = [];
       navigate(createPageUrl(tab.rootPage));
-      requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
       return;
     }
-    const last = lastRouteByTab[tab.key];
+
+    // Navigate to the deepest page the user was on in that tab, or its root
+    const stack = tabHistoryRef.current[tab.key];
+    const last = stack[stack.length - 1];
     navigate(last || createPageUrl(tab.rootPage));
-  }, [currentTab, lastRouteByTab, navigate]);
+  }, [currentTab, navigate]);
 
   if (hidden) return null;
 

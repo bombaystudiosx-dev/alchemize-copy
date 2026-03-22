@@ -44,14 +44,34 @@ export default function Appointments() {
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Appointment.create(data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['appointments'] }); closeDialog(); toast('Appointment saved ✓'); },
-    onError: (e) => toast(e?.message || 'Save failed', 'error')
+    onMutate: async (data) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const prev = queryClient.getQueryData(['appointments']);
+      queryClient.setQueryData(['appointments'], (old = []) => [...old, { id: `temp-${Date.now()}`, ...data }]);
+      return { prev };
+    },
+    onError: (e, data, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['appointments'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
+    onSuccess: () => { closeDialog(); toast('Appointment saved ✓'); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['appointments'] })
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Appointment.update(id, data),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['appointments'] }); closeDialog(); toast('Appointment updated ✓'); },
-    onError: (e) => toast(e?.message || 'Save failed', 'error')
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      const prev = queryClient.getQueryData(['appointments']);
+      queryClient.setQueryData(['appointments'], (old = []) => old.map(a => a.id === id ? { ...a, ...data } : a));
+      return { prev };
+    },
+    onError: (e, vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(['appointments'], ctx.prev);
+      toast(e?.message || 'Save failed', 'error');
+    },
+    onSuccess: () => { closeDialog(); toast('Appointment updated ✓'); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['appointments'] })
   });
 
   const deleteMutation = useMutation({
