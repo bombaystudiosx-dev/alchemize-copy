@@ -16,6 +16,7 @@ import { Check } from 'lucide-react';
  */
 export default function BottomSheet({ open, onOpenChange, title, options = [], value, onSelect }) {
   const sheetRef = useRef(null);
+  const titleId = React.useId();
 
   // Close on escape
   useEffect(() => {
