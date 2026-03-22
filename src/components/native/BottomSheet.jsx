@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useId } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { Check } from 'lucide-react';
 
@@ -16,7 +16,7 @@ import { Check } from 'lucide-react';
  */
 export default function BottomSheet({ open, onOpenChange, title, options = [], value, onSelect }) {
   const sheetRef = useRef(null);
-  const titleId = React.useId();
+  const titleId = useId();
 
   // Close on escape
   useEffect(() => {
