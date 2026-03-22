@@ -125,6 +125,7 @@ export default function Affirmations() {
           <h1 className="text-xl font-bold text-white">Affirmations</h1>
           <button 
             onClick={() => setShowDialog(true)}
+            aria-label="Add affirmation"
             className="w-10 h-10 rounded-full bg-gradient-to-r from-pink-600 to-rose-600 flex items-center justify-center"
           >
             <Plus className="w-5 h-5 text-white" />
@@ -242,6 +243,7 @@ export default function Affirmations() {
                             setNewAffirmation({ text: affirmation.text, category: affirmation.category || '' });
                             setShowDialog(true);
                           }}
+                          aria-label="Edit affirmation"
                           className="p-2 rounded-full hover:bg-white/10 transition-colors"
                         >
                           <Edit2 className="w-5 h-5 text-white/60" />
@@ -251,12 +253,14 @@ export default function Affirmations() {
                             id: affirmation.id,
                             data: { is_favorite: !affirmation.is_favorite }
                           })}
+                          aria-label={affirmation.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
                           className="p-2 rounded-full hover:bg-white/10 transition-colors"
                         >
                           <Star className={`w-5 h-5 ${affirmation.is_favorite ? 'text-yellow-400 fill-yellow-400' : 'text-white/40'}`} />
                         </button>
                         <button
                           onClick={() => deleteMutation.mutate(affirmation.id)}
+                          aria-label="Delete affirmation"
                           className="p-2 rounded-full hover:bg-white/10 transition-colors"
                         >
                           <Trash2 className="w-5 h-5 text-white/40 hover:text-red-400" />

@@ -441,6 +441,7 @@ export default function Habits() {
           <h1 className="text-xl font-bold text-white">Habit Tracker</h1>
           <button 
             onClick={() => setShowAddDialog(true)}
+            aria-label="Add new habit"
             className="w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-purple-600 flex items-center justify-center hover:scale-110 transition-transform"
           >
             <PlusCircle className="w-5 h-5 text-white" />
@@ -555,12 +556,14 @@ export default function Habits() {
                             </div>
                             <button
                               onClick={() => setEditingHabit(habit)}
+                              aria-label={`Edit habit: ${habit.name}`}
                               className="p-1 rounded-lg bg-white/10 hover:bg-white/20 transition-all"
                             >
                               <Edit className="w-4 h-4 text-white/80" />
                             </button>
                             <button
                               onClick={() => deleteHabit(habit.id)}
+                              aria-label={`Delete habit: ${habit.name}`}
                               className="p-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-all"
                             >
                               <Trash2 className="w-4 h-4 text-red-400" />

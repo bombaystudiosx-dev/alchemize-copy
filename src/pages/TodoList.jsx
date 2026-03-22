@@ -231,6 +231,7 @@ export default function TodoList() {
                     >
                       <button
                         onClick={() => toggleTodoMutation.mutate(todo.id)}
+                        aria-label={`Complete: ${todo.text}`}
                         className="mt-1 w-6 h-6 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all border-amber-800/50 hover:border-amber-600 hover:bg-amber-600 hover:shadow-md group"
                       >
                         <svg className="w-4 h-4 text-amber-800/50 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -260,12 +261,14 @@ export default function TodoList() {
                       <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
                         <button
                           onClick={() => setEditingTodo(todo)}
+                          aria-label={`Edit: ${todo.text}`}
                           className="p-1.5 hover:bg-white/60 rounded-lg transition-all"
                         >
                           <Pencil className="w-4 h-4 text-amber-900" />
                         </button>
                         <button
                           onClick={() => deleteTodoMutation.mutate(todo.id)}
+                          aria-label={`Delete: ${todo.text}`}
                           className="p-1.5 hover:bg-red-100 rounded-lg transition-all"
                         >
                           <Trash2 className="w-4 h-4 text-red-600" />

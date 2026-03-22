@@ -128,6 +128,7 @@ export default function Goals() {
           <h1 className="text-xl font-bold text-white">Goal Setting</h1>
           <button 
             onClick={() => setShowDialog(true)}
+            aria-label="Add goal"
             className="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center"
           >
             <Plus className="w-5 h-5 text-white" />
@@ -229,6 +230,7 @@ export default function Goals() {
                             e.stopPropagation();
                             deleteMutation.mutate(goal.id);
                           }}
+                          aria-label={`Delete goal: ${goal.title}`}
                           className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <Trash2 className="w-4 h-4 text-white/40 hover:text-red-400" />

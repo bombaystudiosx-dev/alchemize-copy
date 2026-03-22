@@ -62,6 +62,9 @@ export default function BottomSheet({ open, onOpenChange, title, options = [], v
           {/* Sheet */}
           <motion.div
             ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? titleId : undefined}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -95,7 +98,7 @@ export default function BottomSheet({ open, onOpenChange, title, options = [], v
             {/* Title */}
             {title && (
               <div className="px-6 pb-3 pt-1">
-                <h3 className="text-lg font-semibold text-white">{title}</h3>
+                <h3 id={titleId} className="text-lg font-semibold text-white">{title}</h3>
               </div>
             )}
 
