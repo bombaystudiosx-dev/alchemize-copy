@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { 
   User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown
+  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Code2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
@@ -30,6 +30,7 @@ export default function Settings() {
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(false);
+  const [devMode, setDevMode] = useState(localStorage.getItem('dev_mode') === 'true');
   const [landingPage, setLandingPage] = useState(localStorage.getItem('preferred_landing_page') || 'Splash');
 
   const navigate = useNavigate();
@@ -230,6 +231,42 @@ export default function Settings() {
                   />
                 </a>
               ))}
+            </div>
+          </div>
+
+          {/* DEVELOPER Section */}
+          <div>
+            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Developer</h3>
+            <div className="space-y-2">
+              <div
+                className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/5 border border-white/10"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-green-500/20 flex items-center justify-center">
+                    <Code2 className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Dev Mode</p>
+                    <p className="text-white/50 text-xs">Unlock all features & bypass paywall</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    const next = !devMode;
+                    setDevMode(next);
+                    localStorage.setItem('dev_mode', next ? 'true' : 'false');
+                  }}
+                  className={`relative w-12 h-7 rounded-full transition-colors duration-200 ${
+                    devMode ? 'bg-green-500' : 'bg-white/20'
+                  }`}
+                >
+                  <span
+                    className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                      devMode ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
             </div>
           </div>
 

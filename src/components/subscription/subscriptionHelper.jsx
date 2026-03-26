@@ -1,7 +1,12 @@
 // Free tier gets 3 features: manifestation, affirmations, gratitude
 export const FREE_FEATURE_IDS = ['manifestation', 'affirmations', 'gratitude'];
 
+export function isDevMode() {
+  return localStorage.getItem('dev_mode') === 'true';
+}
+
 export function isPremiumUser(user) {
+  if (isDevMode()) return true;
   // Check all possible subscription status fields (old and new schema)
   const oldStatus = user?.subscription_status;
   const newStatus = user?.subscriptionStatus;
