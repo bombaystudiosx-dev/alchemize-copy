@@ -234,9 +234,6 @@ export default function Settings() {
             </div>
           </div>
 
-
-          </div>
-
           {/* DATA Section */}
           <div>
             <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Data</h3>
