@@ -216,23 +216,6 @@ export default function Settings() {
             </div>
           </div>
 
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Community</h3>
-            <div className="space-y-2">
-              {communityLinks.map((link) => (
-                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer">
-                  <SettingsRow
-                    icon={Heart}
-                    iconBg="bg-pink-500/20"
-                    iconColor="text-pink-400"
-                    title={link.label}
-                    subtitle={link.description}
-                    onClick={() => {}}
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
 
           {/* DATA Section */}
           <div>
