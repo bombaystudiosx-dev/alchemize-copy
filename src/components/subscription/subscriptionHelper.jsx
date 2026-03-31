@@ -1,27 +1,14 @@
-// Free tier gets 3 features: manifestation, affirmations, gratitude
-export const FREE_FEATURE_IDS = ['manifestation', 'affirmations', 'gratitude'];
+// All features are free - paywall removed
+export const FREE_FEATURE_IDS = ['manifestation', 'affirmations', 'gratitude', 'goals', 'habits', 'finance', 'fitness', 'calories', 'appointments', 'todo', 'settings'];
 
 export function isDevMode() {
-  return localStorage.getItem('dev_mode') === 'true';
+  return true;
 }
 
 export function isPremiumUser(user) {
-  if (isDevMode()) return true;
-  // Check all possible subscription status fields (old and new schema)
-  const oldStatus = user?.subscription_status;
-  const newStatus = user?.subscriptionStatus;
-  const accessLevel = user?.accessLevel;
-  
-  return (
-    oldStatus === 'active' || 
-    oldStatus === 'trialing' || 
-    newStatus === 'active' || 
-    newStatus === 'trialing' ||
-    accessLevel === 'Pro'
-  );
+  return true;
 }
 
 export function isFeatureLocked(featureId, user) {
-  if (isPremiumUser(user)) return false;
-  return !FREE_FEATURE_IDS.includes(featureId);
+  return false;
 }
