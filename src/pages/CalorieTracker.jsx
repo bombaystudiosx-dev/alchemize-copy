@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { format } from 'date-fns';
 import { ArrowLeft, Camera, Plus, SlidersHorizontal } from 'lucide-react';
-import useBackNav from '@/components/common/useBackNav';
 import PremiumGate from '@/components/subscription/PremiumGate';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -36,7 +35,6 @@ const getLocalDateKey = (value) => {
 };
 
 export default function CalorieTracker() {
-  const goBack = useBackNav('Home', 'CalorieTracker');
   const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [showScanner, setShowScanner] = useState(false);
   const [showGoalsDialog, setShowGoalsDialog] = useState(false);
@@ -207,9 +205,9 @@ export default function CalorieTracker() {
       {/* Header */}
       <div className="sticky top-0 z-30 bg-[#0a0118]/90 backdrop-blur-lg px-5 pt-4 pb-3">
         <div className="flex items-center justify-between">
-          <button onClick={goBack} className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center">
+          <Link to={createPageUrl('Home')} className="w-9 h-9 rounded-full bg-white/[0.06] flex items-center justify-center">
             <ArrowLeft className="w-4 h-4 text-white/60" />
-          </button>
+          </Link>
           <span className="text-white font-semibold text-sm">Nutrition</span>
           <button
             onClick={() => { setGoalDraft({ ...goals }); setShowGoalsDialog(true); }}

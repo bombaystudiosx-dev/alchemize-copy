@@ -4,13 +4,12 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import { ArrowLeft, Plus, Trash2, Loader2, Pencil, AlertTriangle } from 'lucide-react';
-import useBackNav from '@/components/common/useBackNav';
 import TaskEditDialog from '@/components/tasks/TaskEditDialog';
-
+import { Link } from 'react-router-dom';
+import { createPageUrl } from '@/utils';
 import PremiumGate from '@/components/subscription/PremiumGate';
 
 export default function TodoList() {
-  const goBack = useBackNav('Home', 'TodoList');
   const [newTodo, setNewTodo] = useState({ text: '', notes: '', urgent: false });
   const [showNotes, setShowNotes] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -105,14 +104,15 @@ export default function TodoList() {
       <div className="relative z-10 w-full min-h-screen flex flex-col px-6 py-8 pb-32">
         {/* Header */}
         <div className="w-full max-w-2xl mx-auto flex items-center justify-between mb-8">
-          <motion.button
-              onClick={goBack}
+          <Link to={createPageUrl('Home')}>
+            <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="p-2 rounded-full bg-amber-900/40 hover:bg-amber-900/60 backdrop-blur-sm shadow-lg"
             >
               <ArrowLeft className="w-6 h-6 text-amber-100" />
             </motion.button>
+          </Link>
           <h1 
             className="text-3xl font-bold text-amber-100 drop-shadow-lg"
             style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
