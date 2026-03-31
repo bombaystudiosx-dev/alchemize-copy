@@ -1,33 +1,84 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Camera, Image, Loader2, RotateCcw, ChevronUp } from 'lucide-react';
+import { X, Image, RotateCcw, ChevronUp, Zap, ZapOff, FlipHorizontal, AlertTriangle, Settings } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-// Scanning pulse animation
-function ScanPulse() {
+// ─── CORNER BRACKETS ──────────────────────────────────────────────────────────
+function ScanFrame({ ready }) {
   return (
-    <div className="absolute inset-0 pointer-events-none">
-      {/* Corner brackets */}
-      <div className="absolute top-8 left-8 w-16 h-16">
-        <div className="absolute top-0 left-0 w-full h-[3px] bg-white rounded-full" />
-        <div className="absolute top-0 left-0 w-[3px] h-full bg-white rounded-full" />
-      </div>
-      <div className="absolute top-8 right-8 w-16 h-16">
-        <div className="absolute top-0 right-0 w-full h-[3px] bg-white rounded-full" />
-        <div className="absolute top-0 right-0 w-[3px] h-full bg-white rounded-full" />
-      </div>
-      <div className="absolute bottom-8 left-8 w-16 h-16">
-        <div className="absolute bottom-0 left-0 w-full h-[3px] bg-white rounded-full" />
-        <div className="absolute bottom-0 left-0 w-[3px] h-full bg-white rounded-full" />
-      </div>
-      <div className="absolute bottom-8 right-8 w-16 h-16">
-        <div className="absolute bottom-0 right-0 w-full h-[3px] bg-white rounded-full" />
-        <div className="absolute bottom-0 right-0 w-[3px] h-full bg-white rounded-full" />
+    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+      <div className="relative" style={{ width: '72vw', maxWidth: 320, aspectRatio: '1' }}>
+        {/* Ambient glow behind frame */}
+        <motion.div
+          animate={{ opacity: ready ? [0.15, 0.4, 0.15] : 0.1 }}
+          transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
+          className="absolute inset-[-12px] rounded-[36px] pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(200,160,40,0.18) 0%, transparent 70%)' }}
+        />
+        {/* Outer rounded rect */}
+        <motion.div
+          animate={{ opacity: ready ? [0.35, 0.7, 0.35] : 0.25 }}
+          transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }}
+          className="absolute inset-0 rounded-[28px] border border-[#c8a028]/40"
+        />
+        {/* Gold corner brackets */}
+        {[['top-0 left-0', 't l'], ['top-0 right-0', 't r'], ['bottom-0 left-0', 'b l'], ['bottom-0 right-0', 'b r']].map(([pos, key]) => {
+          const isTop = key.includes('t');
+          const isLeft = key.includes('l');
+          return (
+            <motion.div
+              key={key}
+              animate={{ opacity: ready ? [0.6, 1, 0.6] : 0.4 }}
+              transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut', delay: 0.3 }}
+              className={`absolute ${pos} w-8 h-8`}
+            >
+              {/* horizontal */}
+              <div
+                className="absolute"
+                style={{
+                  [isTop ? 'top' : 'bottom']: 0,
+                  [isLeft ? 'left' : 'right']: 0,
+                  width: 32,
+                  height: 3,
+                  background: 'linear-gradient(90deg, #c8a028, #f0cc6a)',
+                  borderRadius: 99,
+                }}
+              />
+              {/* vertical */}
+              <div
+                className="absolute"
+                style={{
+                  [isTop ? 'top' : 'bottom']: 0,
+                  [isLeft ? 'left' : 'right']: 0,
+                  width: 3,
+                  height: 32,
+                  background: 'linear-gradient(180deg, #c8a028, #f0cc6a)',
+                  borderRadius: 99,
+                }}
+              />
+            </motion.div>
+          );
+        })}
+        {/* Scan line */}
+        {ready && (
+          <motion.div
+            initial={{ top: '8%' }}
+            animate={{ top: ['8%', '88%', '8%'] }}
+            transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+            className="absolute left-[8%] right-[8%] h-[2px] pointer-events-none overflow-hidden"
+            style={{ borderRadius: 99 }}
+          >
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(90deg, transparent, rgba(200,160,40,0.9), transparent)' }} />
+            {/* soft glow below line */}
+            <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 20, background: 'linear-gradient(to bottom, rgba(200,160,40,0.2), transparent)' }} />
+          </motion.div>
+        )}
       </div>
     </div>
   );
 }
 
+// ─── ANALYZING OVERLAY ────────────────────────────────────────────────────────
 function AnalyzingOverlay() {
   return (
     <motion.div
@@ -36,14 +87,16 @@ function AnalyzingOverlay() {
       className="absolute inset-0 bg-[#0a0118]/90 backdrop-blur-md flex flex-col items-center justify-center z-20"
     >
       <motion.div
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ repeat: Infinity, duration: 1.5 }}
-        className="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center mb-6"
+        animate={{ scale: [1, 1.15, 1] }}
+        transition={{ repeat: Infinity, duration: 1.6 }}
+        className="w-20 h-20 rounded-full flex items-center justify-center mb-6"
+        style={{ border: '1.5px solid rgba(200,160,40,0.25)' }}
       >
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-          className="w-14 h-14 rounded-full border-2 border-transparent border-t-white"
+          className="w-14 h-14 rounded-full border-t-2"
+          style={{ borderColor: 'transparent', borderTopColor: '#c8a028' }}
         />
       </motion.div>
       <p className="text-white text-lg font-semibold tracking-wide">Identifying food</p>
@@ -52,7 +105,63 @@ function AnalyzingOverlay() {
   );
 }
 
-function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
+// ─── PERMISSION / ERROR STATES ────────────────────────────────────────────────
+function CameraPermissionDenied({ onUploadInstead, onOpenSettings }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-8 text-center">
+      <div className="w-16 h-16 rounded-full bg-white/8 flex items-center justify-center mb-6">
+        <AlertTriangle className="w-7 h-7 text-[#c8a028]" />
+      </div>
+      <p className="text-white font-semibold text-lg mb-2">Camera access needed</p>
+      <p className="text-white/40 text-sm leading-relaxed mb-8 max-w-[260px]">
+        Alchemize uses your camera to instantly identify food and analyze nutrition.
+      </p>
+      <button
+        onClick={onOpenSettings}
+        className="w-full h-12 rounded-full mb-3 flex items-center justify-center gap-2 font-semibold text-sm"
+        style={{ background: 'linear-gradient(135deg, #c8a028, #a07820)' }}
+      >
+        <Settings className="w-4 h-4" />
+        Open Settings
+      </button>
+      <button
+        onClick={onUploadInstead}
+        className="w-full h-12 rounded-full bg-white/10 text-white/70 font-medium text-sm"
+      >
+        Upload Photo Instead
+      </button>
+    </div>
+  );
+}
+
+function CameraError({ onRetry, onUploadInstead }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full px-8 text-center">
+      <div className="w-16 h-16 rounded-full bg-white/8 flex items-center justify-center mb-6">
+        <AlertTriangle className="w-7 h-7 text-red-400" />
+      </div>
+      <p className="text-white font-semibold text-lg mb-2">Camera unavailable</p>
+      <p className="text-white/40 text-sm leading-relaxed mb-8">
+        Could not start camera. Try again or upload a photo.
+      </p>
+      <button
+        onClick={onRetry}
+        className="w-full h-12 rounded-full mb-3 bg-white/12 text-white font-semibold text-sm"
+      >
+        Retry Camera
+      </button>
+      <button
+        onClick={onUploadInstead}
+        className="w-full h-12 rounded-full bg-white/6 text-white/60 font-medium text-sm"
+      >
+        Upload Photo Instead
+      </button>
+    </div>
+  );
+}
+
+// ─── RESULTS PANEL ────────────────────────────────────────────────────────────
+function ResultsPanel({ result, image, onConfirm, onRetry, onClose }) {
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState(result);
   const [expanded, setExpanded] = useState(false);
@@ -63,30 +172,23 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="absolute inset-0 z-30 bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620] overflow-y-auto"
+        className="absolute inset-0 z-30 overflow-y-auto"
+        style={{ background: 'linear-gradient(160deg, #0a0118, #1a0a2e, #0d0620)' }}
       >
-        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 bg-[#0a0118]/90 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-5 py-4 backdrop-blur-sm" style={{ background: 'rgba(10,1,24,0.9)' }}>
           <button onClick={() => setEditMode(false)} className="text-white/60 text-sm">Cancel</button>
           <span className="text-white font-semibold">Edit Values</span>
-          <button onClick={() => onConfirm(editData)} className="text-emerald-400 font-semibold text-sm">Save</button>
+          <button onClick={() => onConfirm(editData)} style={{ color: '#c8a028' }} className="font-semibold text-sm">Save</button>
         </div>
         <div className="px-5 pb-12 space-y-4">
-          <div>
-            <label className="text-white/40 text-xs uppercase tracking-wider block mb-1.5">Name</label>
-            <input
-              value={editData.food_name}
-              onChange={e => setEditData({ ...editData, food_name: e.target.value })}
-              className="w-full bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-white/30"
-            />
-          </div>
-          <div>
-            <label className="text-white/40 text-xs uppercase tracking-wider block mb-1.5">Serving</label>
-            <input
-              value={editData.serving_description}
-              onChange={e => setEditData({ ...editData, serving_description: e.target.value })}
-              className="w-full bg-white/8 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-white/30"
-            />
-          </div>
+          {[['food_name', 'Name', 'text'], ['serving_description', 'Serving', 'text']].map(([k, l, t]) => (
+            <div key={k}>
+              <label className="text-white/40 text-xs uppercase tracking-wider block mb-1.5">{l}</label>
+              <input value={editData[k] || ''} onChange={e => setEditData({ ...editData, [k]: e.target.value })}
+                className="w-full rounded-xl px-4 py-3 text-white text-sm focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
+            </div>
+          ))}
           <div className="grid grid-cols-2 gap-3">
             {[
               { key: 'calories', label: 'CALORIES', unit: '' },
@@ -99,12 +201,10 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
               <div key={key}>
                 <label className="text-white/30 text-[10px] uppercase tracking-wider block mb-1">{label}</label>
                 <div className="relative">
-                  <input
-                    type="number"
-                    value={editData[key]}
+                  <input type="number" value={editData[key] || 0}
                     onChange={e => setEditData({ ...editData, [key]: parseFloat(e.target.value) || 0 })}
-                    className="w-full bg-white/8 border border-white/10 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-white/30"
-                  />
+                    className="w-full rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }} />
                   {unit && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 text-xs">{unit}</span>}
                 </div>
               </div>
@@ -132,8 +232,9 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
           <X className="w-4 h-4 text-white" />
         </button>
         <div className="absolute bottom-3 left-4 right-4">
-          <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-500/20 border border-purple-300/20 mb-2">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-purple-100">AI Estimate</span>
+          <div className="inline-flex items-center px-2 py-0.5 rounded-full mb-2"
+            style={{ background: 'rgba(200,160,40,0.15)', border: '1px solid rgba(200,160,40,0.25)' }}>
+            <span className="text-[10px] uppercase tracking-[0.2em]" style={{ color: '#c8a028' }}>AI Estimate</span>
           </div>
           <h2 className="text-white font-bold text-xl leading-tight">{result.food_name}</h2>
           <p className="text-white/50 text-xs mt-0.5">{result.serving_description}</p>
@@ -154,7 +255,7 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
             {[
               { label: 'Protein', value: result.protein_grams, color: '#22d3ee', max: 50 },
               { label: 'Carbs', value: result.carb_grams, color: '#a78bfa', max: 80 },
-              { label: 'Fat', value: result.fat_grams, color: '#fbbf24', max: 40 },
+              { label: 'Fat', value: result.fat_grams, color: '#c8a028', max: 40 },
             ].map(m => (
               <div key={m.label}>
                 <div className="flex justify-between items-center mb-1">
@@ -212,15 +313,15 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
 
           {/* Confidence warning */}
           {result.confidence_score < 0.7 && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-4">
-              <p className="text-amber-400/90 text-xs">Low confidence — tap Edit to adjust values</p>
+            <div className="rounded-xl p-3 mb-4" style={{ background: 'rgba(200,160,40,0.08)', border: '1px solid rgba(200,160,40,0.2)' }}>
+              <p className="text-xs" style={{ color: 'rgba(200,160,40,0.9)' }}>Low confidence — tap Edit to adjust values</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Action bar */}
-      <div className="flex-shrink-0 px-5 pb-6 pt-2 bg-[#0a0118] border-t border-purple-500/10">
+      <div className="flex-shrink-0 px-5 pb-6 pt-2 bg-[#0a0118]" style={{ borderTop: '1px solid rgba(200,160,40,0.1)' }}>
         <div className="flex gap-3">
           <button
             onClick={onRetry}
@@ -236,7 +337,8 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
           </button>
           <button
             onClick={() => onConfirm(result)}
-            className="flex-1 h-12 rounded-full bg-white font-semibold text-sm text-black"
+            className="flex-1 h-12 rounded-full font-semibold text-sm text-black"
+            style={{ background: 'linear-gradient(135deg, #c8a028, #f0cc6a)' }}
           >
             Add to Log
           </button>
@@ -246,37 +348,170 @@ function ResultsPanel({ result, image, onConfirm, onEdit, onRetry, onClose }) {
   );
 }
 
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function FullScreenScanner({ open, onClose, onFoodLogged }) {
-  const [step, setStep] = useState('capture'); // capture, analyzing, results
+  const [step, setStep] = useState('loading'); // loading | ready | permissionDenied | cameraError | analyzing | results
+  const [cameraReady, setCameraReady] = useState(false);
+  const [facingMode, setFacingMode] = useState('environment');
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [result, setResult] = useState(null);
+  const [error, setError] = useState(null);
+  const [captureFlash, setCaptureFlash] = useState(false);
+
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // ── Camera lifecycle ──────────────────────────────────────────────────────
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraReady(false);
+    setTorchOn(false);
+  }, []);
+
+  const startCamera = useCallback(async (facing = 'environment') => {
+    stopCamera();
+    setStep('loading');
+    setCameraReady(false);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: facing },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current.play().then(() => {
+            setCameraReady(true);
+            setStep('ready');
+            // Detect torch support
+            const track = stream.getVideoTracks()[0];
+            const caps = track.getCapabilities?.() || {};
+            setTorchSupported(!!caps.torch);
+          }).catch(() => { setStep('cameraError'); });
+        };
+      }
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        setStep('permissionDenied');
+      } else {
+        setStep('cameraError');
+      }
+    }
+  }, [stopCamera]);
+
+  // Auto-start on open; cleanup on close
+  useEffect(() => {
+    if (open) {
+      startCamera(facingMode);
+    } else {
+      stopCamera();
+      reset();
+    }
+    return () => stopCamera();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const reset = useCallback(() => {
-    setStep('capture');
     setImagePreview(null);
     setImageUrl(null);
     setResult(null);
+    setError(null);
+    setCaptureFlash(false);
   }, []);
 
-  useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
+  // ── Torch toggle ──────────────────────────────────────────────────────────
+  const toggleTorch = useCallback(async () => {
+    if (!streamRef.current) return;
+    const track = streamRef.current.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      await track.applyConstraints({ advanced: [{ torch: !torchOn }] });
+      setTorchOn(prev => !prev);
+    } catch (_) { /* torch not supported on this device */ }
+  }, [torchOn]);
 
-  const [error, setError] = useState(null);
+  // ── Flip camera ──────────────────────────────────────────────────────────
+  const flipCamera = useCallback(() => {
+    const next = facingMode === 'environment' ? 'user' : 'environment';
+    setFacingMode(next);
+    startCamera(next);
+  }, [facingMode, startCamera]);
 
-  const handleFile = async (e) => {
+  // ── Capture from video stream ─────────────────────────────────────────────
+  const captureFrame = useCallback(async () => {
+    if (!videoRef.current || !cameraReady) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current || document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    if (facingMode === 'user') {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+    ctx.drawImage(video, 0, 0);
+    // Haptic
+    if (navigator.vibrate) navigator.vibrate(40);
+    // Flash animation
+    setCaptureFlash(true);
+    setTimeout(() => setCaptureFlash(false), 200);
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      const previewUrl = URL.createObjectURL(blob);
+      setImagePreview(previewUrl);
+      stopCamera();
+      setStep('analyzing');
+      setError(null);
+      try {
+        const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+        const { file_url } = await base44.integrations.Core.UploadFile({ file });
+        setImageUrl(file_url);
+        await analyzeImage(file_url);
+      } catch (err) {
+        setError(err?.message || 'Analysis failed. Please try again.');
+        setStep('ready');
+        startCamera(facingMode);
+      }
+    }, 'image/jpeg', 0.88);
+  }, [cameraReady, facingMode, stopCamera, startCamera]);
+
+  // ── Gallery upload ────────────────────────────────────────────────────────
+  const handleFile = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
-    setError(null);
-    setImagePreview(URL.createObjectURL(file));
+    const previewUrl = URL.createObjectURL(file);
+    setImagePreview(previewUrl);
+    stopCamera();
     setStep('analyzing');
-
+    setError(null);
     try {
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setImageUrl(file_url);
+      const { file_url } = await base44.integrations.Core.UploadFile({ file });
+      setImageUrl(file_url);
+      await analyzeImage(file_url);
+    } catch (err) {
+      setError(err?.message || 'Analysis failed. Please try again.');
+      setStep('ready');
+      startCamera(facingMode);
+    }
+  }, [stopCamera, startCamera, facingMode]);
 
+  // ── AI analysis pipeline ──────────────────────────────────────────────────
+  const analyzeImage = useCallback(async (file_url) => {
     const response = await base44.integrations.Core.InvokeLLM({
       prompt: `You are a world-class food recognition AI trained on USDA FoodData Central. Analyze this image precisely.
 
@@ -301,32 +536,32 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
       file_urls: [file_url],
       add_context_from_internet: true,
       response_json_schema: {
-        type: "object",
+        type: 'object',
         properties: {
-          food_name: { type: "string" },
-          serving_description: { type: "string" },
-          calories: { type: "number" },
-          protein_grams: { type: "number" },
-          carb_grams: { type: "number" },
-          fat_grams: { type: "number" },
-          sugar_grams: { type: "number" },
-          fiber_grams: { type: "number" },
-          sodium_mg: { type: "number" },
-          confidence_score: { type: "number" },
+          food_name: { type: 'string' },
+          serving_description: { type: 'string' },
+          calories: { type: 'number' },
+          protein_grams: { type: 'number' },
+          carb_grams: { type: 'number' },
+          fat_grams: { type: 'number' },
+          sugar_grams: { type: 'number' },
+          fiber_grams: { type: 'number' },
+          sodium_mg: { type: 'number' },
+          confidence_score: { type: 'number' },
           items_detected: {
-            type: "array",
+            type: 'array',
             items: {
-              type: "object",
+              type: 'object',
               properties: {
-                name: { type: "string" },
-                portion: { type: "string" },
-                calories: { type: "number" }
-              }
-            }
+                name: { type: 'string' },
+                portion: { type: 'string' },
+                calories: { type: 'number' },
+              },
+            },
           },
-          health_tip: { type: "string" }
-        }
-      }
+          health_tip: { type: 'string' },
+        },
+      },
     });
 
     // Validate macro math
@@ -337,13 +572,10 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
 
     setResult({ ...response, image_url: file_url });
     setStep('results');
-    } catch (err) {
-      setError(err?.message || 'Failed to analyze food. Please try again.');
-      setStep('capture');
-    }
-  };
+  }, []);
 
-  const handleConfirm = (data) => {
+  // ── Log confirmed food ────────────────────────────────────────────────────
+  const handleConfirm = useCallback((data) => {
     onFoodLogged({
       food_name: data.food_name,
       serving_description: data.serving_description,
@@ -359,90 +591,229 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
       logged_at: new Date().toISOString(),
       source_type: 'camera',
       is_estimated: true,
-      estimation_source: 'image'
+      estimation_source: 'image',
     });
     onClose();
-  };
+  }, [imageUrl, onFoodLogged, onClose]);
 
   if (!open) return null;
 
+  // ── RENDER ────────────────────────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-gradient-to-br from-[#0a0118] via-[#1a0a2e] to-[#0d0620]"
+      className="fixed inset-0 z-[100] overflow-hidden"
+      style={{ background: 'linear-gradient(160deg, #0a0118, #1a0a2e, #0d0620)' }}
     >
-      {/* Capture step */}
-      {step === 'capture' && (
-        <div className="h-full flex flex-col">
-          {/* Top bar */}
-          <div className="flex-shrink-0 flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+12px)] pb-4">
+      {/* ── ALWAYS-MOUNTED video element (hidden when not in camera step) ── */}
+      <video
+        ref={videoRef}
+        playsInline
+        muted
+        autoPlay
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          display: (step === 'ready' || step === 'loading') ? 'block' : 'none',
+          transform: facingMode === 'user' ? 'scaleX(-1)' : 'none',
+        }}
+      />
+      <canvas ref={canvasRef} className="hidden" />
+      <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+
+      {/* ── LOADING STATE ── */}
+      <AnimatePresence>
+        {step === 'loading' && (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center z-10"
+            style={{ background: 'linear-gradient(160deg, #0a0118, #1a0a2e, #0d0620)' }}
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
+              className="w-10 h-10 rounded-full border-t-2 mb-5"
+              style={{ borderColor: 'transparent', borderTopColor: '#c8a028' }}
+            />
+            <p className="text-white/50 text-sm tracking-wide">Opening camera...</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── PERMISSION DENIED ── */}
+      {step === 'permissionDenied' && (
+        <div className="absolute inset-0 z-10">
+          <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+12px)] pb-4">
             <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
               <X className="w-5 h-5 text-white" />
             </button>
-            <span className="text-white/60 text-sm font-medium">Scan Food</span>
-            <div className="w-10" />
           </div>
-
-          {/* Main area */}
-          <div className="flex-1 flex flex-col items-center justify-center px-8">
-            <div className="relative w-64 h-64 mb-10">
-              {/* Animated target */}
-              <motion.div
-                animate={{ opacity: [0.3, 0.8, 0.3] }}
-                transition={{ repeat: Infinity, duration: 2.5 }}
-                className="absolute inset-0 rounded-3xl border-2 border-white/20"
-              />
-              <ScanPulse />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Camera className="w-12 h-12 text-white/20" />
-              </div>
-            </div>
-
-            <p className="text-white text-lg font-semibold mb-2">Point at your food</p>
-            <p className="text-white/40 text-sm text-center leading-relaxed max-w-[260px]">
-              Take a photo or upload an image for instant nutrition analysis
-            </p>
-
-            {error && (
-              <div className="mt-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl max-w-[280px]">
-                <p className="text-red-300 text-sm text-center">{error}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Bottom actions */}
-          <div className="flex-shrink-0 px-8 pb-[calc(env(safe-area-inset-bottom)+24px)]">
-            <div className="flex items-center gap-4">
-              <label className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center cursor-pointer">
-                <Image className="w-6 h-6 text-white/60" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFile}
-                  className="hidden"
-                />
-              </label>
-              <label className="flex-1 h-14 rounded-full bg-white flex items-center justify-center gap-3 cursor-pointer">
-                <Camera className="w-5 h-5 text-black" />
-                <span className="text-black font-semibold">Take Photo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="environment"
-                  onChange={handleFile}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
+          <CameraPermissionDenied
+            onOpenSettings={() => {
+              // On web we can only suggest; on native this would deep-link to settings
+              alert('Please enable camera access in your browser or device Settings, then reopen the scanner.');
+            }}
+            onUploadInstead={() => fileInputRef.current?.click()}
+          />
         </div>
       )}
 
-      {/* Analyzing step */}
+      {/* ── CAMERA ERROR ── */}
+      {step === 'cameraError' && (
+        <div className="absolute inset-0 z-10">
+          <div className="flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+12px)] pb-4">
+            <button onClick={onClose} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
+          <CameraError
+            onRetry={() => startCamera(facingMode)}
+            onUploadInstead={() => fileInputRef.current?.click()}
+          />
+        </div>
+      )}
+
+      {/* ── LIVE CAMERA UI (overlays on top of <video>) ── */}
+      {(step === 'ready') && (
+        <>
+          {/* Subtle dark vignette so UI is readable */}
+          <div
+            className="absolute inset-0 pointer-events-none z-[1]"
+            style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(5,0,15,0.55) 100%)' }}
+          />
+
+          {/* TOP BAR */}
+          <div
+            className="absolute top-0 left-0 right-0 z-[5] flex items-center justify-between px-4"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)', paddingBottom: 16 }}
+          >
+            {/* Close */}
+            <button
+              onClick={onClose}
+              className="w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center"
+              style={{ background: 'rgba(10,1,24,0.55)', border: '1px solid rgba(255,255,255,0.12)' }}
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+
+            {/* Title */}
+            <span className="text-white/70 text-sm font-medium tracking-wide">Scan Food</span>
+
+            {/* Right controls */}
+            <div className="flex items-center gap-2">
+              {torchSupported && (
+                <button
+                  onClick={toggleTorch}
+                  className="w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center"
+                  style={{ background: torchOn ? 'rgba(200,160,40,0.25)' : 'rgba(10,1,24,0.55)', border: '1px solid rgba(255,255,255,0.12)' }}
+                >
+                  {torchOn
+                    ? <Zap className="w-5 h-5" style={{ color: '#c8a028' }} />
+                    : <ZapOff className="w-5 h-5 text-white/70" />
+                  }
+                </button>
+              )}
+              <button
+                onClick={flipCamera}
+                className="w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center"
+                style={{ background: 'rgba(10,1,24,0.55)', border: '1px solid rgba(255,255,255,0.12)' }}
+              >
+                <FlipHorizontal className="w-5 h-5 text-white/70" />
+              </button>
+            </div>
+          </div>
+
+          {/* SCAN FRAME + HINT TEXT */}
+          <div className="absolute inset-0 z-[3] flex flex-col items-center justify-center pointer-events-none">
+            <ScanFrame ready={cameraReady} />
+            <div className="mt-[calc(36vw+28px)] max-w-[200px] text-center">
+              <p className="text-white font-semibold text-sm leading-snug mb-1">Point your food at the camera</p>
+              <p className="text-white/40 text-xs leading-relaxed">
+                Take a photo or upload an image for instant nutrition analysis
+              </p>
+            </div>
+          </div>
+
+          {/* Error toast */}
+          {error && (
+            <div
+              className="absolute top-24 left-4 right-4 z-[8] px-4 py-3 rounded-2xl text-center"
+              style={{ background: 'rgba(200,40,40,0.15)', border: '1px solid rgba(200,40,40,0.3)' }}
+            >
+              <p className="text-red-300 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* BOTTOM CONTROLS */}
+          <div
+            className="absolute bottom-0 left-0 right-0 z-[5] flex items-center justify-between px-8"
+            style={{
+              paddingBottom: 'calc(env(safe-area-inset-bottom) + 28px)',
+              paddingTop: 24,
+              background: 'linear-gradient(to top, rgba(10,1,24,0.85) 0%, transparent 100%)',
+            }}
+          >
+            {/* Gallery */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="w-14 h-14 rounded-2xl backdrop-blur-md flex items-center justify-center"
+              style={{ background: 'rgba(10,1,24,0.55)', border: '1px solid rgba(255,255,255,0.14)' }}
+            >
+              <Image className="w-6 h-6 text-white/70" />
+            </button>
+
+            {/* Shutter */}
+            <button
+              onClick={captureFrame}
+              className="relative w-[74px] h-[74px] flex items-center justify-center"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              {/* Outer ring */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{ border: '2.5px solid rgba(200,160,40,0.7)' }}
+              />
+              {/* Inner button */}
+              <motion.div
+                whileTap={{ scale: 0.88 }}
+                className="w-[58px] h-[58px] rounded-full"
+                style={{ background: 'linear-gradient(135deg, #c8a028, #f0cc6a)' }}
+              />
+            </button>
+
+            {/* Flip (bottom right mirror) */}
+            <button
+              onClick={flipCamera}
+              className="w-14 h-14 rounded-2xl backdrop-blur-md flex items-center justify-center"
+              style={{ background: 'rgba(10,1,24,0.55)', border: '1px solid rgba(255,255,255,0.14)' }}
+            >
+              <FlipHorizontal className="w-6 h-6 text-white/70" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ── CAPTURE FLASH ── */}
+      <AnimatePresence>
+        {captureFlash && (
+          <motion.div
+            key="flash"
+            initial={{ opacity: 0.8 }}
+            animate={{ opacity: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="absolute inset-0 bg-white z-[15] pointer-events-none"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── ANALYZING ── */}
       {step === 'analyzing' && (
-        <div className="h-full relative">
+        <div className="absolute inset-0 z-10">
           {imagePreview && (
             <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover" />
           )}
@@ -450,21 +821,24 @@ Be specific. "Grilled chicken thigh with skin, ~150g" not just "chicken".`,
         </div>
       )}
 
-      {/* Results step */}
-      {step === 'results' && result && (
-        <div className="h-full relative">
-          {imagePreview && (
-            <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-          )}
-          <ResultsPanel
-            result={result}
-            image={imagePreview}
-            onConfirm={handleConfirm}
-            onRetry={reset}
-            onClose={onClose}
-          />
-        </div>
-      )}
+      {/* ── RESULTS ── */}
+      <AnimatePresence>
+        {step === 'results' && result && (
+          <div className="absolute inset-0 z-20">
+            {imagePreview && (
+              <img src={imagePreview} alt="" className="absolute inset-0 w-full h-full object-cover opacity-25" />
+            )}
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(10,1,24,1) 40%, rgba(10,1,24,0.6) 70%, rgba(10,1,24,0.2))' }} />
+            <ResultsPanel
+              result={result}
+              image={imagePreview}
+              onConfirm={handleConfirm}
+              onRetry={() => { reset(); startCamera(facingMode); }}
+              onClose={onClose}
+            />
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
