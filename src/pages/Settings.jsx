@@ -3,22 +3,20 @@ import { base44 } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
-import { 
-  User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette, 
-  Trash2, LogOut, ChevronLeft, Sparkles, Moon, Crown, Code2
+import {
+  User, Mail, Info, FileText, Shield, Eye, Bluetooth, Heart, Palette,
+  Trash2, LogOut, ChevronLeft, Sparkles, Moon
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import SettingsRow from '@/components/settings/SettingsRow';
 import DeleteAccountFlow from '@/components/settings/DeleteAccountFlow';
 import FeatureManager from '@/components/home/FeatureManager';
 
-
 import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
 import ResetDataDialog from '@/components/settings/ResetDataDialog';
 import BottomSheet from '@/components/native/BottomSheet';
-import { communityLinks } from '@/lib/communityLinks';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -30,8 +28,8 @@ export default function Settings() {
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
   const [showLandingPage, setShowLandingPage] = useState(false);
-  const [devMode, setDevMode] = useState(localStorage.getItem('dev_mode') === 'true');
-  const [landingPage, setLandingPage] = useState(localStorage.getItem('preferred_landing_page') || 'Splash');
+  const [landingPage, setLandingPage] = useState(localStorage.getItem('landingPage') || 'Home');
+  const [themeLabel, setThemeLabel] = useState(localStorage.getItem('theme') || 'Cosmic Dark');
 
   const navigate = useNavigate();
 
@@ -39,339 +37,184 @@ export default function Settings() {
     const fetchUser = async () => {
       const userData = await base44.auth.me();
       setUser(userData);
-      if (userData?.preferred_landing_page) {
-        setLandingPage(userData.preferred_landing_page);
-        localStorage.setItem('preferred_landing_page', userData.preferred_landing_page);
-      }
     };
     fetchUser();
   }, []);
 
-  const handleLogout = () => {
-    base44.auth.logout();
+  const handleLogout = async () => {
+    await base44.auth.logout();
+    navigate('/');
   };
 
-  const currentTheme = localStorage.getItem('app_theme') || 'cosmic-dark';
-  const themeLabel = {
-    'cosmic-dark': 'Cosmic Dark',
-    'midnight-blue': 'Midnight Blue',
-    'aurora': 'Aurora',
-    'rose-gold': 'Rose Gold'
-  }[currentTheme] || 'Cosmic Dark';
-
   return (
-    <CosmicBackground>
-      <div className="min-h-screen pb-0">
+    <CosmicBackground className="min-h-screen">
+      <div className="max-w-2xl mx-auto pb-24">
         {/* Header */}
-        <header className="flex items-center px-4 py-4 sticky top-0 z-50 bg-gradient-to-b from-[#0a0118]/95 to-transparent backdrop-blur-sm">
-          <button 
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-1 text-white"
-          >
-            <ChevronLeft className="w-6 h-6" />
-            <span className="text-base font-medium">Back</span>
+        <div className="flex items-center gap-3 p-4 pt-safe">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/10" aria-label="Go back">
+            <ChevronLeft className="w-5 h-5 text-white" />
           </button>
-          <h1 className="text-xl font-bold text-white flex-1 text-center mr-16">Settings</h1>
-        </header>
+          <h1 className="text-xl font-bold text-white">Settings</h1>
+        </div>
 
-        <div className="px-4 space-y-6">
-          {/* ACCOUNT Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Account</h3>
-            <div className="space-y-2">
-              <Link to={createPageUrl('Profile')}>
-                <SettingsRow
-                  icon={User}
-                  iconBg="bg-purple-500/20"
-                  iconColor="text-purple-400"
-                  title="Profile"
-                  subtitle="Manage your profile details"
-                  onClick={() => {}}
-                />
-              </Link>
-              <SettingsRow
-                icon={Mail}
-                iconBg="bg-blue-500/20"
-                iconColor="text-blue-400"
-                title="Email"
-                subtitle={user?.email || 'Not set'}
-              />
-            </div>
-          </div>
-
-          {/* PREMIUM Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Premium</h3>
-            <div className="space-y-2">
-              {user?.subscription_status === 'active' || user?.subscription_status === 'trialing' ? (
-                <SettingsRow
-                  icon={Crown}
-                  iconBg="bg-amber-500/20"
-                  iconColor="text-amber-400"
-                  title="Alchemize Premium"
-                  subtitle={user?.subscription_status === 'trialing' ? 'Free Trial Active' : 'Active Subscription'}
-                  onClick={async () => {
-                    if (window.self !== window.top) {
-                      alert('Manage subscription from the published app.');
-                      return;
-                    }
-                    try {
-                      const res = await base44.functions.invoke('createPortalSession');
-                      if (res.data?.url) window.location.href = res.data.url;
-                    } catch (e) {
-                      alert('Could not open subscription management.');
-                    }
-                  }}
-                />
-              ) : (
-                <Link to={createPageUrl('Premium')}>
-                  <SettingsRow
-                    icon={Crown}
-                    iconBg="bg-amber-500/20"
-                    iconColor="text-amber-400"
-                    title="Alchemize Premium"
-                    subtitle="Unlock advanced manifestation tools"
-                    onClick={() => {}}
-                  />
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* APP Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">App</h3>
-            <div className="space-y-2">
-              <SettingsRow
-                icon={Info}
-                iconBg="bg-purple-500/20"
-                iconColor="text-purple-400"
-                title="About Alchemize"
-                subtitle="Learn more about the app"
-                onClick={() => setShowAbout(true)}
-              />
-              <Link to={createPageUrl('Terms')}>
-                <SettingsRow
-                  icon={FileText}
-                  iconBg="bg-blue-500/20"
-                  iconColor="text-blue-400"
-                  title="Terms & Conditions"
-                  subtitle="Read our terms of service"
-                  onClick={() => {}}
-                />
-              </Link>
-              <Link to={createPageUrl('Privacy')}>
-                <SettingsRow
-                  icon={Shield}
-                  iconBg="bg-purple-500/20"
-                  iconColor="text-purple-400"
-                  title="Privacy Policy"
-                  subtitle="How we handle your data"
-                  onClick={() => {}}
-                />
-              </Link>
-              <SettingsRow
-                icon={Eye}
-                iconBg="bg-pink-500/20"
-                iconColor="text-pink-400"
-                title="Manage Features"
-                subtitle="Choose which features to display"
-                onClick={() => setShowFeatures(true)}
-              />
-              <SettingsRow
-                icon={Bluetooth}
-                iconBg="bg-blue-600/20"
-                iconColor="text-blue-400"
-                title="Bluetooth Devices"
-                subtitle="Scan and connect to devices"
-                onClick={() => setShowBluetooth(true)}
-              />
-              <SettingsRow
-                icon={Heart}
-                iconBg="bg-red-500/20"
-                iconColor="text-red-400"
-                title="Apple Health"
-                subtitle="Sync workouts from Apple Watch & Ring"
-                onClick={() => setShowHealth(true)}
-              />
-              <SettingsRow
-                icon={Palette}
-                iconBg="bg-indigo-500/20"
-                iconColor="text-indigo-400"
-                title="Theme"
-                subtitle={themeLabel}
-                onClick={() => setShowTheme(true)}
-              />
-              <SettingsRow
-                icon={Sparkles}
-                iconBg="bg-amber-500/20"
-                iconColor="text-amber-400"
-                title="Landing Page"
-                subtitle={landingPage}
-                onClick={() => setShowLandingPage(true)}
-              />
-
-
-
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Community</h3>
-            <div className="space-y-2">
-              {communityLinks.map((link) => (
-                <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer">
-                  <SettingsRow
-                    icon={Heart}
-                    iconBg="bg-pink-500/20"
-                    iconColor="text-pink-400"
-                    title={link.label}
-                    subtitle={link.description}
-                    onClick={() => {}}
-                  />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* DEVELOPER Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Developer</h3>
-            <div className="space-y-2">
-              <div
-                className="flex items-center justify-between px-4 py-3 rounded-2xl bg-white/5 border border-white/10"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-green-500/20 flex items-center justify-center">
-                    <Code2 className="w-5 h-5 text-green-400" />
-                  </div>
-                  <div>
-                    <p className="text-white font-medium text-sm">Dev Mode</p>
-                    <p className="text-white/50 text-xs">Unlock all features & bypass paywall</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => {
-                    const next = !devMode;
-                    setDevMode(next);
-                    localStorage.setItem('dev_mode', next ? 'true' : 'false');
-                  }}
-                  className={`relative w-12 h-7 rounded-full transition-colors duration-200 ${
-                    devMode ? 'bg-green-500' : 'bg-white/20'
-                  }`}
-                >
-                  <span
-                    className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
-                      devMode ? 'translate-x-6' : 'translate-x-1'
-                    }`}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* DATA Section */}
-          <div>
-            <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-widest mb-3 px-1">Data</h3>
-            <div className="space-y-2">
-              <SettingsRow
-                icon={Trash2}
-                iconBg="bg-red-500/20"
-                iconColor="text-red-400"
-                title="Reset All Data"
-                subtitle="Permanently delete all app data"
-                onClick={() => setShowResetData(true)}
-              />
-              <SettingsRow
-                icon={Trash2}
-                iconBg="bg-red-600/20"
-                iconColor="text-red-500"
-                title="Delete Account"
-                subtitle="Permanently delete your account and all data"
-                onClick={() => setShowDeleteAccount(true)}
-              />
-            </div>
-          </div>
-
-          {/* Sign Out */}
-          <div className="pt-2">
-            <button
-              onClick={handleLogout}
-              className="w-full py-4 rounded-2xl border border-red-500/30 bg-red-500/10 flex items-center justify-center gap-2 text-red-400 font-semibold text-base hover:bg-red-500/20 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              Sign Out
-            </button>
-          </div>
-
-          {/* Version */}
-          <div className="text-center pb-4">
-            <p className="text-xs text-white/30">Alchemize v1.0.0</p>
+        {/* ACCOUNT Section */}
+        <div>
+          <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-wider px-4 mb-2">Account</h3>
+          <div className="space-y-2">
+            <SettingsRow
+              icon={User}
+              iconBg="bg-purple-500/20"
+              iconColor="text-purple-400"
+              title={user?.full_name || 'Your Name'}
+              subtitle={user?.email || 'Not set'}
+            />
           </div>
         </div>
 
-        {/* Dialogs */}
-        <DeleteAccountFlow open={showDeleteAccount} onOpenChange={setShowDeleteAccount} />
-        <FeatureManager open={showFeatures} onOpenChange={setShowFeatures} />
-        <BluetoothDialog open={showBluetooth} onOpenChange={setShowBluetooth} />
-        <AppleHealthDialog open={showHealth} onOpenChange={setShowHealth} />
-        <ThemeDialog open={showTheme} onOpenChange={setShowTheme} />
-        <ResetDataDialog open={showResetData} onOpenChange={setShowResetData} />
-        <BottomSheet
-          open={showLandingPage}
-          onOpenChange={setShowLandingPage}
-          title="Landing Page"
-          value={landingPage}
-          onSelect={async (value) => {
-            setLandingPage(value);
-            localStorage.setItem('preferred_landing_page', value);
-            await base44.auth.updateMe({ preferred_landing_page: value });
-          }}
-          options={['Splash', 'Home', 'Journal', 'CalorieTracker', 'Habits', 'Fitness', 'Appointments', 'ManifestationBoard', 'Finance', 'Affirmations', 'TodoList'].map((page) => ({ value: page, label: page }))}
-        />
+        {/* APP Section */}
+        <div>
+          <h3 className="text-xs font-semibold text-purple-400/80 uppercase tracking-wider px-4 mb-2 mt-6">App</h3>
+          <div className="space-y-2">
+            <SettingsRow
+              icon={Info}
+              iconBg="bg-purple-500/20"
+              iconColor="text-purple-400"
+              title="About Alchemize"
+              subtitle="Learn more about the app"
+              onClick={() => setShowAbout(true)}
+            />
+            <Link to={createPageUrl('Terms')}>
+              <SettingsRow
+                icon={FileText}
+                iconBg="bg-blue-500/20"
+                iconColor="text-blue-400"
+                title="Terms & Conditions"
+                subtitle="Read our terms of service"
+                onClick={() => {}}
+              />
+            </Link>
+            <Link to={createPageUrl('Privacy')}>
+              <SettingsRow
+                icon={Shield}
+                iconBg="bg-purple-500/20"
+                iconColor="text-purple-400"
+                title="Privacy Policy"
+                subtitle="How we handle your data"
+                onClick={() => {}}
+              />
+            </Link>
+            <SettingsRow
+              icon={Eye}
+              iconBg="bg-pink-500/20"
+              iconColor="text-pink-400"
+              title="Manage Features"
+              subtitle="Choose which features to display"
+              onClick={() => setShowFeatures(true)}
+            />
+            <SettingsRow
+              icon={Bluetooth}
+              iconBg="bg-blue-600/20"
+              iconColor="text-blue-400"
+              title="Bluetooth Devices"
+              subtitle="Scan and connect to devices"
+              onClick={() => setShowBluetooth(true)}
+            />
+            <SettingsRow
+              icon={Heart}
+              iconBg="bg-red-500/20"
+              iconColor="text-red-400"
+              title="Apple Health"
+              subtitle="Sync workouts from Apple Watch & Ring"
+              onClick={() => setShowHealth(true)}
+            />
+            <SettingsRow
+              icon={Palette}
+              iconBg="bg-indigo-500/20"
+              iconColor="text-indigo-400"
+              title="Theme"
+              subtitle={themeLabel}
+              onClick={() => setShowTheme(true)}
+            />
+            <SettingsRow
+              icon={Sparkles}
+              iconBg="bg-amber-500/20"
+              iconColor="text-amber-400"
+              title="Landing Page"
+              subtitle={landingPage}
+              onClick={() => setShowLandingPage(true)}
+            />
+          </div>
+        </div>
 
-        {/* About Dialog */}
-        <Dialog open={showAbout} onOpenChange={setShowAbout}>
-          <DialogContent className="bg-gradient-to-br from-[#1a0a2e] to-[#0d0620] border-purple-500/30 text-white max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-white flex items-center gap-2 justify-center">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-              </DialogTitle>
-            </DialogHeader>
-            
-            <div className="text-center space-y-4 py-4">
-              <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-white to-indigo-300">
-                Alchemize
-              </h2>
-              
-              <p className="text-purple-200/80 text-lg">
-                Unlock Your Highest Self
-              </p>
-              
-              <div className="py-4 space-y-3 text-sm text-white/60 leading-relaxed">
-                <p>
-                  Alchemize is your personal transformation companion, designed to help you manifest your dreams and become the best version of yourself.
-                </p>
-                <p>
-                  Through manifestation boards, affirmations, goal setting, habit tracking, and holistic life management tools, Alchemize empowers you to create positive change in every area of your life.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-center gap-4 py-4">
-                <Sparkles className="w-6 h-6 text-purple-400" />
-                <Moon className="w-6 h-6 text-indigo-400" />
-                <Heart className="w-6 h-6 text-pink-400" />
-              </div>
-
-              <p className="text-xs text-white/40">
-                Transform your reality, one intention at a time.
-              </p>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* DANGER Section */}
+        <div>
+          <h3 className="text-xs font-semibold text-red-400/80 uppercase tracking-wider px-4 mb-2 mt-6">Danger Zone</h3>
+          <div className="space-y-2">
+            <SettingsRow
+              icon={Trash2}
+              iconBg="bg-red-500/20"
+              iconColor="text-red-400"
+              title="Reset All Data"
+              subtitle="Permanently delete all your data"
+              onClick={() => setShowResetData(true)}
+            />
+            <SettingsRow
+              icon={Trash2}
+              iconBg="bg-red-500/20"
+              iconColor="text-red-400"
+              title="Delete Account"
+              subtitle="Permanently delete your account"
+              onClick={() => setShowDeleteAccount(true)}
+            />
+            <SettingsRow
+              icon={LogOut}
+              iconBg="bg-gray-500/20"
+              iconColor="text-gray-400"
+              title="Sign Out"
+              subtitle="Log out of your account"
+              onClick={handleLogout}
+            />
+          </div>
+        </div>
       </div>
+
+      {/* About Dialog */}
+      <Dialog open={showAbout} onOpenChange={setShowAbout}>
+        <DialogContent className="bg-gray-900 border-purple-500/20 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white">About Alchemize</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-gray-300 text-sm">Alchemize is your all-in-one personal growth companion.</p>
+            <p className="text-gray-400 text-xs">Version 1.0.0</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <DeleteAccountFlow open={showDeleteAccount} onOpenChange={setShowDeleteAccount} />
+      <FeatureManager open={showFeatures} onOpenChange={setShowFeatures} />
+      <BluetoothDialog open={showBluetooth} onOpenChange={setShowBluetooth} />
+      <AppleHealthDialog open={showHealth} onOpenChange={setShowHealth} />
+      <ThemeDialog open={showTheme} onOpenChange={setShowTheme} onThemeChange={setThemeLabel} />
+      <ResetDataDialog open={showResetData} onOpenChange={setShowResetData} />
+
+      <BottomSheet open={showLandingPage} onOpenChange={setShowLandingPage} title="Landing Page">
+        {['Home', 'Manifestation', 'Affirmations', 'Goals', 'Habits', 'Finance', 'Fitness', 'Calories', 'Appointments', 'Todo', 'Gratitude'].map((page) => (
+          <button
+            key={page}
+            className={`w-full text-left px-4 py-3 rounded-lg min-h-[44px] ${
+              landingPage === page ? 'bg-purple-500/30 text-purple-300' : 'text-white hover:bg-white/10'
+            }`}
+            onClick={() => {
+              setLandingPage(page);
+              localStorage.setItem('landingPage', page);
+              setShowLandingPage(false);
+            }}
+          >
+            {page}
+          </button>
+        ))}
+      </BottomSheet>
     </CosmicBackground>
   );
 }
