@@ -5,7 +5,7 @@ import { base44 } from '@/api/base44Client';
 import GlowButton from '@/components/cosmic/GlowButton';
 
 export default function FoodScanner({ onFoodScanned, onClose }) {
-  const [mode, setMode] = useState('select'); // select, camera, preview, analyzing, results
+  const [mode, setMode] = useState('select'); // 'select', 'camera', 'preview', 'analyzing'
   const [image, setImage] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [foodData, setFoodData] = useState(null);
@@ -16,8 +16,8 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' }
       });
       streamRef.current = stream;
       if (videoRef.current) {
@@ -43,70 +43,61 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext('2d').drawImage(video, 0, 0);
-    
+
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'food-photo.jpg', { type: 'image/jpeg' });
-      setImage(URL.createObjectURL(blob));
+      const url = URL.createObjectURL(blob);
+      setImage(file);
+      setImageUrl(url);
       stopCamera();
       setMode('preview');
-      await uploadAndAnalyze(file);
-    }, 'image/jpeg', 0.8);
+    }, 'image/jpeg', 0.95);
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setImage(URL.createObjectURL(file));
-    setMode('preview');
-    await uploadAndAnalyze(file);
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setImage(file);
+      setImageUrl(url);
+      setMode('preview');
+    }
   };
 
-  const uploadAndAnalyze = async (file) => {
+  const analyzeFood = async () => {
+    if (!image) return;
+
     setIsAnalyzing(true);
     setMode('analyzing');
-    
-    // Upload file
-    const { file_url } = await base44.integrations.Core.UploadFile({ file });
-    setImageUrl(file_url);
-    
-    // Analyze with AI
-    const result = await base44.integrations.Core.InvokeLLM({
-      prompt: `Analyze this food image and provide detailed nutritional information. 
-      Identify all food items visible and estimate their nutritional content.
-      Be specific about portion sizes and provide realistic calorie estimates.
-      If you cannot identify specific foods, make your best educated guess based on what you see.`,
-      file_urls: [file_url],
-      response_json_schema: {
-        type: 'object',
-        properties: {
-          foods: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                portion: { type: 'string' },
-                calories: { type: 'number' },
-                protein: { type: 'number' },
-                carbs: { type: 'number' },
-                fat: { type: 'number' }
-              }
-            }
-          },
-          total_calories: { type: 'number' },
-          total_protein: { type: 'number' },
-          total_carbs: { type: 'number' },
-          total_fat: { type: 'number' },
-          meal_summary: { type: 'string' },
-          health_notes: { type: 'string' }
-        }
-      }
-    });
-    
-    setFoodData(result);
-    setIsAnalyzing(false);
-    setMode('results');
+
+    try {
+      const imageData = await base44.integrations.Core.UploadFile({ file: image });
+      const response = await base44.integrations.Core.InvokeLLM({
+        model: 'gemini-1.5-flash',
+        prompt: `Analyze this food image and return ONLY a valid JSON object with these fields: name (string), portion_size (string), calories (number), protein (number), carbs (number), fat (number), fiber (number). Example: {"name":"Grilled Chicken","portion_size":"6 oz","calories":280,"protein":53,"carbs":0,"fat":6,"fiber":0}`,
+        images: [imageData.url],
+        response_format: 'json'
+      });
+
+      const data = JSON.parse(response.output);
+      setFoodData({
+        name: data.name,
+        portion_size: data.portion_size,
+        calories: Math.round(data.calories || 0),
+        protein: Math.round(data.protein || 0),
+        carbs: Math.round(data.carbs || 0),
+        fat: Math.round(data.fat || 0),
+        fiber: Math.round(data.fiber || 0),
+        health_notes: null
+      });
+      setMode('preview');
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      alert('Failed to analyze food. Please try again.');
+      setMode('preview');
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const reset = () => {
@@ -114,53 +105,54 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
     setImage(null);
     setImageUrl(null);
     setFoodData(null);
-    setIsAnalyzing(false);
     setMode('select');
   };
 
   const handleUseData = () => {
-    if (foodData && onFoodScanned) {
+    if (foodData) {
       onFoodScanned(foodData);
+      onClose();
     }
-    onClose();
   };
 
+  React.useEffect(() => {
+    return () => stopCamera();
+  }, []);
+
   return (
-    <div className="space-y-4">
+    <div className="fixed inset-0 bg-black/95 z-50 flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 pt-safe">
+        <h2 className="text-xl font-bold text-white">Food Scanner</h2>
+        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10">
+          <X className="w-5 h-5 text-white" />
+        </button>
+      </div>
+
       {/* Select Mode */}
       {mode === 'select' && (
-        <div className="space-y-4">
-          <p className="text-center text-purple-200/70 text-sm">
-            Scan your food to get instant nutritional information
-          </p>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={startCamera}
-              className="flex flex-col items-center gap-3 p-6 rounded-xl bg-white/10 hover:bg-white/15 transition-colors border border-white/10"
-            >
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-lime-500 to-green-600 flex items-center justify-center">
-                <Camera className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-white font-medium">Take Photo</span>
-            </button>
-            
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex flex-col items-center gap-3 p-6 rounded-xl bg-white/10 hover:bg-white/15 transition-colors border border-white/10"
-            >
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
-                <Upload className="w-7 h-7 text-white" />
-              </div>
-              <span className="text-white font-medium">Upload Image</span>
-            </button>
-          </div>
-          
+        <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6">
+          <button
+            onClick={startCamera}
+            className="w-full max-w-xs bg-purple-500/20 border border-purple-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-purple-500/30 transition"
+          >
+            <Camera className="w-12 h-12 text-purple-400" />
+            <span className="text-white font-medium">Take Photo</span>
+          </button>
+
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full max-w-xs bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-blue-500/30 transition"
+          >
+            <Upload className="w-12 h-12 text-blue-400" />
+            <span className="text-white font-medium">Upload Photo</span>
+          </button>
+
           <input
-            type="file"
             ref={fileInputRef}
-            onChange={handleFileUpload}
+            type="file"
             accept="image/*"
+            onChange={handleFileUpload}
             className="hidden"
           />
         </div>
@@ -168,122 +160,102 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
 
       {/* Camera Mode */}
       {mode === 'camera' && (
-        <div className="space-y-4">
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-black">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 border-2 border-lime-400/50 rounded-xl pointer-events-none">
-              <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-lime-400" />
-              <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-lime-400" />
-              <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-lime-400" />
-              <div className="absolute bottom-4 right-4 w-8 h-8 border-b-2 border-r-2 border-lime-400" />
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-center gap-4">
-            <button
-              onClick={() => { stopCamera(); setMode('select'); }}
-              className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
-            >
-              <X className="w-6 h-6 text-white" />
-            </button>
+        <div className="flex-1 relative flex items-center justify-center bg-black">
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 gap-4">
             <button
               onClick={capturePhoto}
-              className="w-16 h-16 rounded-full bg-gradient-to-br from-lime-500 to-green-600 flex items-center justify-center shadow-lg shadow-lime-500/30"
+              className="w-20 h-20 rounded-full bg-white border-4 border-white/50 hover:scale-105 transition shadow-2xl"
+            />
+            <button
+              onClick={reset}
+              className="px-6 py-2 bg-red-500/80 rounded-full text-white font-medium hover:bg-red-500 transition"
             >
-              <div className="w-12 h-12 rounded-full border-4 border-white" />
+              Cancel
             </button>
-            <div className="w-12" />
           </div>
+        </div>
+      )}
+
+      {/* Preview Mode */}
+      {mode === 'preview' && (
+        <div className="flex-1 flex flex-col overflow-y-auto pb-24">
+          <div className="relative w-full aspect-square max-h-96">
+            <img src={imageUrl} alt="Food" className="w-full h-full object-cover" />
+          </div>
+
+          {!foodData && !isAnalyzing && (
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6">
+              <GlowButton onClick={analyzeFood} className="flex-1">
+                Analyze Food
+              </GlowButton>
+              <button
+                onClick={reset}
+                className="w-full px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 transition"
+              >
+                Retake Photo
+              </button>
+            </div>
+          )}
+
+          {foodData && (
+            <div className="flex-1 p-6 space-y-4">
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-xl p-4">
+                <h3 className="text-white font-bold text-lg mb-2">{foodData.name}</h3>
+                <p className="text-white/60 text-sm">Portion: {foodData.portion_size}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-white/60 text-xs">Calories</p>
+                  <p className="text-white font-bold text-xl">{foodData.calories}</p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-white/60 text-xs">Protein</p>
+                  <p className="text-white font-bold text-xl">{foodData.protein}g</p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-white/60 text-xs">Carbs</p>
+                  <p className="text-white font-bold text-xl">{foodData.carbs}g</p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-white/60 text-xs">Fat</p>
+                  <p className="text-white font-bold text-xl">{foodData.fat}g</p>
+                </div>
+                <div className="bg-white/5 rounded-lg p-3">
+                  <p className="text-white/60 text-xs">Fiber</p>
+                  <p className="text-white font-bold text-xl">{foodData.fiber}g</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={reset}
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 transition"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Scan Again
+                </button>
+                <GlowButton onClick={handleUseData} className="flex-1">
+                  Use This Data
+                </GlowButton>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Analyzing Mode */}
       {mode === 'analyzing' && (
-        <div className="space-y-4">
-          <div className="relative aspect-[4/3] rounded-xl overflow-hidden">
-            <img src={image} alt="Food" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center">
-              <Loader2 className="w-12 h-12 text-lime-400 animate-spin mb-4" />
-              <p className="text-white font-medium">Analyzing your food...</p>
-              <p className="text-white/60 text-sm">This may take a moment</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Results Mode */}
-      {mode === 'results' && foodData && (
-        <div className="space-y-4">
-          <div className="relative aspect-video rounded-xl overflow-hidden">
-            <img src={image} alt="Food" className="w-full h-full object-cover" />
-          </div>
-          
-          {/* Summary */}
-          <div className="bg-white/10 rounded-xl p-4">
-            <p className="text-white/80 text-sm">{foodData.meal_summary}</p>
-          </div>
-          
-          {/* Total Nutrition */}
-          <div className="grid grid-cols-4 gap-2">
-            <div className="bg-lime-500/20 rounded-xl p-3 text-center">
-              <p className="text-lime-400 text-xl font-bold">{foodData.total_calories}</p>
-              <p className="text-white/60 text-xs">Calories</p>
-            </div>
-            <div className="bg-blue-500/20 rounded-xl p-3 text-center">
-              <p className="text-blue-400 text-xl font-bold">{foodData.total_protein}g</p>
-              <p className="text-white/60 text-xs">Protein</p>
-            </div>
-            <div className="bg-amber-500/20 rounded-xl p-3 text-center">
-              <p className="text-amber-400 text-xl font-bold">{foodData.total_carbs}g</p>
-              <p className="text-white/60 text-xs">Carbs</p>
-            </div>
-            <div className="bg-pink-500/20 rounded-xl p-3 text-center">
-              <p className="text-pink-400 text-xl font-bold">{foodData.total_fat}g</p>
-              <p className="text-white/60 text-xs">Fat</p>
-            </div>
-          </div>
-          
-          {/* Food Items */}
-          {foodData.foods?.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-white/70 text-sm font-medium">Detected Foods</h4>
-              {foodData.foods.map((food, i) => (
-                <div key={i} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
-                  <div>
-                    <p className="text-white font-medium">{food.name}</p>
-                    <p className="text-white/50 text-xs">{food.portion}</p>
-                  </div>
-                  <p className="text-lime-400 font-medium">{food.calories} cal</p>
-                </div>
-              ))}
-            </div>
-          )}
-          
-          {/* Health Notes */}
-          {foodData.health_notes && (
-            <div className="bg-purple-500/20 rounded-xl p-4">
-              <p className="text-purple-200 text-sm">💡 {foodData.health_notes}</p>
-            </div>
-          )}
-          
-          {/* Actions */}
-          <div className="flex gap-3">
-            <button
-              onClick={reset}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/10 text-white"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Scan Again
-            </button>
-            <GlowButton onClick={handleUseData} className="flex-1">
-              Use This Data
-            </GlowButton>
-          </div>
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <Loader2 className="w-12 h-12 text-purple-400 animate-spin" />
+          <p className="text-white font-medium">Analyzing food...</p>
         </div>
       )}
     </div>
