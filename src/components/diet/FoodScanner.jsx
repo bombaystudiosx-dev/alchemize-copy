@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, X, Loader2, Upload, RotateCcw } from 'lucide-react';
+import { Camera, X, Loader2, Upload, RotateCcw, ZapIcon } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import GlowButton from '@/components/cosmic/GlowButton';
 
@@ -13,6 +13,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const fileInputRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const startCamera = async () => {
     try {
@@ -20,10 +21,14 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
         video: { facingMode: 'environment' }
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
       setMode('camera');
+      // Attach stream after mode state sets and video element renders
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(console.error);
+        }
+      }, 100);
     } catch (err) {
       console.error('Camera access denied:', err);
       alert('Unable to access camera. Please use file upload instead.');
@@ -35,14 +40,22 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
   };
 
   const capturePhoto = () => {
     const video = videoRef.current;
-    const canvas = document.createElement('canvas');
+    if (!video || !video.videoWidth) {
+      alert('Camera not ready yet. Please wait a moment.');
+      return;
+    }
+    const canvas = canvasRef.current || document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    canvas.getContext('2d').drawImage(video, 0, 0);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
 
     canvas.toBlob(async (blob) => {
       const file = new File([blob], 'food-photo.jpg', { type: 'image/jpeg' });
@@ -115,7 +128,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => stopCamera();
   }, []);
 
@@ -124,7 +137,11 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 pt-safe">
         <h2 className="text-xl font-bold text-white">Food Scanner</h2>
-        <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10">
+        <button
+          onClick={onClose}
+          className="p-2 rounded-full hover:bg-white/10 active:scale-95 transition"
+          aria-label="Close scanner"
+        >
           <X className="w-5 h-5 text-white" />
         </button>
       </div>
@@ -134,7 +151,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
         <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6">
           <button
             onClick={startCamera}
-            className="w-full max-w-xs bg-purple-500/20 border border-purple-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-purple-500/30 transition"
+            className="w-full max-w-xs bg-purple-500/20 border border-purple-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-purple-500/30 active:scale-95 transition"
           >
             <Camera className="w-12 h-12 text-purple-400" />
             <span className="text-white font-medium">Take Photo</span>
@@ -142,7 +159,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="w-full max-w-xs bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-blue-500/30 transition"
+            className="w-full max-w-xs bg-blue-500/20 border border-blue-500/30 rounded-2xl p-6 flex flex-col items-center gap-3 hover:bg-blue-500/30 active:scale-95 transition"
           >
             <Upload className="w-12 h-12 text-blue-400" />
             <span className="text-white font-medium">Upload Photo</span>
@@ -160,26 +177,56 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
 
       {/* Camera Mode */}
       {mode === 'camera' && (
-        <div className="flex-1 relative flex items-center justify-center bg-black">
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 gap-4">
-            <button
-              onClick={capturePhoto}
-              className="w-20 h-20 rounded-full bg-white border-4 border-white/50 hover:scale-105 transition shadow-2xl"
+        <div className="flex-1 relative flex flex-col bg-black overflow-hidden">
+          {/* Video feed */}
+          <div className="flex-1 relative">
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="absolute inset-0 w-full h-full object-cover"
             />
+            {/* Targeting overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-64 h-64 border-2 border-white/40 rounded-2xl" />
+            </div>
+          </div>
+
+          {/* Capture controls — always visible at bottom */}
+          <div
+            className="relative z-10 bg-black/80 flex flex-col items-center justify-center gap-4 py-8 px-6"
+            style={{ minHeight: 160 }}
+          >
+            <p className="text-white/60 text-sm">Aim at food and tap capture</p>
+
+            {/* Large capture button */}
+            <button
+              onPointerDown={(e) => e.currentTarget.style.transform = 'scale(0.93)'}
+              onPointerUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; capturePhoto(); }}
+              onPointerLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              style={{ transition: 'transform 0.1s ease' }}
+              className="relative flex items-center justify-center"
+              aria-label="Capture photo"
+            >
+              {/* Outer ring */}
+              <span className="absolute w-24 h-24 rounded-full border-4 border-white/60" />
+              {/* Inner shutter */}
+              <span className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-2xl">
+                <Camera className="w-8 h-8 text-gray-800" />
+              </span>
+            </button>
+
             <button
               onClick={reset}
-              className="px-6 py-2 bg-red-500/80 rounded-full text-white font-medium hover:bg-red-500 transition"
+              className="px-6 py-2 bg-red-500/80 rounded-full text-white font-medium hover:bg-red-500 active:scale-95 transition"
             >
               Cancel
             </button>
           </div>
+
+          {/* Hidden canvas for capture */}
+          <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
 
@@ -197,7 +244,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
               </GlowButton>
               <button
                 onClick={reset}
-                className="w-full px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 transition"
+                className="w-full px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 active:scale-95 transition"
               >
                 Retake Photo
               </button>
@@ -237,7 +284,7 @@ export default function FoodScanner({ onFoodScanned, onClose }) {
               <div className="flex gap-3">
                 <button
                   onClick={reset}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 transition"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-500/20 rounded-xl text-white hover:bg-gray-500/30 active:scale-95 transition"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Scan Again

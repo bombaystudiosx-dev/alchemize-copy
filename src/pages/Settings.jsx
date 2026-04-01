@@ -16,7 +16,6 @@ import BluetoothDialog from '@/components/settings/BluetoothDialog';
 import AppleHealthDialog from '@/components/settings/AppleHealthDialog';
 import ThemeDialog from '@/components/settings/ThemeDialog';
 import ResetDataDialog from '@/components/settings/ResetDataDialog';
-import BottomSheet from '@/components/native/BottomSheet';
 
 export default function Settings() {
   const [user, setUser] = useState(null);
@@ -27,8 +26,6 @@ export default function Settings() {
   const [showHealth, setShowHealth] = useState(false);
   const [showTheme, setShowTheme] = useState(false);
   const [showResetData, setShowResetData] = useState(false);
-  const [showLandingPage, setShowLandingPage] = useState(false);
-  const [landingPage, setLandingPage] = useState(localStorage.getItem('landingPage') || 'Home');
   const [themeLabel, setThemeLabel] = useState(localStorage.getItem('theme') || 'Cosmic Dark');
 
   const navigate = useNavigate();
@@ -135,14 +132,6 @@ export default function Settings() {
               subtitle={themeLabel}
               onClick={() => setShowTheme(true)}
             />
-            <SettingsRow
-              icon={Sparkles}
-              iconBg="bg-amber-500/20"
-              iconColor="text-amber-400"
-              title="Landing Page"
-              subtitle={landingPage}
-              onClick={() => setShowLandingPage(true)}
-            />
           </div>
         </div>
 
@@ -197,24 +186,6 @@ export default function Settings() {
       <AppleHealthDialog open={showHealth} onOpenChange={setShowHealth} />
       <ThemeDialog open={showTheme} onOpenChange={setShowTheme} onThemeChange={setThemeLabel} />
       <ResetDataDialog open={showResetData} onOpenChange={setShowResetData} />
-
-      <BottomSheet open={showLandingPage} onOpenChange={setShowLandingPage} title="Landing Page">
-        {['Home', 'Manifestation', 'Affirmations', 'Goals', 'Habits', 'Finance', 'Fitness', 'Calories', 'Appointments', 'Todo', 'Gratitude'].map((page) => (
-          <button
-            key={page}
-            className={`w-full text-left px-4 py-3 rounded-lg min-h-[44px] ${
-              landingPage === page ? 'bg-purple-500/30 text-purple-300' : 'text-white hover:bg-white/10'
-            }`}
-            onClick={() => {
-              setLandingPage(page);
-              localStorage.setItem('landingPage', page);
-              setShowLandingPage(false);
-            }}
-          >
-            {page}
-          </button>
-        ))}
-      </BottomSheet>
     </CosmicBackground>
   );
 }
