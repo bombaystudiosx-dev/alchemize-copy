@@ -23,9 +23,7 @@ export default function Splash() {
 
   const getNextUrl = useCallback(() => {
     const onboarded = localStorage.getItem('onboarding_complete');
-    const skipped = localStorage.getItem('skipped_premium');
-    if (onboarded && skipped) return createPageUrl('Home');
-    if (onboarded) return createPageUrl('Premium');
+        if (onboarded) return createPageUrl('Home');
     return createPageUrl('Onboarding');
   }, []);
 
