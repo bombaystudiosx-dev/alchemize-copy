@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { createPageUrl } from '@/utils';
 import { Sparkles, Target, Flame, ChevronRight } from 'lucide-react';
-
 const SLIDES = [
   {
     icon: Sparkles,
@@ -23,27 +22,22 @@ const SLIDES = [
     gradient: 'from-pink-500 to-rose-600',
   },
 ];
-
 export default function Onboarding() {
   const [current, setCurrent] = useState(0);
-
   const next = () => {
     if (current < SLIDES.length - 1) {
       setCurrent(current + 1);
     } else {
       localStorage.setItem('onboarding_complete', 'true');
-      window.location.href = createPageUrl('Premium');
+      window.location.href = createPageUrl('Home');
     }
   };
-
   const skip = () => {
     localStorage.setItem('onboarding_complete', 'true');
-    window.location.href = createPageUrl('Premium');
+    window.location.href = createPageUrl('Home');
   };
-
   const slide = SLIDES[current];
   const Icon = slide.icon;
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0a0118]">
       <div
@@ -53,7 +47,6 @@ export default function Onboarding() {
         }}
       />
       <div className="absolute inset-0 bg-black/70" />
-
       <div className="relative z-10 min-h-screen flex flex-col px-6 pt-16 pb-10 safe-area-top safe-area-bottom">
         {/* Skip */}
         <div className="flex justify-end">
@@ -61,7 +54,6 @@ export default function Onboarding() {
             Skip
           </button>
         </div>
-
         {/* Content */}
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <motion.div
@@ -73,7 +65,6 @@ export default function Onboarding() {
           >
             <Icon className="w-12 h-12 text-white" />
           </motion.div>
-
           <motion.h1
             key={`t-${current}`}
             initial={{ opacity: 0, y: 20 }}
@@ -83,7 +74,6 @@ export default function Onboarding() {
           >
             {slide.title}
           </motion.h1>
-
           <motion.p
             key={`d-${current}`}
             initial={{ opacity: 0, y: 20 }}
@@ -94,7 +84,6 @@ export default function Onboarding() {
             {slide.description}
           </motion.p>
         </div>
-
         {/* Dots */}
         <div className="flex items-center justify-center gap-2 mb-8">
           {SLIDES.map((_, i) => (
@@ -106,7 +95,6 @@ export default function Onboarding() {
             />
           ))}
         </div>
-
         {/* Next button */}
         <button
           onClick={next}
