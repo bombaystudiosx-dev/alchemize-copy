@@ -10,7 +10,7 @@ import PageTransition from '@/components/native/PageTransition';
 import { AppToastProvider } from '@/components/common/AppToast';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 
-const PUBLIC_PAGES = ['Splash', 'Terms', 'Privacy', 'Onboarding', 'Premium'];
+const PUBLIC_PAGES = ['Splash', 'Terms', 'Privacy', 'Onboarding'];
 
 const LoadingFallback = () => (
   <div className="fixed inset-0 bg-[#0a0118] flex items-center justify-center">
