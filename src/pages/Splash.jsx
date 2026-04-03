@@ -15,6 +15,7 @@ export default function Splash() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
@@ -47,12 +48,15 @@ export default function Splash() {
     return () => { mounted = false; };
   }, [navigate, getNextUrl]);
 
-  const handleGoogle = () => {
-    base44.auth.loginWithProvider('google', getNextUrl());
-  };
-
   const handleApple = () => {
-    base44.auth.loginWithProvider('apple', getNextUrl());
+    setAppleLoading(true);
+    setError('');
+    try {
+      base44.auth.loginWithProvider('apple', getNextUrl());
+    } catch (err) {
+      setError('Sign in with Apple failed. Please try again.');
+      setAppleLoading(false);
+    }
   };
 
   const handleEmailAuth = async (e) => {
@@ -151,6 +155,31 @@ export default function Splash() {
           <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-amber-500 to-purple-600 rounded-2xl blur-lg opacity-50 animate-pulse" />
 
           <div className="relative bg-black/60 backdrop-blur-md rounded-xl p-6 border border-white/10 space-y-3">
+            {/* Sign in with Apple — primary social login (required for App Store) */}
+            <button
+              onClick={handleApple}
+              disabled={appleLoading}
+              aria-label="Sign in with Apple"
+              className="w-full py-3 px-5 bg-white rounded-xl flex items-center justify-center gap-3 text-black font-semibold text-sm hover:bg-white/90 active:bg-white/80 transition-colors disabled:opacity-60"
+            >
+              {appleLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.42c1.32.07 2.23.77 3 .8 1.17-.24 2.29-.94 3.56-.84 1.5.12 2.63.73 3.38 1.89-3.01 1.8-2.37 5.87.56 7.03-.49 1.25-1.09 2.48-2.5 3.98zM12.03 7.25c-.14-2.5 1.83-4.66 4.17-4.75.31 2.83-2.55 4.99-4.17 4.75z"/>
+                </svg>
+              )}
+              Sign in with Apple
+            </button>
+
+            {/* Divider */}
+            <div className="flex items-center gap-2 py-1">
+              <div className="flex-1 h-px bg-white/10" />
+              <span className="text-white/30 text-xs">or</span>
+              <div className="flex-1 h-px bg-white/10" />
+            </div>
+
+            {/* Email / Password */}
             <AnimatePresence mode="wait">
               {!showEmailForm ? (
                 <motion.button
@@ -212,6 +241,7 @@ export default function Splash() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -254,19 +284,6 @@ export default function Splash() {
                 </motion.form>
               )}
             </AnimatePresence>
-
-            <button
-              onClick={handleGoogle}
-              className="w-full py-3 px-5 bg-white rounded-xl flex items-center justify-center gap-3 text-black font-semibold text-sm hover:bg-white/90 transition-colors"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-              </svg>
-              Sign in with Google
-            </button>
 
             <div className="flex items-center justify-center gap-3 text-xs text-white/40 pt-1">
               <Link to={createPageUrl('Terms')} className="hover:text-white/70 transition-colors">Terms</Link>
