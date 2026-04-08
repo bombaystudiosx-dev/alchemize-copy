@@ -3,9 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- iPhone-only viewport: no zoom, no iPad scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- iOS PWA / App Store web clip meta -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Alchemize" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <!-- Prevent tablet layout on iPad during review -->
+    <meta name="format-detection" content="telephone=no" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Base44 APP</title>
+    <title>Alchemize</title>
   </head>
   <body>
     <div id="root"></div>
