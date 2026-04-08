@@ -1,4 +1,19 @@
 @tailwind base;
+
+/* ===== IPHONE-ONLY LAYOUT CONSTRAINT ===== */
+/* Prevents iPad tablet-width layout breakage during App Review */
+body, #root {
+  max-width: 428px; /* iPhone 14 Pro Max width */
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Override any responsive breakpoints that would trigger tablet layout */
+@media (min-width: 768px) {
+  body, #root {
+    max-width: 428px !important;
+  }
+}
 @tailwind components;
 @tailwind utilities;
 
