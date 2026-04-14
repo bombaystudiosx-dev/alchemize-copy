@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { base44 } from '@/api/base44Client';
+import { supabase } from '@/api/base44Client';
 import CosmicBackground from '@/components/cosmic/CosmicBackground';
 import FeatureCarousel from '@/components/carousel/FeatureCarousel';
 import FeatureManager from '@/components/home/FeatureManager';
@@ -22,19 +22,26 @@ export default function Home() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const userData = await base44.auth.me();
-        setUser(userData);
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authUser.id)
+            .single();
+          setUser(profile || authUser);
+        }
       } catch (e) {
-
-
-
         // User not logged in - handled by layout
-      }};loadUser();
+      }
+    };
+    loadUser();
+
     // Set time-based greeting
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good Morning');else
-    if (hour < 17) setGreeting('Good Afternoon');else
-    setGreeting('Good Evening');
+    if (hour < 12) setGreeting('Good Morning');
+    else if (hour < 17) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
 
     // Update time every second
     const timer = setInterval(() => {
@@ -48,7 +55,7 @@ export default function Home() {
       if (params.get('checkout') === 'success' || sessionId) {
         if (sessionId) {
           try {
-            await base44.functions.invoke('verifySession', { session_id: sessionId });
+            await supabase.functions.invoke('verify-session', { body: { session_id: sessionId } });
             await loadUser();
           } catch (e) {
             console.error('Session verify error:', e);
@@ -65,189 +72,99 @@ export default function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const firstName = useMemo(() => user?.full_name?.split(' ')[0] || 'Seeker', [user?.full_name]);
+  const firstName = useMemo(() => user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Seeker', [user]);
 
   const handleRefresh = useCallback(async () => {
     try {
-      const userData = await base44.auth.me();
-      setUser(userData);
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+        setUser(profile || authUser);
+      }
     } catch (e) {}
     window.dispatchEvent(new Event('features-updated'));
   }, []);
 
   return (
-    <CosmicBackground>
+    <PullToRefresh onRefresh={handleRefresh}>
       {/* Checkout Success Banner */}
-      <AnimatePresence>
-        {showCheckoutSuccess &&
+      {showCheckoutSuccess && (
         <motion.div
-          initial={{ opacity: 0, y: -40 }}
+          initial={{ opacity: 0, y: -50 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -40 }}
-          className="fixed top-4 left-4 right-4 z-50 bg-green-500/90 backdrop-blur-md rounded-2xl px-5 py-4 flex items-center gap-3 shadow-lg shadow-green-500/30">
+          exit={{ opacity: 0, y: -50 }}
+          className="fixed top-4 left-4 right-4 z-50 bg-green-500/20 border border-green-500/40 rounded-2xl p-4 flex items-center gap-3"
+        >
+          <CheckCircle2 className="w-6 h-6 text-green-400 flex-shrink-0" />
+          <div>
+            <p className="text-white font-semibold">Welcome to Premium!</p>
+            <p className="text-green-200/70 text-sm">Your subscription is now active. Enjoy all features!</p>
+          </div>
+        </motion.div>
+      )}
 
-            <CheckCircle2 className="w-6 h-6 text-white flex-shrink-0" />
-            <div>
-              <p className="text-white font-bold text-sm">Welcome to Premium!</p>
-              <p className="text-white/80 text-xs">Your subscription is now active. Enjoy all features!</p>
-            </div>
-          </motion.div>
-        }
-      </AnimatePresence>
+      {/* Lightweight CSS-only particles */}
+      <CosmicBackground />
 
-      <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
-        {/* Lightweight CSS-only particles */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-float-slow" style={{ left: '15%', top: '20%' }} />
-          <div className="absolute w-1 h-1 bg-purple-400/20 rounded-full animate-float-slow" style={{ left: '75%', top: '35%', animationDelay: '1s' }} />
-          <div className="absolute w-1 h-1 bg-purple-400/25 rounded-full animate-float-slow" style={{ left: '45%', top: '60%', animationDelay: '2s' }} />
-        </div>
-
+      <div className="min-h-screen bg-[#0a0118] text-white relative">
         {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-6 py-4 relative z-10">
-
+        <div className="flex items-center justify-between px-4 pt-12 pb-4">
           {/* Left - Logo + Profile */}
           <div className="flex items-center gap-3">
-            <motion.img
-              src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/692fa99b47f4eb7e5fb3c1a9/de839f697_9EA146BA-906E-4508-B4D9-35794A087FAF.png"
-              alt="Alchemize"
-              className="h-10 object-contain"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }} />
-
-            {user?.profile_picture &&
-            <Link to={createPageUrl('Profile')}>
-                <img
-                src={user.profile_picture}
-                alt=""
-                className="w-8 h-8 rounded-full object-cover border-2 border-purple-500/50" />
-
-              </Link>
-            }
+            {user?.profile_picture && (
+              <img src={user.profile_picture} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+            )}
+            <Sparkles className="w-6 h-6 text-purple-400" />
           </div>
 
           {/* Right - Time, Settings, Moon */}
           <div className="flex items-center gap-3">
-            <span
-              className="text-white/90 text-lg tracking-wider"
-              style={{ fontFamily: 'Georgia, serif' }}>
-
+            <span className="text-purple-300/70 text-sm">
               {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
-
-
-
-            <motion.div
-              animate={{
-                rotate: [0, 10, -10, 0],
-                filter: ['drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))', 'drop-shadow(0 0 16px rgba(168, 85, 247, 0.6))', 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.3))']
-              }}
-              transition={{ duration: 4, repeat: Infinity }}>
-
-              <Moon className="w-5 h-5 text-purple-300" />
-            </motion.div>
+            <Link to={createPageUrl('Settings')}>
+              <Moon className="w-5 h-5 text-purple-400" />
+            </Link>
           </div>
-        </motion.header>
+        </div>
 
         {/* Welcome Message */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-center px-6 pt-4 relative z-10">
-
-          <motion.div
-            className="flex items-center justify-center gap-2 mb-2"
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3 }}>
-
-            <Sparkles className="w-5 h-5 text-amber-400" />
-            <span
-              className="text-sm uppercase tracking-widest"
-              style={{
-                background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                filter: 'drop-shadow(0 0 12px rgba(168, 85, 247, 0.7)) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5))',
-                fontFamily: 'Georgia, serif',
-                fontStyle: 'italic'
-              }}>
-              {greeting}</span>
-            <Sparkles className="w-5 h-5 text-purple-400" />
-          </motion.div>
-          <h1
-            className="text-2xl md:text-3xl font-bold mb-2"
-            style={{
-              fontFamily: 'Georgia, serif',
-              letterSpacing: '0.05em',
-              background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 0 30px rgba(255, 215, 0, 0.8), 0 0 50px rgba(168, 85, 247, 0.6)',
-              filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.9)) drop-shadow(0 0 40px rgba(168, 85, 247, 0.8))'
-            }}>
-
-            {firstName}
-          </h1>
-          <p
-            className="text-xl md:text-2xl font-semibold"
-            style={{
-              background: 'linear-gradient(135deg, #ffd700, #a855f7, #ffd700)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 4px 8px rgba(0,0,0,0.9), 0 2px 4px rgba(0,0,0,0.8)',
-              filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.9)) drop-shadow(0 0 24px rgba(168, 85, 247, 0.6))',
-              fontFamily: "'Playfair Display', Georgia, serif",
-              fontStyle: 'italic',
-              letterSpacing: '0.02em'
-            }}>
-
-            Transform your reality by transforming yourself
-          </p>
+          className="px-4 pb-4"
+        >
+          <p className="text-purple-300/70 text-sm">{greeting}</p>
+          <h1 className="text-3xl font-bold text-white">{firstName}</h1>
+          <p className="text-purple-200/50 text-sm mt-1">Transform your reality by transforming yourself</p>
         </motion.div>
 
         {/* Daily Affirmation Widget */}
         <DailyAffirmationWidget />
 
         {/* Carousel */}
-        <div className="flex-1 flex items-center">
-          <FeatureCarousel />
-        </div>
+        <FeatureCarousel />
 
         {/* Bottom hint */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="text-center pb-4 relative z-10">
+        <div className="px-4 pb-8 text-center">
+          <p className="text-purple-200/30 text-xs">Swipe up to explore your tools</p>
+        </div>
 
-          <motion.div
-            className="flex items-center justify-center gap-2 text-white/40 text-sm"
-            animate={{ x: [-3, 3, -3] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-
-            
-            
-            
-          </motion.div>
-        </motion.div>
-      </PullToRefresh>
-
-      {/* Feature Manager */}
-      <FeatureManager
-        open={showFeatureManager}
-        onOpenChange={(open) => {
-          setShowFeatureManager(open);
-          if (!open) {
-            window.dispatchEvent(new Event('features-updated'));
-          }
-        }} />
-
-    </CosmicBackground>);
-
+        {/* Feature Manager */}
+        <FeatureManager
+          open={showFeatureManager}
+          onOpenChange={(open) => {
+            setShowFeatureManager(open);
+            if (!open) {
+              window.dispatchEvent(new Event('features-updated'));
+            }
+          }}
+        />
+      </div>
+    </PullToRefresh>
+  );
 }
