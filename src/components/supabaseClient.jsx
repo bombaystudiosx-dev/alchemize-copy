@@ -1,7 +1,14 @@
-
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = 'https://yywtssolialsiwlsmssm.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5d3Rzc29saWFsc2l3bHNtc3NtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM2ODQxOTksImV4cCI6MjA3OTI2MDE5OX0.dVzTiSfvN_sSsNbqnmNON81uEcUsW75QEhWMIDUMr98'
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+/**
+ * src/components/supabaseClient.jsx
+ *
+ * COMPATIBILITY SHIM - do not add new code here.
+ *
+ * This file previously contained hardcoded Supabase credentials.
+ * It now re-exports from the canonical client in @/api/base44Client
+ * which reads credentials from environment variables (VITE_SUPABASE_URL
+ * and VITE_SUPABASE_ANON_KEY) instead of hardcoding them.
+ *
+ * Move all new Supabase usage to:
+ *   import { supabase } from '@/api/base44Client';
+ */
+export { supabase } from '@/api/base44Client';
